@@ -1,24 +1,29 @@
 import { SignIn, SignOutButton, SignedIn, SignedOut } from "@clerk/clerk-react";
-import Chat from "./components/chat";
+import { Routes, Route } from "react-router";
+import Review from "./pages/review";
+import Conversation from "./pages/conversation";
+import Home from "./pages/home";
+import Login from "./pages/login";
+import NavbarSO from "./components/navbarSO";
+import NavbarSI from "./components/navbarSI";
 
 function App() {
   return (
     <div>
-      <div className="flex justify-center items-center h-screen">
-        {/* When user is signed out */}
-        <SignedOut>
-          <SignIn />
-        </SignedOut>
-        {/* When user is signed in */}
-        <SignedIn>
-          <div className="flex flex-col items-center justify-center p-4">
-            <h1>Welcome! You are signed in.</h1>
-            <SignOutButton />
-          </div>
-
-          <Chat />
-        </SignedIn>
-      </div>
+      <SignedIn>
+        <NavbarSI />
+        <Routes>
+          <Route path="/chat" element={<Conversation />} />
+          <Route path="/review" element={<Review />} />
+        </Routes>
+      </SignedIn>
+      <SignedOut>
+        <NavbarSO />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+        </Routes>
+      </SignedOut>
     </div>
   );
 }

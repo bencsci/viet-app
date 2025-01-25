@@ -2,30 +2,26 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useAuth } from "@clerk/clerk-react";
 
-function sendMessageToOpenAI(messages, callback, getToken, setIsTyping) {
-  getToken().then((token) => {
-    axios
-      .post(
-        "http://localhost:4000/api/chat",
-        { messages },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      )
-      .then((res) => {
-        callback([...messages, { role: "assistant", content: res.data.reply }]);
-      })
-      .catch((err) => {
-        console.error("Error details:", err.response?.data || err);
-        alert("Something went wrong. Please try again later!");
-        callback(messages); // Keep existing messages on error
-      })
-      .finally(() => {
-        setIsTyping(false);
-      });
-  });
+async function sendMessageToOpenAI(messages, callback, getToken, setIsTyping) {
+  try {
+    const token = await getToken();
+    const res = await axios.post(
+      "http://localhost:4000/api/chat/send",
+      { messages },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    callback([...messages, { role: "assistant", content: res.data.reply }]);
+  } catch (error) {
+    console.error("Error details:", error.response?.data || error);
+    alert("Something went wrong. Please try again later!");
+    callback(messages); // Keep existing messages on error
+  } finally {
+    setIsTyping(false);
+  }
 }
 
 const Chat = () => {
@@ -42,6 +38,8 @@ const Chat = () => {
     setMessages((prev) => [...prev, newMessage]);
     setIsTyping(true);
 
+    console.log("Messages:", messages);
+
     // Pass getToken and setIsTyping to the function
     sendMessageToOpenAI(
       [...messages, newMessage],
@@ -54,9 +52,9 @@ const Chat = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-100">
-      <div className="bg-blue-600 text-white p-4">
-        <h1 className="text-xl font-bold">Chat with Vietnamese Friend 🇻🇳</h1>
+    <div className="flex flex-col h-[calc(100vh-64px)]">
+      <div className="bg-red-500 text-white p-4">
+        <h1 className="text-xl font-bold">Chat with Vietnamese Friend</h1>
       </div>
 
       {/* Chat messages container */}
@@ -76,7 +74,7 @@ const Chat = () => {
             <div
               className={`max-w-[70%] rounded-2xl px-4 py-2 ${
                 message.role === "user"
-                  ? "bg-blue-500 text-white rounded-br-none"
+                  ? "bg-red-500 text-white rounded-br-none"
                   : "bg-gray-300 text-black rounded-bl-none"
               }`}
             >
@@ -87,7 +85,11 @@ const Chat = () => {
         {isTyping && (
           <div className="flex justify-start">
             <div className="bg-gray-300 text-black rounded-2xl rounded-bl-none px-4 py-2">
-              typing...
+              <div className="flex space-x-1">
+                <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"></div>
+              </div>
             </div>
           </div>
         )}
@@ -104,11 +106,11 @@ const Chat = () => {
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             placeholder="Type a message..."
-            className="flex-1 rounded-full border border-gray-300 px-4 py-2 focus:outline-none focus:border-blue-500"
+            className="flex-1 rounded-full border border-gray-300 px-4 py-2 focus:outline-none focus:border-red-500"
           />
           <button
             type="submit"
-            className="bg-blue-500 text-white rounded-full px-6 py-2 hover:bg-blue-600 focus:outline-none"
+            className="bg-red-500 text-white rounded-full px-6 py-2 hover:bg-red-600 focus:outline-none"
           >
             Send
           </button>
