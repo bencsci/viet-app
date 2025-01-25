@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useAuth } from "@clerk/clerk-react";
 
-async function sendMessageToOpenAI(messages, callback, getToken, setIsTyping) {
+async function sendMessageToOpenAI(messages, addAiResponse, getToken, setIsTyping) {
   try {
     const token = await getToken();
     const res = await axios.post(
@@ -14,11 +14,11 @@ async function sendMessageToOpenAI(messages, callback, getToken, setIsTyping) {
         },
       }
     );
-    callback([...messages, { role: "assistant", content: res.data.reply }]);
+    addAiResponse([...messages, { role: "assistant", content: res.data.reply }]);
   } catch (error) {
     console.error("Error details:", error.response?.data || error);
     alert("Something went wrong. Please try again later!");
-    callback(messages); // Keep existing messages on error
+    addAiResponse(messages); // Keep existing messages on error
   } finally {
     setIsTyping(false);
   }
