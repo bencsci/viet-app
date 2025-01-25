@@ -58,6 +58,20 @@ const home = () => {
           </div>
         </div>
 
+        {/* Learning Philosophy Section */}
+        <div className="max-w-4xl mx-auto text-center mt-16 mb-16 bg-white p-10 rounded-xl shadow-lg">
+          <FaLightbulb className="text-5xl text-red-500 mb-6 mx-auto" />
+          <h2 className="text-3xl font-bold text-gray-800 mb-4">
+            The Secret to Language Learning? Practice!
+          </h2>
+          <p className="text-xl text-gray-600">
+            The most effective way to master any language is through active
+            conversation. But finding a patient conversation partner can be
+            challenging. Don't worry - we've created the perfect AI friend who's
+            always ready to chat with you in Vietnamese!
+          </p>
+        </div>
+
         {/* Call to Action */}
         <div className="text-center mt-16">
           <h2 className="text-3xl font-bold text-gray-800 mb-4">
