@@ -1,5 +1,20 @@
 import OpenAI from "openai";
-import { vietnameseTutorPrompt } from "../prompts/beginners.js";
+import {
+  vietnameseTutorPrompt,
+  translateWordsPrompt,
+} from "../prompts/beginners.js";
+
+import { TranslationServiceClient } from "@google-cloud/translate";
+
+const translationClient = new TranslationServiceClient();
+
+// Add error checking for credentials
+if (
+  !process.env.GOOGLE_APPLICATION_CREDENTIALS ||
+  !process.env.GOOGLE_CLOUD_PROJECT_ID
+) {
+  console.error("Missing Google Cloud credentials or project ID");
+}
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -9,25 +24,25 @@ const sendMessageToOpenAI = async (req, res) => {
   try {
     console.log("Received chat request");
     const { messages } = req.body;
-    //console.log("Messages:", messages);
     if (!messages || !Array.isArray(messages)) {
       return res.status(400).json({ error: "Invalid messages array" });
     }
 
+    // Get the last 5 messages from the conversation
+    const recentMessages = messages.slice(-5);
+    console.log("Messages:", recentMessages);
     // Add system message for Vietnamese tutor context
     const conversationContext = {
       role: "system",
       content: vietnameseTutorPrompt,
     };
 
-    //const userMessage = { role: "user", content: messages };
-
-    const fullMessages = [conversationContext, ...messages];
+    const fullMessages = [conversationContext, ...recentMessages];
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "gpt-4o",
       messages: fullMessages,
-      temperature: 1.5,
+      temperature: 0.6,
     });
 
     // The AI's reply is in response.choices[0].message.content
@@ -43,4 +58,60 @@ const sendMessageToOpenAI = async (req, res) => {
   }
 };
 
-export { sendMessageToOpenAI };
+const translateWords = async (req, res) => {
+  try {
+    const { words } = req.body;
+    if (!words) {
+      return res.status(400).json({ error: "Invalid words format" });
+    }
+
+    const messages = [
+      {
+        role: "system",
+        content: translateWordsPrompt,
+      },
+      {
+        role: "user",
+        content: words,
+      },
+    ];
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4",
+      messages: messages,
+      temperature: 0.3,
+    });
+
+    const translation = response.choices[0]?.message?.content;
+
+    res.json({ translation });
+  } catch (error) {
+    console.error("OpenAI Translation error:", error);
+    res.status(500).json({
+      error: "OpenAI Translation Error",
+      details: error.message,
+    });
+  }
+};
+
+const translateWordsGoogle = async (req, res) => {
+  try {
+    const { words } = req.body;
+    const request = {
+      parent: `projects/${process.env.GOOGLE_CLOUD_PROJECT_ID}/locations/${process.env.GOOGLE_CLOUD_LOCATION}`,
+      contents: [words],
+      mimeType: "text/plain",
+      sourceLanguageCode: "vi",
+      targetLanguageCode: "en",
+    };
+
+    const [response] = await translationClient.translateText(request);
+    const translation = response.translations[0].translatedText;
+    res.json({ translation: translation });
+  } catch (error) {
+    console.error("Google Translate error:", error);
+    res.status(500).json({ error: "Google Translate API Error" });
+  }
+};
+
+export { sendMessageToOpenAI, translateWords, translateWordsGoogle };

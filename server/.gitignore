@@ -1,2 +1,5 @@
 #env
 .env
+
+keys
+keys/translation-service-account.json

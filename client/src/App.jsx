@@ -13,7 +13,7 @@ function App() {
       <SignedIn>
         <NavbarSI />
         <Routes>
-          <Route path="/chat" element={<Conversation />} />
+          <Route path="/" element={<Conversation />} />
           <Route path="/review" element={<Review />} />
         </Routes>
       </SignedIn>
