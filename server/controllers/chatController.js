@@ -1,7 +1,8 @@
 import OpenAI from "openai";
 import {
-  vietnameseTutorPrompt,
+  languageTutorPrompt,
   translateWordsPrompt,
+  translatePrompt,
 } from "../prompts/beginners.js";
 
 import { TranslationServiceClient } from "@google-cloud/translate";
@@ -34,7 +35,7 @@ const sendMessageToOpenAI = async (req, res) => {
     // Add system message for Vietnamese tutor context
     const conversationContext = {
       role: "system",
-      content: vietnameseTutorPrompt,
+      content: languageTutorPrompt,
     };
 
     const fullMessages = [conversationContext, ...recentMessages];
@@ -60,15 +61,15 @@ const sendMessageToOpenAI = async (req, res) => {
 
 const translateWords = async (req, res) => {
   try {
-    const { words } = req.body;
-    if (!words) {
+    const { words, context } = req.body;
+    if (!words || !context) {
       return res.status(400).json({ error: "Invalid words format" });
     }
 
     const messages = [
       {
         role: "system",
-        content: translateWordsPrompt,
+        content: translatePrompt(context),
       },
       {
         role: "user",
@@ -77,11 +78,13 @@ const translateWords = async (req, res) => {
     ];
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: "gpt-4o-mini",
       messages: messages,
       temperature: 0.3,
     });
 
+    //console.log(messages);
+    
     const translation = response.choices[0]?.message?.content;
 
     res.json({ translation });

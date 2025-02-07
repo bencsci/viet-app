@@ -1,67 +1,65 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useAuth } from "@clerk/clerk-react";
 import { MdTranslate, MdClear, MdAdd } from "react-icons/md";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-async function sendMessageToOpenAI(
-  messages,
-  addAiResponse,
-  getToken,
-  setIsTyping
-) {
-  try {
-    const token = await getToken();
-    const res = await axios.post(
-      `${BACKEND_URL}/api/chat/send`,
-      { messages },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-    addAiResponse([
-      ...messages,
-      { role: "assistant", content: res.data.reply },
-    ]);
-  } catch (error) {
-    console.error("Error details:", error.response?.data || error);
-    alert("Something went wrong. Please try again later!");
-    addAiResponse(messages); // Keep existing messages on error
-  } finally {
-    setIsTyping(false);
-  }
-}
-
-async function translateWords(words, getToken) {
-  try {
-    const token = await getToken();
-    const res = await axios.post(
-      `${BACKEND_URL}/api/chat/translate`,
-      {
-        words: typeof words === "string" ? words : words.join(" "),
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-    return res.data.translation;
-  } catch (error) {
-    console.error("Error details:", error.response?.data || error);
-    alert("Something went wrong with translation!");
-    return null;
-  }
-}
 
 const Chat = () => {
   const { getToken } = useAuth();
+  const messagesEndRef = useRef(null);
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [messageStates, setMessageStates] = useState({});
+
+  async function sendMessageToOpenAI(messages) {
+    try {
+      const token = await getToken();
+      const res = await axios.post(
+        `${BACKEND_URL}/api/chat/send`,
+        { messages },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setMessages([
+        ...messages,
+        { role: "assistant", content: res.data.reply },
+      ]);
+    } catch (error) {
+      console.error("Error details:", error.response?.data || error);
+      alert("Something went wrong. Please try again later!");
+      setMessages(messages); // Keep existing messages on error
+    } finally {
+      setIsTyping(false);
+    }
+  }
+
+  async function translateWords(words) {
+    try {
+      const token = await getToken();
+      const res = await axios.post(
+        `${BACKEND_URL}/api/chat/translate`,
+        {
+          words: typeof words === "string" ? words : words.join(" "),
+          context: messages.slice(-1)[0]?.content || "", // Get the last message content
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return res.data.translation;
+    } catch (error) {
+      console.error("Error details:", error.response?.data || error);
+      alert("Something went wrong with translation!");
+      return null;
+    }
+  }
 
   const handleWordTranslation = async (
     word,
@@ -77,11 +75,13 @@ const Chat = () => {
       if (newSelectedWords.has(key)) {
         newSelectedWords.delete(key);
       } else {
-        newSelectedWords.set(key, word);
+        newSelectedWords.set(key, { word, position: wordPosition });
       }
 
-      // Get only the words for translation
-      const orderedWords = Array.from(newSelectedWords.values());
+      // Get words in original sentence order
+      const orderedWords = Array.from(newSelectedWords.values())
+        .sort((a, b) => a.position - b.position)
+        .map((item) => item.word);
 
       if (orderedWords.length > 0) {
         // Set loading state before translation
@@ -159,15 +159,18 @@ const Chat = () => {
 
     console.log("Messages:", messages);
 
-    sendMessageToOpenAI(
-      [...messages, newMessage],
-      setMessages,
-      getToken,
-      setIsTyping
-    );
+    sendMessageToOpenAI([...messages, newMessage]);
 
     setInputMessage("");
   };
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, isTyping]);
 
   useEffect(() => {
     console.log(messageStates);
@@ -290,6 +293,7 @@ const Chat = () => {
             </div>
           </div>
         )}
+        <div ref={messagesEndRef} />
       </div>
 
       <form

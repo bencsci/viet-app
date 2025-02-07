@@ -17,7 +17,7 @@ createRoot(document.getElementById("root")).render(
     <BrowserRouter>
       <ClerkProvider
         publishableKey={PUBLISHABLE_KEY}
-        afterSignInUrl="/chat"
+        afterSignInUrl="/"
         afterSignOutUrl="/"
       >
         <App />

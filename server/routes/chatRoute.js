@@ -10,6 +10,6 @@ import {
 const chatRoute = express.Router();
 
 chatRoute.post("/send", requireAuth(), sendMessageToOpenAI);
-chatRoute.post("/translate", requireAuth(), translateWordsGoogle);
+chatRoute.post("/translate", requireAuth(), translateWords);
 
 export default chatRoute;
