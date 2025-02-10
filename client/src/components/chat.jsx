@@ -5,7 +5,7 @@ import { MdTranslate, MdClear, MdAdd, MdRestartAlt } from "react-icons/md";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
-const Chat = ({ conversationId }) => {
+const Chat = () => {
   const { getToken } = useAuth();
   const messagesEndRef = useRef(null);
   const [messages, setMessages] = useState([]);
@@ -15,18 +15,13 @@ const Chat = ({ conversationId }) => {
 
   useEffect(() => {
     const loadMessages = async () => {
-      if (!conversationId) return;
-
       try {
         const token = await getToken();
-        const res = await axios.get(
-          `${BACKEND_URL}/api/chat/conversations/${conversationId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const res = await axios.get(`${BACKEND_URL}/api/chat/get`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         if (res.data && res.data.messages) {
           setMessages(res.data.messages);
         }
@@ -36,7 +31,7 @@ const Chat = ({ conversationId }) => {
     };
 
     loadMessages();
-  }, [conversationId]);
+  }, []);
 
   async function sendMessageToOpenAI(messages) {
     try {
@@ -203,12 +198,12 @@ const Chat = ({ conversationId }) => {
 
   useEffect(() => {
     const updateDatabase = async () => {
-      if (!conversationId || messages.length === 0) return;
+      if (messages.length === 0) return;
 
       try {
         const token = await getToken();
-        await axios.put(
-          `${BACKEND_URL}/api/chat/conversations/${conversationId}`,
+        await axios.post(
+          `${BACKEND_URL}/api/chat/update`,
           { messages },
           {
             headers: {
@@ -222,7 +217,7 @@ const Chat = ({ conversationId }) => {
     };
 
     updateDatabase();
-  }, [messages, conversationId]);
+  }, [messages]);
 
   const handleSaveConversation = async () => {
     try {
