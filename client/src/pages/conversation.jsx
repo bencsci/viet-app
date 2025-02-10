@@ -1,7 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import Chat from "../components/chat";
+import Sidebar from "../components/sidebar";
 
-const conversation = () => {
+const Conversation = () => {
+  const [currentConversationId, setCurrentConversationId] = useState(null);
+
   return (
     <div className="pt-16">
       <Chat />
@@ -9,4 +12,4 @@ const conversation = () => {
   );
 };
 
-export default conversation;
+export default Conversation;

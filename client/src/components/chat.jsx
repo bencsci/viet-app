@@ -1,17 +1,42 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useAuth } from "@clerk/clerk-react";
-import { MdTranslate, MdClear, MdAdd } from "react-icons/md";
+import { MdTranslate, MdClear, MdAdd, MdRestartAlt } from "react-icons/md";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
-const Chat = () => {
+const Chat = ({ conversationId }) => {
   const { getToken } = useAuth();
   const messagesEndRef = useRef(null);
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [messageStates, setMessageStates] = useState({});
+
+  useEffect(() => {
+    const loadMessages = async () => {
+      if (!conversationId) return;
+
+      try {
+        const token = await getToken();
+        const res = await axios.get(
+          `${BACKEND_URL}/api/chat/conversations/${conversationId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        if (res.data && res.data.messages) {
+          setMessages(res.data.messages);
+        }
+      } catch (error) {
+        console.error("Error loading conversation:", error);
+      }
+    };
+
+    loadMessages();
+  }, [conversationId]);
 
   async function sendMessageToOpenAI(messages) {
     try {
@@ -176,10 +201,86 @@ const Chat = () => {
     console.log(messageStates);
   }, [messageStates]);
 
+  useEffect(() => {
+    const updateDatabase = async () => {
+      if (!conversationId || messages.length === 0) return;
+
+      try {
+        const token = await getToken();
+        await axios.put(
+          `${BACKEND_URL}/api/chat/conversations/${conversationId}`,
+          { messages },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+      } catch (error) {
+        console.error("Error updating conversation:", error);
+      }
+    };
+
+    updateDatabase();
+  }, [messages, conversationId]);
+
+  const handleSaveConversation = async () => {
+    try {
+      const token = await getToken();
+      await axios.post(
+        `${BACKEND_URL}/api/chat/save`,
+        { messages },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      alert("Conversation saved successfully!");
+    } catch (error) {
+      console.error("Error saving conversation:", error);
+      alert("Failed to save conversation");
+    }
+  };
+
+  const handleDeleteConversation = async () => {
+    try {
+      const token = await getToken();
+      await axios.delete(`${BACKEND_URL}/api/chat/delete`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setMessages([]); // Clear messages locally
+      alert("Conversation deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting conversation:", error);
+      alert("Failed to delete conversation");
+    }
+  };
+
   return (
     <div className="flex flex-col h-[calc(100vh-64px)]">
-      <div className="bg-red-500 text-white p-4">
+      <div className="bg-red-500 text-white p-4 flex justify-between items-center">
         <h1 className="text-xl font-bold">Chat with Vietnamese Friend</h1>
+        {messages.length > 0 && (
+          <div className="flex gap-2">
+            <button
+              onClick={handleDeleteConversation}
+              className="bg-white text-red-500 px-4 py-1 rounded-full hover:bg-red-50 transition-colors flex items-center gap-1"
+              title="Delete conversation"
+            >
+              <MdRestartAlt className="w-5 h-5" />
+              Reset
+            </button>
+            <button
+              onClick={handleSaveConversation}
+              className="bg-white text-red-500 px-4 py-1 rounded-full hover:bg-red-50 transition-colors"
+            >
+              Save Chat
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
