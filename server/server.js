@@ -3,6 +3,7 @@ import "dotenv/config"; // loads .env
 import express from "express";
 import cors from "cors";
 import chatRoute from "./routes/chatRoute.js";
+import historyRoute from "./routes/historyRoute.js";
 import { clerkMiddleware} from "@clerk/express";
 import OpenAI from "openai";
 
@@ -26,6 +27,7 @@ app.get("/", (req, res) => {
 
 // Mount chat routes (protected inside chatRoutes)
 app.use("/api/chat", chatRoute);
+app.use("/api/history", historyRoute);
 
 
 //app.post("/api/chat", chatRoute);

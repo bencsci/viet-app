@@ -12,12 +12,13 @@ const Chat = () => {
   const [inputMessage, setInputMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [messageStates, setMessageStates] = useState({});
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const loadMessages = async () => {
       try {
         const token = await getToken();
-        const res = await axios.get(`${BACKEND_URL}/api/chat/get`, {
+        const res = await axios.get(`${BACKEND_URL}/api/history/get`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -27,6 +28,8 @@ const Chat = () => {
         }
       } catch (error) {
         console.error("Error loading conversation:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -203,7 +206,7 @@ const Chat = () => {
       try {
         const token = await getToken();
         await axios.post(
-          `${BACKEND_URL}/api/chat/update`,
+          `${BACKEND_URL}/api/history/update`,
           { messages },
           {
             headers: {
@@ -223,7 +226,7 @@ const Chat = () => {
     try {
       const token = await getToken();
       await axios.post(
-        `${BACKEND_URL}/api/chat/save`,
+        `${BACKEND_URL}/api/history/save`,
         { messages },
         {
           headers: {
@@ -241,7 +244,7 @@ const Chat = () => {
   const handleDeleteConversation = async () => {
     try {
       const token = await getToken();
-      await axios.delete(`${BACKEND_URL}/api/chat/delete`, {
+      await axios.delete(`${BACKEND_URL}/api/history/delete`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -278,119 +281,129 @@ const Chat = () => {
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.length === 0 && (
-          <div className="text-center text-gray-500 mt-8">
-            Hello! Start a conversation! 👋
+      {isLoading ? (
+        <div className="flex-1 flex items-center justify-center">
+          <div className="flex flex-col items-center space-y-4">
+            <div className="w-12 h-12 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
           </div>
-        )}
-        {messages.map((message, index) => (
-          <div key={index} className="space-y-2">
-            {(messageStates[index]?.translation ||
-              messageStates[index]?.isLoading) && (
+        </div>
+      ) : (
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {messages.length === 0 && (
+            <div className="text-center text-gray-500 mt-8">
+              Hello! Start a conversation! 👋
+            </div>
+          )}
+          {messages.map((message, index) => (
+            <div key={index} className="space-y-2">
+              {(messageStates[index]?.translation ||
+                messageStates[index]?.isLoading) && (
+                <div
+                  className={`flex ${
+                    message.role === "user" ? "justify-end" : "justify-start"
+                  }`}
+                >
+                  <div className="bg-white shadow-md border border-gray-100 rounded-lg px-4 py-2 text-sm text-gray-600 max-w-[70%]">
+                    <div className="text-xs text-gray-400 mb-1">
+                      Translation:
+                    </div>
+                    {messageStates[index]?.isLoading ? (
+                      <div className="flex justify-center py-2">
+                        <div className="w-5 h-5 border-2 border-gray-300 border-t-red-500 rounded-full animate-spin"></div>
+                      </div>
+                    ) : (
+                      <div>{messageStates[index].translation}</div>
+                    )}
+                    <div className="mt-2 pt-2 border-t border-gray-400/30 flex space-x-2">
+                      <button
+                        className="p-1.5 bg-green-100 hover:bg-green-200 rounded-full text-green-600 transition-colors"
+                        title="Add to flashcards"
+                      >
+                        <MdAdd className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => clearTranslation(index)}
+                        className="p-1.5 bg-red-100 hover:bg-red-200 rounded-full text-red-500 transition-colors"
+                        title="Clear translation"
+                      >
+                        <MdClear className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div
                 className={`flex ${
                   message.role === "user" ? "justify-end" : "justify-start"
                 }`}
               >
-                <div className="bg-white shadow-md border border-gray-100 rounded-lg px-4 py-2 text-sm text-gray-600 max-w-[70%]">
-                  <div className="text-xs text-gray-400 mb-1">Translation:</div>
-                  {messageStates[index]?.isLoading ? (
-                    <div className="flex justify-center py-2">
-                      <div className="w-5 h-5 border-2 border-gray-300 border-t-red-500 rounded-full animate-spin"></div>
-                    </div>
-                  ) : (
-                    <div>{messageStates[index].translation}</div>
-                  )}
-                  <div className="mt-2 pt-2 border-t border-gray-400/30 flex space-x-2">
-                    <button
-                      className="p-1.5 bg-green-100 hover:bg-green-200 rounded-full text-green-600 transition-colors"
-                      title="Add to flashcards"
-                    >
-                      <MdAdd className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={() => clearTranslation(index)}
-                      className="p-1.5 bg-red-100 hover:bg-red-200 rounded-full text-red-500 transition-colors"
-                      title="Clear translation"
-                    >
-                      <MdClear className="w-3.5 h-3.5" />
-                    </button>
+                <div
+                  className={`relative group max-w-[70%] rounded-2xl px-4 py-2 ${
+                    message.role === "user"
+                      ? "bg-red-500 text-white rounded-br-none"
+                      : "bg-gray-300 text-black rounded-bl-none"
+                  }`}
+                >
+                  <div>
+                    {message.role === "user"
+                      ? message.content
+                      : message.content.split(" ").map((word, wordIndex) => (
+                          <span
+                            key={wordIndex}
+                            onClick={() =>
+                              handleWordTranslation(
+                                word,
+                                index,
+                                message.content,
+                                wordIndex
+                              )
+                            }
+                            className={`cursor-pointer transition-colors duration-200 ${
+                              messageStates[index]?.selectedWords?.has(
+                                `${word}-${wordIndex}`
+                              )
+                                ? "text-red-600"
+                                : "hover:text-red-300"
+                            }`}
+                          >
+                            {word}{" "}
+                          </span>
+                        ))}
                   </div>
-                </div>
-              </div>
-            )}
 
-            <div
-              className={`flex ${
-                message.role === "user" ? "justify-end" : "justify-start"
-              }`}
-            >
-              <div
-                className={`relative group max-w-[70%] rounded-2xl px-4 py-2 ${
-                  message.role === "user"
-                    ? "bg-red-500 text-white rounded-br-none"
-                    : "bg-gray-300 text-black rounded-bl-none"
-                }`}
-              >
-                <div>
-                  {message.role === "user"
-                    ? message.content
-                    : message.content.split(" ").map((word, wordIndex) => (
-                        <span
-                          key={wordIndex}
+                  {message.role === "assistant" &&
+                    messageStates[index]?.selectedWords?.size > 0 && (
+                      <div className="mt-2 pt-2 border-t border-gray-400/30 flex space-x-2">
+                        <button
                           onClick={() =>
-                            handleWordTranslation(
-                              word,
-                              index,
-                              message.content,
-                              wordIndex
-                            )
+                            handleBubbleTranslation(message.content, index)
                           }
-                          className={`cursor-pointer transition-colors duration-200 ${
-                            messageStates[index]?.selectedWords?.has(
-                              `${word}-${wordIndex}`
-                            )
-                              ? "text-red-600"
-                              : "hover:text-red-300"
-                          }`}
+                          className="p-1 bg-blue-100 hover:bg-blue-200 rounded-full transition-colors text-blue-600"
+                          title="Translate message"
                         >
-                          {word}{" "}
-                        </span>
-                      ))}
+                          <MdTranslate className="w-4 h-4" />
+                        </button>
+                      </div>
+                    )}
                 </div>
-
-                {message.role === "assistant" &&
-                  messageStates[index]?.selectedWords?.size > 0 && (
-                    <div className="mt-2 pt-2 border-t border-gray-400/30 flex space-x-2">
-                      <button
-                        onClick={() =>
-                          handleBubbleTranslation(message.content, index)
-                        }
-                        className="p-1 bg-blue-100 hover:bg-blue-200 rounded-full transition-colors text-blue-600"
-                        title="Translate message"
-                      >
-                        <MdTranslate className="w-4 h-4" />
-                      </button>
-                    </div>
-                  )}
               </div>
             </div>
-          </div>
-        ))}
-        {isTyping && (
-          <div className="flex justify-start">
-            <div className="bg-gray-300 text-black rounded-2xl rounded-bl-none px-4 py-2">
-              <div className="flex space-x-1">
-                <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"></div>
+          ))}
+          {isTyping && (
+            <div className="flex justify-start">
+              <div className="bg-gray-300 text-black rounded-2xl rounded-bl-none px-4 py-2">
+                <div className="flex space-x-1">
+                  <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                  <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                  <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"></div>
+                </div>
               </div>
             </div>
-          </div>
-        )}
-        <div ref={messagesEndRef} />
-      </div>
+          )}
+          <div ref={messagesEndRef} />
+        </div>
+      )}
 
       <form
         onSubmit={handleSendMessage}
