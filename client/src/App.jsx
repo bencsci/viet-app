@@ -6,7 +6,6 @@ import Home from "./pages/home";
 import Login from "./pages/login";
 import NavbarSO from "./components/navbarSO";
 import NavbarSI from "./components/navbarSI";
-
 function App() {
   return (
     <div>

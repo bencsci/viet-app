@@ -3,11 +3,12 @@ import Chat from "../components/chat";
 import Sidebar from "../components/sidebar";
 
 const Conversation = () => {
-  const [currentConversationId, setCurrentConversationId] = useState(null);
-
   return (
-    <div className="pt-16">
-      <Chat />
+    <div className="pt-16 flex w-full">
+      <Sidebar />
+      <div className="flex-1">
+        <Chat />
+      </div>
     </div>
   );
 };

@@ -1,12 +1,15 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import axios from "axios";
 import { useAuth } from "@clerk/clerk-react";
 import { MdTranslate, MdClear, MdAdd, MdRestartAlt } from "react-icons/md";
+import { UserContext } from "../context/userContext";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const Chat = () => {
   const { getToken } = useAuth();
+  const { selectedConvoId, conversations, setSelectedConvoId } =
+    useContext(UserContext);
   const messagesEndRef = useRef(null);
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
@@ -15,26 +18,33 @@ const Chat = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const loadMessages = async () => {
-      try {
-        const token = await getToken();
-        const res = await axios.get(`${BACKEND_URL}/api/history/get`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        if (res.data && res.data.messages) {
-          setMessages(res.data.messages);
+    if (selectedConvoId !== null) {
+      const loadMessages = async () => {
+        try {
+          setIsLoading(true);
+          const token = await getToken();
+          const res = await axios.post(
+            `${BACKEND_URL}/api/history/get`,
+            { convoId: selectedConvoId },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+          if (res.data && res.data.messages) {
+            setMessages(res.data.messages);
+          }
+        } catch (error) {
+          console.error("Error loading conversation:", error);
+        } finally {
+          setIsLoading(false);
         }
-      } catch (error) {
-        console.error("Error loading conversation:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+      };
 
-    loadMessages();
-  }, []);
+      loadMessages();
+    }
+  }, [selectedConvoId]);
 
   async function sendMessageToOpenAI(messages) {
     try {
@@ -48,18 +58,46 @@ const Chat = () => {
           },
         }
       );
-      setMessages([
+
+      const updatedMessages = [
         ...messages,
         { role: "assistant", content: res.data.reply },
-      ]);
+      ];
+      setMessages(updatedMessages);
+
+      // Saves user conversation if there are no other conversations
+      if (!selectedConvoId) {
+        createNewConversation(updatedMessages);
+      }
     } catch (error) {
       console.error("Error details:", error.response?.data || error);
       alert("Something went wrong. Please try again later!");
-      setMessages(messages); // Keep existing messages on error
+      setMessages(messages);
     } finally {
       setIsTyping(false);
     }
   }
+
+  const createNewConversation = async (messageToSave) => {
+    try {
+      const token = await getToken();
+      const res = await axios.post(
+        `${BACKEND_URL}/api/history/save`,
+        { messages: messageToSave },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      // Set the new conversation ID as the selected conversation
+      // if (res.data && res.data.convoId) {
+      //   setSelectedConvoId(res.data.convoId);
+      // }
+    } catch (error) {
+      console.error("Error creating conversation:", error);
+    }
+  };
 
   async function translateWords(words) {
     try {
@@ -201,13 +239,16 @@ const Chat = () => {
 
   useEffect(() => {
     const updateDatabase = async () => {
-      if (messages.length === 0) return;
+      if (messages.length === 0 || selectedConvoId === null) return;
 
       try {
         const token = await getToken();
         await axios.post(
           `${BACKEND_URL}/api/history/update`,
-          { messages },
+          {
+            messages,
+            convoId: selectedConvoId,
+          },
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -222,63 +263,10 @@ const Chat = () => {
     updateDatabase();
   }, [messages]);
 
-  const handleSaveConversation = async () => {
-    try {
-      const token = await getToken();
-      await axios.post(
-        `${BACKEND_URL}/api/history/save`,
-        { messages },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      alert("Conversation saved successfully!");
-    } catch (error) {
-      console.error("Error saving conversation:", error);
-      alert("Failed to save conversation");
-    }
-  };
-
-  const handleDeleteConversation = async () => {
-    try {
-      const token = await getToken();
-      await axios.delete(`${BACKEND_URL}/api/history/delete`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      setMessages([]); // Clear messages locally
-      alert("Conversation deleted successfully!");
-    } catch (error) {
-      console.error("Error deleting conversation:", error);
-      alert("Failed to delete conversation");
-    }
-  };
-
   return (
     <div className="flex flex-col h-[calc(100vh-64px)]">
       <div className="bg-red-500 text-white p-4 flex justify-between items-center">
         <h1 className="text-xl font-bold">Chat with Vietnamese Friend</h1>
-        {messages.length > 0 && (
-          <div className="flex gap-2">
-            <button
-              onClick={handleDeleteConversation}
-              className="bg-white text-red-500 px-4 py-1 rounded-full hover:bg-red-50 transition-colors flex items-center gap-1"
-              title="Delete conversation"
-            >
-              <MdRestartAlt className="w-5 h-5" />
-              Reset
-            </button>
-            <button
-              onClick={handleSaveConversation}
-              className="bg-white text-red-500 px-4 py-1 rounded-full hover:bg-red-50 transition-colors"
-            >
-              Save Chat
-            </button>
-          </div>
-        )}
       </div>
 
       {isLoading ? (
@@ -291,7 +279,7 @@ const Chat = () => {
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {messages.length === 0 && (
             <div className="text-center text-gray-500 mt-8">
-              Hello! Start a conversation! 👋
+              Hello! Start a conversation! 👋: {selectedConvoId}
             </div>
           )}
           {messages.map((message, index) => (

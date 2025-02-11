@@ -5,13 +5,15 @@ import {
   getConversation,
   deleteConversation,
   updateConversation,
+  listConversations,
 } from "../controllers/historyController.js";
 
 const historyRoute = express.Router();
 
 historyRoute.post("/save", requireAuth(), saveConversation);
-historyRoute.get("/get", requireAuth(), getConversation);
-historyRoute.delete("/delete", requireAuth(), deleteConversation);
+historyRoute.post("/get", requireAuth(), getConversation);
+historyRoute.post("/delete", requireAuth(), deleteConversation);
 historyRoute.post("/update", requireAuth(), updateConversation);
+historyRoute.get("/list", requireAuth(), listConversations);
 
 export default historyRoute;

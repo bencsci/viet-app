@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { useAuth } from "@clerk/clerk-react";
 import { MdAdd, MdChat, MdDelete, MdMenu } from "react-icons/md";
+import { UserContext } from "../context/userContext";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
-const Sidebar = ({ onConversationSelect, currentConversationId }) => {
+const Sidebar = () => {
+  const { setSelectedConvoId, selectedConvoId, backendUrl } =
+    useContext(UserContext);
   const { getToken } = useAuth();
   const [conversations, setConversations] = useState([]);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -17,12 +20,17 @@ const Sidebar = ({ onConversationSelect, currentConversationId }) => {
   const loadConversations = async () => {
     try {
       const token = await getToken();
-      const res = await axios.get(`${BACKEND_URL}/api/chat/conversations`, {
+      const res = await axios.get(`${BACKEND_URL}/api/history/list`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      setConversations(res.data.conversations);
+
+      setConversations(res.data);
+
+      if (res.data.length <= 0) {
+        setSelectedConvoId(null);
+      }
     } catch (error) {
       console.error("Error loading conversations:", error);
     }
@@ -32,15 +40,16 @@ const Sidebar = ({ onConversationSelect, currentConversationId }) => {
     try {
       const token = await getToken();
       const res = await axios.post(
-        `${BACKEND_URL}/api/chat/conversations`,
-        {},
+        `${BACKEND_URL}/api/history/save`,
+        { messages: [] },
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
-      onConversationSelect(res.data.id);
+
+      setSelectedConvoId(res.data.id);
       loadConversations();
       setIsMobileOpen(false); // Close sidebar on mobile after creating new chat
     } catch (error) {
@@ -52,11 +61,15 @@ const Sidebar = ({ onConversationSelect, currentConversationId }) => {
     e.stopPropagation();
     try {
       const token = await getToken();
-      await axios.delete(`${BACKEND_URL}/api/chat/conversations/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      await axios.post(
+        `${BACKEND_URL}/api/history/delete`,
+        { convoId: id },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       loadConversations();
     } catch (error) {
       console.error("Error deleting conversation:", error);
@@ -64,8 +77,8 @@ const Sidebar = ({ onConversationSelect, currentConversationId }) => {
   };
 
   const handleConversationSelect = (id) => {
-    onConversationSelect(id);
-    setIsMobileOpen(false); // Close sidebar on mobile after selection
+    setSelectedConvoId(id);
+    setIsMobileOpen(false);
   };
 
   return (
@@ -99,16 +112,14 @@ const Sidebar = ({ onConversationSelect, currentConversationId }) => {
                 key={conv.id}
                 onClick={() => handleConversationSelect(conv.id)}
                 className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors ${
-                  currentConversationId === conv.id
-                    ? "bg-gray-300 text-black"
-                    : "text-gray-800 hover:bg-gray-200"
+                  selectedConvoId === conv.id
+                    ? "bg-gray-300"
+                    : "hover:bg-gray-200"
                 }`}
               >
                 <div className="flex items-center gap-2 truncate">
                   <MdChat className="w-5 h-5 flex-shrink-0" />
-                  <span className="truncate">
-                    {conv.title || "New Conversation"}
-                  </span>
+                  <span className="truncate">{conv.title || conv.id}</span>
                 </div>
                 <button
                   onClick={(e) => deleteConversation(conv.id, e)}

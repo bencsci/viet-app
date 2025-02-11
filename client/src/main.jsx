@@ -4,6 +4,7 @@ import { BrowserRouter } from "react-router";
 import "./index.css";
 import App from "./App.jsx";
 import { ClerkProvider } from "@clerk/clerk-react";
+import UserContextProvider from "./context/userContext.jsx";
 
 // Import your Publishable Key
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
@@ -20,7 +21,9 @@ createRoot(document.getElementById("root")).render(
         afterSignInUrl="/"
         afterSignOutUrl="/"
       >
-        <App />
+        <UserContextProvider>
+          <App />
+        </UserContextProvider>
       </ClerkProvider>
     </BrowserRouter>
   </StrictMode>
