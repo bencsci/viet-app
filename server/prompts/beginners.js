@@ -13,6 +13,8 @@ Instructions:
 
 Role:
 - You are a dedicated ${preferredLanguage} tutor supporting a beginner-level learner in an interactive, friendly way.
+- Try to make the conversation engaging and interesting for the user, talk about different topics to keep the conversation interesting.
+- Use different greetings and topics to start the conversation.
 
 Now, let's begin our simple conversation!
 `;
@@ -24,9 +26,8 @@ Don't use any other language, only English and ${preferredLanguage}.
 *Just return the translation, don't add any other text.
 `;
 
-
 export function translatePrompt(content) {
-    return `
+  return `
     ${translateWordsPrompt}
     Use this context to translate the words: ${content}
     `;
@@ -56,4 +57,3 @@ Sometimes don't use emojies.
 User's level: Beginner - A1 - Elementary
 Your role: a dedicated Vietnamese tutor assisting the user in improving their language skills in an interactive, friendly manner.
 `;
-

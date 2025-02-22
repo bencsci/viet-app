@@ -29,9 +29,9 @@ const sendMessageToOpenAI = async (req, res) => {
     }
 
     // Get the last 5 messages from the conversation
-    const recentMessages = messages.slice(-5);
+    const recentMessages = messages.slice(-10);
     console.log("Messages:", recentMessages);
-    // Add system message for Vietnamese tutor context
+    // Add system message for Vietnamese tutor contex7
     const conversationContext = {
       role: "system",
       content: languageTutorPrompt,
@@ -116,8 +116,4 @@ const translateWordsGoogle = async (req, res) => {
   }
 };
 
-export {
-  sendMessageToOpenAI,
-  translateWords,
-  translateWordsGoogle,
-};
+export { sendMessageToOpenAI, translateWords, translateWordsGoogle };
