@@ -2,6 +2,8 @@ import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { useAuth } from "@clerk/clerk-react";
 import { MdAdd, MdChat, MdDelete, MdMenu } from "react-icons/md";
+import { IoIosArrowBack } from "react-icons/io";
+import { AiOutlineClose } from "react-icons/ai";
 import { UserContext } from "../context/userContext";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
@@ -86,9 +88,13 @@ const Sidebar = () => {
       {/* Mobile Toggle Button - updated colors */}
       <button
         onClick={() => setIsMobileOpen(!isMobileOpen)}
-        className="md:hidden fixed top-20 right-4 z-50 p-2 bg-gray-300 text-black rounded-lg hover:bg-gray-400 transition-colors shadow-lg"
+        className="md:hidden fixed top-19 right-2 z-50 p-2 text-white"
       >
-        <MdMenu className="w-6 h-6" />
+        {isMobileOpen ? (
+          <AiOutlineClose size={24} />
+        ) : (
+          <IoIosArrowBack size={24} />
+        )}
       </button>
 
       {/* Sidebar - updated background color */}
@@ -136,7 +142,7 @@ const Sidebar = () => {
       {/* Overlay for mobile */}
       {isMobileOpen && (
         <div
-          className="md:hidden fixed inset-0 bg-black bg-opacity-20 z-30"
+          className="md:hidden fixed inset-0 z-30"
           onClick={() => setIsMobileOpen(false)}
         />
       )}
