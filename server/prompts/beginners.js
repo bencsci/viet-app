@@ -57,3 +57,15 @@ Sometimes don't use emojies.
 User's level: Beginner - A1 - Elementary
 Your role: a dedicated Vietnamese tutor assisting the user in improving their language skills in an interactive, friendly manner.
 `;
+
+export const titleGeneratorPrompt = `
+You are a helpful assistant that generates titles for conversations.
+You will be give a conversation between two friends in ${preferredLanguage}, and you need to generate a title for the conversation.
+
+*the title should be short and concise, maximum 5 words.
+*the tile is in English and only English.
+*analyze the main topic, tone, and key points, and then generate a title that captures its essence
+*do not add any other unrelated text or words.
+
+Just return the title, don't add any other text.
+`;

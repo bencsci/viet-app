@@ -1,4 +1,10 @@
 import { supabaseClient } from "../config/supabaseClient.js";
+import { titleGeneratorPrompt } from "../prompts/beginners.js";
+import OpenAI from "openai";
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 const saveConversation = async (req, res) => {
   try {
@@ -137,10 +143,83 @@ const listConversations = async (req, res) => {
   }
 };
 
+const generateTitle = async (req, res) => {
+  try {
+    const supabase = await supabaseClient(
+      req.auth.getToken({ template: "supabase" })
+    );
+    const userId = req.auth.userId;
+
+    const { messages, convoId } = req.body;
+
+    if (!messages || !Array.isArray(messages) || !convoId) {
+      return res
+        .status(400)
+        .json({ error: "Invalid messages array or missing convoId" });
+    }
+
+    const promptMessages = [
+      {
+        role: "system",
+        content: titleGeneratorPrompt,
+      },
+      ...messages.map((msg) => ({
+        role: msg.role,
+        content: msg.content,
+      })),
+    ];
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: promptMessages,
+      temperature: 0.3,
+    });
+
+    const title = response.choices[0]?.message?.content;
+
+    await supabase
+      .from("conversations")
+      .update({ title })
+      .eq("user_id", userId)
+      .eq("id", convoId);
+
+    console.log("TITLE GENERATED");
+    res.json({ success: true, title });
+  } catch (error) {
+    console.error("Error generating title:", error);
+    res.status(500).json({ error: "Failed to generate title" });
+  }
+};
+
+const updateTitle = async (req, res) => {
+  try {
+    const supabase = await supabaseClient(
+      req.auth.getToken({ template: "supabase" })
+    );
+    const userId = req.auth.userId;
+
+    const { title, convoId } = req.body;
+
+    const { error } = await supabase
+      .from("conversations")
+      .update({ title })
+      .eq("user_id", userId)
+      .eq("id", convoId);
+
+    if (error) throw error;
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error updating title:", error);
+    res.status(500).json({ error: "Failed to update title" });
+  }
+};
+
 export {
   saveConversation,
   getConversation,
   deleteConversation,
   updateConversation,
   listConversations,
+  generateTitle,
+  updateTitle,
 };

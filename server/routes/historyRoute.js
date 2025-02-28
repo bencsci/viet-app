@@ -6,6 +6,8 @@ import {
   deleteConversation,
   updateConversation,
   listConversations,
+  generateTitle,
+  updateTitle,
 } from "../controllers/historyController.js";
 
 const historyRoute = express.Router();
@@ -15,5 +17,7 @@ historyRoute.post("/get", requireAuth(), getConversation);
 historyRoute.post("/delete", requireAuth(), deleteConversation);
 historyRoute.post("/update", requireAuth(), updateConversation);
 historyRoute.get("/list", requireAuth(), listConversations);
+historyRoute.post("/generate-title", requireAuth(), generateTitle);
+historyRoute.post("/update-title", requireAuth(), updateTitle);
 
 export default historyRoute;

@@ -3,6 +3,7 @@ import {
   languageTutorPrompt,
   translateWordsPrompt,
   translatePrompt,
+  titleGeneratorPrompt,
 } from "../prompts/beginners.js";
 import { TranslationServiceClient } from "@google-cloud/translate";
 
@@ -28,7 +29,7 @@ const sendMessageToOpenAI = async (req, res) => {
       return res.status(400).json({ error: "Invalid messages array" });
     }
 
-    // Get the last 5 messages from the conversation
+    // Get the last messages from the conversation
     const recentMessages = messages.slice(-10);
     console.log("Messages:", recentMessages);
     // Add system message for Vietnamese tutor contex7

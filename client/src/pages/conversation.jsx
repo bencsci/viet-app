@@ -24,7 +24,7 @@ const Conversation = () => {
     <div className="pt-16 flex w-full">
       <div
         className={`${
-          isSidebarOpen ? "w-64" : "w-0"
+          isSidebarOpen ? "w-72" : "w-0"
         } transition-all duration-300 ease-in-out fixed md:static top-16 left-0 z-40`}
       >
         <Sidebar

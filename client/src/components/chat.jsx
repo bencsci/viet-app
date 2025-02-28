@@ -47,6 +47,37 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
     }
   }, [selectedConvoId]);
 
+  useEffect(() => {
+    if (
+      messages.length === 6 &&
+      selectedConvoId &&
+      conversations.find((c) => c.id === selectedConvoId)?.title === null
+    ) {
+      generateTitle();
+    }
+  }, [messages]);
+
+  const generateTitle = async () => {
+    try {
+      const token = await getToken();
+      const res = await axios.post(
+        `${BACKEND_URL}/api/history/generate-title`,
+        {
+          messages: messages,
+          convoId: selectedConvoId,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log("Title generated successfully");
+    } catch (error) {
+      console.error("Error generating title for conversation:", error);
+    }
+  };
+
   async function sendMessageToOpenAI(messages) {
     try {
       const token = await getToken();
@@ -277,7 +308,9 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
             <AiOutlineMenuFold size={20} />
           </button>
         )}
-        <h1 className="text-xl font-bold">Chat with a Vietnamese Friend</h1>
+        <h1 className="text-xl font-bold truncate">
+          Chat with a Vietnamese Friend {Object.keys(messages).length}
+        </h1>
       </div>
 
       {isLoading ? (
@@ -290,7 +323,7 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {messages.length === 0 && (
             <div className="text-center text-gray-500 mt-8">
-              Hello! Start a conversation! 👋: {selectedConvoId}
+              Hello! Start a conversation! 👋
             </div>
           )}
           {messages.map((message, index) => (
