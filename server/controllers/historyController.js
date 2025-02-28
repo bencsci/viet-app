@@ -183,7 +183,7 @@ const generateTitle = async (req, res) => {
       .eq("user_id", userId)
       .eq("id", convoId);
 
-    console.log("TITLE GENERATED");
+    console.log("----------*TITLE GENERATED*---------");
     res.json({ success: true, title });
   } catch (error) {
     console.error("Error generating title:", error);

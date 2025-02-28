@@ -17,6 +17,7 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
   const [isTyping, setIsTyping] = useState(false);
   const [messageStates, setMessageStates] = useState({});
   const [isLoading, setIsLoading] = useState(true);
+  const [titleGenerated, setTitleGenerated] = useState(false);
 
   useEffect(() => {
     if (selectedConvoId !== null) {
@@ -44,6 +45,7 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
       };
 
       loadMessages();
+      setTitleGenerated(false);
     }
   }, [selectedConvoId]);
 
@@ -51,8 +53,10 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
     if (
       messages.length === 6 &&
       selectedConvoId &&
-      conversations.find((c) => c.id === selectedConvoId)?.title === null
+      conversations.find((c) => c.id === selectedConvoId)?.title === null &&
+      !titleGenerated
     ) {
+      setTitleGenerated(true);
       generateTitle();
     }
   }, [messages]);
