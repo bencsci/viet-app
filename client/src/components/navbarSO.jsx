@@ -16,7 +16,7 @@ const NavbarSO = () => {
           <Link to="/" className="flex items-center space-x-2">
             <FaLanguage className="text-[#FFF9C4] text-3xl" />
             <span className="text-[#FFF9C4] font-bold text-xl">
-              VietAI Chat
+              VietAI
             </span>
           </Link>
 

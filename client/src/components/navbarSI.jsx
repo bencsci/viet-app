@@ -16,7 +16,7 @@ const NavbarSI = () => {
           {/* Logo and Brand Name */}
           <Link to="/" className="flex items-center space-x-2">
             <FaLanguage className="text-red-500 text-3xl" />
-            <span className="text-red-500 font-bold text-xl">VietAI Chat</span>
+            <span className="text-red-500 font-bold text-xl">VietAI</span>
           </Link>
 
           {/* Desktop Menu */}

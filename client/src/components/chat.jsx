@@ -2,11 +2,12 @@ import React, { useState, useEffect, useRef, useContext } from "react";
 import axios from "axios";
 import { useAuth } from "@clerk/clerk-react";
 import { MdTranslate, MdClear, MdAdd, MdRestartAlt } from "react-icons/md";
+import { AiOutlineMenuFold, AiOutlineMenuUnfold } from "react-icons/ai";
 import { UserContext } from "../context/userContext";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
-const Chat = () => {
+const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
   const { getToken } = useAuth();
   const { selectedConvoId, conversations, setSelectedConvoId } =
     useContext(UserContext);
@@ -264,9 +265,19 @@ const Chat = () => {
   }, [messages]);
 
   return (
-    <div className="flex flex-col h-[calc(100vh-64px)]">
-      <div className="bg-red-500 text-white p-4 flex justify-between items-center">
-        <h1 className="text-xl font-bold">Chat with Vietnamese Friend</h1>
+    <div
+      className={`flex flex-col h-[calc(100vh-64px)] bg-white transition-all duration-300 ease-in-out`}
+    >
+      <div className="bg-red-500 text-white p-4 flex items-center gap-2 sticky top-0 z-10">
+        {!isSidebarOpen && (
+          <button
+            onClick={() => setIsSidebarOpen(true)}
+            className="hover:bg-red-600 p-1 rounded transition-colors"
+          >
+            <AiOutlineMenuFold size={20} />
+          </button>
+        )}
+        <h1 className="text-xl font-bold">Chat with a Vietnamese Friend</h1>
       </div>
 
       {isLoading ? (
@@ -324,12 +335,12 @@ const Chat = () => {
               <div
                 className={`flex ${
                   message.role === "user" ? "justify-end" : "justify-start"
-                }`}
+                } lg:px-5`}
               >
                 <div
                   className={`relative group max-w-[70%] rounded-2xl px-4 py-2 ${
                     message.role === "user"
-                      ? "bg-red-500 text-white rounded-br-none"
+                      ? "bg-red-600 text-white rounded-br-none"
                       : "bg-gray-300 text-black rounded-bl-none"
                   }`}
                 >

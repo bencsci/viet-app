@@ -1,13 +1,42 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Chat from "../components/chat";
 import Sidebar from "../components/sidebar";
 
 const Conversation = () => {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // Set initial sidebar state based on screen size
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setIsSidebarOpen(false);
+      }
+    };
+
+    handleResize();
+
+    window.addEventListener("resize", handleResize);
+
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   return (
     <div className="pt-16 flex w-full">
-      <Sidebar />
-      <div className="flex-1">
-        <Chat />
+      <div
+        className={`${
+          isSidebarOpen ? "w-64" : "w-0"
+        } transition-all duration-300 ease-in-out fixed md:static top-16 left-0 z-40`}
+      >
+        <Sidebar
+          isSidebarOpen={isSidebarOpen}
+          setIsSidebarOpen={setIsSidebarOpen}
+        />
+      </div>
+      <div className={`flex-1 transition-all duration-300 ease-in-out`}>
+        <Chat
+          isSidebarOpen={isSidebarOpen}
+          setIsSidebarOpen={setIsSidebarOpen}
+        />
       </div>
     </div>
   );
