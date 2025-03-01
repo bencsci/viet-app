@@ -6,6 +6,7 @@ import Home from "./pages/home";
 import Login from "./pages/login";
 import NavbarSO from "./components/navbarSO";
 import NavbarSI from "./components/navbarSI";
+import Deck from "./pages/deck";
 function App() {
   return (
     <div>
@@ -14,6 +15,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Conversation />} />
           <Route path="/review" element={<Review />} />
+          <Route path="/decks/:deckId" element={<Deck />} />
         </Routes>
       </SignedIn>
       <SignedOut>
