@@ -26,25 +26,6 @@ const Deck = () => {
   const [showAnswer, setShowAnswer] = useState(false);
 
   useEffect(() => {
-    // // Simulate API call to get deck details
-    // setTimeout(() => {
-    //   setDeck({
-    //     id: deckId,
-    //     title: "Basic Vietnamese Phrases",
-    //     created: "2023-05-15",
-    //     lastReviewed: "2023-06-10",
-    //     totalReviews: 24,
-    //     masteryLevel: 68,
-    //   });
-    //   // Sample cards - would come from API
-    //   setCards([
-    //     { id: 1, front: "Xin chào", back: "Hello", mastery: 90 },
-    //     { id: 2, front: "Cảm ơn", back: "Thank you", mastery: 85 },
-    //     { id: 3, front: "Tạm biệt", back: "Goodbye", mastery: 70 },
-    //   ]);
-    //   setLoading(false);
-    // }, 800);
-
     loadDeck();
   }, [deckId]);
 
@@ -200,16 +181,16 @@ const Deck = () => {
             </div>
             <div className="bg-red-700 bg-opacity-30 rounded-lg p-4">
               <p className="text-red-200 text-sm">Mastery</p>
-              <p className="text-2xl font-bold">{deck.masteryLevel}%</p>
+              <p className="text-2xl font-bold">{deck.mastery}%</p>
             </div>
             <div className="bg-red-700 bg-opacity-30 rounded-lg p-4">
               <p className="text-red-200 text-sm">Reviews</p>
-              <p className="text-2xl font-bold">{deck.totalReviews}</p>
+              <p className="text-2xl font-bold">{deck.total_reviews}</p>
             </div>
             <div className="bg-red-700 bg-opacity-30 rounded-lg p-4">
               <p className="text-red-200 text-sm">Last Reviewed</p>
               <p className="text-2xl font-bold">
-                {new Date(deck.lastReviewed).toLocaleDateString()}
+                {new Date(deck.last_reviewed).toLocaleDateString()}
               </p>
             </div>
           </div>
@@ -356,7 +337,7 @@ const Deck = () => {
                 <div className="w-full bg-gray-200 rounded-full h-4">
                   <div
                     className="bg-green-500 h-4 rounded-full"
-                    style={{ width: `${deck.masteryLevel}%` }}
+                    style={{ width: `${deck.mastery}%` }}
                   ></div>
                 </div>
                 <div className="flex justify-between mt-2 text-sm text-gray-500">

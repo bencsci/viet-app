@@ -52,6 +52,7 @@ export const UserContextProvider = ({ children }) => {
     conversations,
     setConversations,
     loadConversations,
+    getToken,
   };
 
   return (

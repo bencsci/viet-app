@@ -12,46 +12,84 @@ import DeckCard from "../components/deckCard";
 import { UserContext } from "../context/userContext";
 import axios from "axios";
 
+const formatLastReviewed = (dateString) => {
+  if (!dateString || dateString === "null") return "Never reviewed";
+
+  const date = new Date(dateString);
+
+  // Check if date is valid
+  if (isNaN(date.getTime())) return "Never reviewed";
+
+  const now = new Date();
+  const diffTime = Math.abs(now - date);
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+  // Today
+  if (diffDays === 0) {
+    return `Today at ${date.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    })}`;
+  }
+
+  // Yesterday
+  if (diffDays === 1) {
+    return "Yesterday";
+  }
+
+  // Within the last week
+  if (diffDays < 7) {
+    const days = [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+    ];
+    return days[date.getDay()];
+  }
+
+  // More than a week ago
+  return date.toLocaleDateString([], { month: "short", day: "numeric" });
+};
+
 const Review = () => {
-  const { getToken } = useAuth();
+  //const { getToken } = useAuth();
   const navigate = useNavigate();
-  const { backendUrl } = useContext(UserContext);
+  const { backendUrl, getToken } = useContext(UserContext);
   const [searchQuery, setSearchQuery] = useState("");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newDeckName, setNewDeckName] = useState("");
-
-  // Sample deck data - would come from API in real implementation
-  const [decks, setDecks] = useState([
-    {
-      id: 1,
-      title: "Basic Vietnamese Phrases",
-      cardCount: 24,
-      lastReviewed: "2 days ago",
-    },
-    {
-      id: 2,
-      title: "Food Vocabulary",
-      cardCount: 38,
-      lastReviewed: "1 week ago",
-    },
-    {
-      id: 3,
-      title: "Travel Expressions",
-      cardCount: 15,
-      lastReviewed: "3 days ago",
-    },
-    { id: 4, title: "Common Verbs", cardCount: 42, lastReviewed: "Just now" },
-    {
-      id: 5,
-      title: "Numbers & Counting",
-      cardCount: 20,
-      lastReviewed: "5 days ago",
-    },
-  ]);
+  const [decks, setDecks] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const filteredDecks = decks.filter((deck) =>
     deck.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const listDecks = async () => {
+    try {
+      setLoading(true);
+      const token = await getToken();
+      const res = await axios.get(`${backendUrl}/api/decks/list`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setDecks(res.data);
+    } catch (error) {
+      console.log("Error listing decks:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    listDecks();
+  }, []);
 
   const handleCreateDeck = async (e) => {
     e.preventDefault();
@@ -113,31 +151,42 @@ const Review = () => {
         </div>
       </div>
 
-      {/* Decks Grid */}
-      <div className="max-w-6xl mx-auto px-4 md:px-8 pb-12">
-        {filteredDecks.length === 0 ? (
-          <div className="text-center py-12 bg-white rounded-lg shadow-sm border border-gray-100">
-            <p className="text-gray-500">
-              No decks found. Create a new deck to get started!
-            </p>
+      {/* Loading State */}
+      {loading && (
+        <div className="max-w-6xl mx-auto px-4 md:px-8 py-12 flex justify-center">
+          <div className="flex flex-col items-center">
+            <div className="w-12 h-12 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredDecks.map((deck) => (
-              <DeckCard
-                key={deck.id}
-                id={deck.id}
-                title={deck.title}
-                cardCount={deck.cardCount}
-                lastReviewed={deck.lastReviewed}
-              />
-            ))}
-          </div>
-        )}
-      </div>
+        </div>
+      )}
 
-      {/* Empty State - shown when no decks exist */}
-      {decks.length === 0 && (
+      {/* Decks Grid */}
+      {!loading && (
+        <div className="max-w-6xl mx-auto px-4 md:px-8 pb-12">
+          {filteredDecks.length === 0 ? (
+            <div className="text-center py-12 bg-white rounded-lg shadow-sm border border-gray-100">
+              <p className="text-gray-500">
+                No decks found. Create a new deck to get started!
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredDecks.map((deck) => (
+                <DeckCard
+                  key={deck.id}
+                  id={deck.id}
+                  title={deck.title}
+                  cardCount={deck.card_count}
+                  lastReviewed={formatLastReviewed(deck.last_reviewed)}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Empty State */}
+      {!loading && decks.length === 0 && (
         <div className="max-w-md mx-auto text-center py-16">
           <div className="bg-red-50 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
             <MdAdd className="text-red-500 text-4xl" />

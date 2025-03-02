@@ -61,6 +61,27 @@ const getDeck = async (req, res) => {
   }
 };
 
+const listDecks = async (req, res) => {
+  try {
+    const supabase = await supabaseClient(
+      req.auth.getToken({ template: "supabase" })
+    );
+    const userId = req.auth.userId;
+
+    const { data, error } = await supabase
+      .from("decks")
+      .select("*")
+      .eq("user_id", userId);
+
+    if (error) throw error;
+
+    res.json(data);
+  } catch (error) {
+    console.error("Error getting decks:", error);
+    res.status(500).json({ error: "Failed to get decks" });
+  }
+};
+
 const editDeckTitle = async (req, res) => {};
 
 const removeDeck = async (req, res) => {};
@@ -82,4 +103,5 @@ export {
   editFront,
   editBack,
   getDeck,
+  listDecks,
 };

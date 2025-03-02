@@ -10,6 +10,7 @@ import {
   editFront,
   editBack,
   getDeck,
+  listDecks,
 } from "../controllers/deckController.js";
 
 const decksRoute = express.Router();
@@ -22,5 +23,6 @@ decksRoute.post("/remove-flashcard", requireAuth(), removeFlashcard);
 decksRoute.post("/edit-front", requireAuth(), editFront);
 decksRoute.post("/edit-back", requireAuth(), editBack);
 decksRoute.post("/get", requireAuth(), getDeck);
+decksRoute.get("/list", requireAuth(), listDecks);
 
 export default decksRoute;

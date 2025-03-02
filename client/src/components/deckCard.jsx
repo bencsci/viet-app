@@ -1,5 +1,6 @@
 import React from "react";
 import { MdMoreVert, MdPlayArrow } from "react-icons/md";
+import { Link } from "react-router";
 
 const DeckCard = ({ id, title, cardCount, lastReviewed }) => {
   return (
@@ -21,10 +22,13 @@ const DeckCard = ({ id, title, cardCount, lastReviewed }) => {
           <span>Last reviewed: {lastReviewed}</span>
         </div>
         <div className="flex gap-3">
-          <button className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors">
-            <MdPlayArrow className="text-lg" />
-            <span>Study</span>
-          </button>
+          <Link to={`/decks/${id}`}>
+            <button className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors cursor-pointer">
+              <MdPlayArrow className="text-lg" />
+
+              <span>Study</span>
+            </button>
+          </Link>
           <button className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-4 rounded-lg transition-colors">
             Edit
           </button>
