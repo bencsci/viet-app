@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { MdAdd, MdClose } from "react-icons/md";
 import axios from "axios";
+import { UserContext } from "../context/userContext";
 
-const AddFlashcards = ({ deckId, backendUrl, getToken, setCards }) => {
+const AddFlashcards = ({ deckId, listFlashcards }) => {
+  const { backendUrl, getToken } = useContext(UserContext);
   const [newFlashcards, setNewFlashcards] = useState([
     { id: 0, front: "", back: "" },
   ]);
@@ -43,25 +45,18 @@ const AddFlashcards = ({ deckId, backendUrl, getToken, setCards }) => {
 
       const cardsToSubmit = [...validCards];
 
-      setNewFlashcards([{ id: 0, front: "", back: "" }]);
+      for (const card of cardsToSubmit) {
+        await axios.post(
+          `${backendUrl}/api/decks/add-flashcard`,
+          { deckId, front: card.front, back: card.back },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      }
 
-      await Promise.all(
-        cardsToSubmit.map((card) =>
-          axios.post(
-            `${backendUrl}/api/decks/add-flashcard`,
-            {
-              deckId,
-              front: card.front,
-              back: card.back,
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          )
-        )
-      );
+      setNewFlashcards([{ id: 0, front: "", back: "" }]);
+      await listFlashcards();
+
+      console.log("All flashcards added successfully");
     } catch (error) {
       console.error("Error creating flashcards:", error);
     }

@@ -121,13 +121,34 @@ const addFlashcard = async (req, res) => {
       .insert({ deck_id: deckId, front: front, back: back });
 
     if (error) throw error;
+    res.json({ success: true });
   } catch (error) {
     console.error("Error adding flashcards:", error);
     res.status(500).json({ error: "Failed to add flashcards" });
   }
 };
 
-const removeFlashcard = async (req, res) => {};
+const removeFlashcard = async (req, res) => {
+  try {
+    const supabase = await supabaseClient(
+      req.auth.getToken({ template: "supabase" })
+    );
+
+    const { deckId, flashcardId } = req.body;
+
+    const { error } = await supabase
+      .from("flashcards")
+      .delete()
+      .eq("deck_id", deckId)
+      .eq("id", flashcardId);
+
+    if (error) throw error;
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error removing decks:", error);
+    res.status(500).json({ error: "Failed to remove decks" });
+  }
+};
 
 const editFront = async (req, res) => {};
 

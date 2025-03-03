@@ -112,25 +112,25 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
 
     if (!newTitle.trim() || !conversationToRename) {
       return;
-
-      try {
-        const token = await getToken();
-        const res = await axios.post(
-          `${BACKEND_URL}/api/history/save`,
-          { messages: [] },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        setSelectedConvoId(res.data.id);
-        loadConversations();
-        setIsSidebarOpen(false); // Close sidebar on mobile after creating new chat
-      } catch (error) {
-        console.error("Error creating conversation:", error);
-      }
     }
+
+    // try {
+    //   const token = await getToken();
+    //   const res = await axios.post(
+    //     `${BACKEND_URL}/api/history/save`,
+    //     { messages: [] },
+    //     {
+    //       headers: {
+    //         Authorization: `Bearer ${token}`,
+    //       },
+    //     }
+    //   );
+    //   setSelectedConvoId(res.data.id);
+    //   loadConversations();
+    //   setIsSidebarOpen(false); // Close sidebar on mobile after creating new chat
+    // } catch (error) {
+    //   console.error("Error creating conversation:", error);
+    // }
 
     try {
       const token = await getToken();

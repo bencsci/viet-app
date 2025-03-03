@@ -39,7 +39,7 @@ const Flashcard = ({ card, onEdit, onDelete }) => {
             <MdEdit className="text-xl" />
           </button>
           <button
-            onClick={() => onDelete(card)}
+            onClick={onDelete}
             className="text-red-400 hover:text-red-600 p-2 rounded-full hover:bg-red-100"
           >
             <MdDelete className="text-xl" />
