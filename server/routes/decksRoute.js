@@ -11,6 +11,7 @@ import {
   editBack,
   getDeck,
   listDecks,
+  listFlashcards,
 } from "../controllers/deckController.js";
 
 const decksRoute = express.Router();
@@ -24,5 +25,6 @@ decksRoute.post("/edit-front", requireAuth(), editFront);
 decksRoute.post("/edit-back", requireAuth(), editBack);
 decksRoute.post("/get", requireAuth(), getDeck);
 decksRoute.get("/list", requireAuth(), listDecks);
+decksRoute.post("/list-flashcards", requireAuth(), listFlashcards);
 
 export default decksRoute;

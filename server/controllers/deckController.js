@@ -86,7 +86,46 @@ const editDeckTitle = async (req, res) => {};
 
 const removeDeck = async (req, res) => {};
 
-const addFlashcard = async (req, res) => {};
+const listFlashcards = async (req, res) => {
+  try {
+    const supabase = await supabaseClient(
+      req.auth.getToken({ template: "supabase" })
+    );
+
+    const { deckId } = req.body;
+
+    const { data, error } = await supabase
+      .from("flashcards")
+      .select("*")
+      .eq("deck_id", deckId);
+
+    if (error) throw error;
+
+    res.json(data);
+  } catch (error) {
+    console.error("Error listing flashcards:", error);
+    res.status(500).json({ error: "Failed to list flashcards" });
+  }
+};
+
+const addFlashcard = async (req, res) => {
+  try {
+    const supabase = await supabaseClient(
+      req.auth.getToken({ template: "supabase" })
+    );
+
+    const { deckId, front, back } = req.body;
+
+    const { error } = await supabase
+      .from("flashcards")
+      .insert({ deck_id: deckId, front: front, back: back });
+
+    if (error) throw error;
+  } catch (error) {
+    console.error("Error adding flashcards:", error);
+    res.status(500).json({ error: "Failed to add flashcards" });
+  }
+};
 
 const removeFlashcard = async (req, res) => {};
 
@@ -104,4 +143,5 @@ export {
   editBack,
   getDeck,
   listDecks,
+  listFlashcards,
 };
