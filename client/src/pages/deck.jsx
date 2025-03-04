@@ -122,6 +122,7 @@ const Deck = () => {
       );
 
       loadDeck();
+      listFlashcards();
 
       console.log("Flashcard deleted successfully");
     } catch (error) {
@@ -131,10 +132,6 @@ const Deck = () => {
       setIsDeleteModalOpen(false);
       setCardToDelete(null);
     }
-  };
-
-  const editFlashcard = async (card) => {
-    console.log("edit");
   };
 
   const startReview = () => {

@@ -1,5 +1,6 @@
 import { SignIn, SignOutButton, SignedIn, SignedOut } from "@clerk/clerk-react";
 import { Routes, Route } from "react-router";
+import { ToastContainer } from "react-toastify";
 import Review from "./pages/review";
 import Conversation from "./pages/conversation";
 import Home from "./pages/home";
@@ -10,6 +11,7 @@ import Deck from "./pages/deck";
 function App() {
   return (
     <div>
+      <ToastContainer autoClose={1250} />
       <SignedIn>
         <NavbarSI />
         <Routes>

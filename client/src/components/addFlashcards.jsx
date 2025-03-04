@@ -2,6 +2,7 @@ import React, { useState, useContext } from "react";
 import { MdAdd, MdClose } from "react-icons/md";
 import axios from "axios";
 import { UserContext } from "../context/userContext";
+import { toast } from "react-toastify";
 
 const AddFlashcards = ({ deckId, listFlashcards }) => {
   const { backendUrl, getToken } = useContext(UserContext);
@@ -55,6 +56,11 @@ const AddFlashcards = ({ deckId, listFlashcards }) => {
 
       setNewFlashcards([{ id: 0, front: "", back: "" }]);
       await listFlashcards();
+
+      let updateMessage =
+        cardsToSubmit.length === 1 ? "Added Flashcard!" : "Added Flashcards!";
+
+      toast.success(updateMessage);
 
       console.log("All flashcards added successfully");
     } catch (error) {

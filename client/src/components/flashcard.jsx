@@ -2,6 +2,7 @@ import React, { useState, useContext } from "react";
 import { MdEdit, MdDelete, MdSave, MdClose } from "react-icons/md";
 import axios from "axios";
 import { UserContext } from "../context/userContext";
+import { toast } from "react-toastify";
 
 const Flashcard = ({ card, listFlashcards, onDelete }) => {
   const { backendUrl, getToken } = useContext(UserContext);
@@ -31,6 +32,7 @@ const Flashcard = ({ card, listFlashcards, onDelete }) => {
 
       //setNewCard("");
       listFlashcards();
+      toast.success("Flashcard Updated!");
     } catch (error) {
       console.log("Error editing card", error);
     }
