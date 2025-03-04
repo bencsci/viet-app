@@ -282,7 +282,7 @@ const Deck = () => {
                   <Flashcard
                     key={card.id}
                     card={card}
-                    onEdit={() => editFlashcard(card)}
+                    listFlashcards={listFlashcards}
                     onDelete={() => deleteFlashcard(card)}
                   />
                 ))}

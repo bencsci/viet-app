@@ -16,7 +16,7 @@ const AddFlashcards = ({ deckId, listFlashcards }) => {
     ]);
   };
 
-  const updateFlashcard = (id, field, value) => {
+  const updateAddFlashcard = (id, field, value) => {
     setNewFlashcards(
       newFlashcards.map((card) =>
         card.id === id ? { ...card, [field]: value } : card
@@ -84,7 +84,7 @@ const AddFlashcards = ({ deckId, listFlashcards }) => {
                 id={`front-${card.id}`}
                 value={card.front}
                 onChange={(e) =>
-                  updateFlashcard(card.id, "front", e.target.value)
+                  updateAddFlashcard(card.id, "front", e.target.value)
                 }
                 placeholder="Enter the Vietnamese word or phrase"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none bg-white"
@@ -102,7 +102,7 @@ const AddFlashcards = ({ deckId, listFlashcards }) => {
                 id={`back-${card.id}`}
                 value={card.back}
                 onChange={(e) =>
-                  updateFlashcard(card.id, "back", e.target.value)
+                  updateAddFlashcard(card.id, "back", e.target.value)
                 }
                 placeholder="Enter the English translation"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none bg-white"

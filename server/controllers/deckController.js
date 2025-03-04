@@ -154,6 +154,25 @@ const editFront = async (req, res) => {};
 
 const editBack = async (req, res) => {};
 
+const editFlashcard = async (req, res) => {
+  try {
+    const supabase = await supabaseClient(
+      req.auth.getToken({ template: "supabase" })
+    );
+
+    const { cardId, newFront, newBack } = req.body;
+
+    const { error } = await supabase
+      .from("flashcards")
+      .update({ front: newFront, back: newBack })
+      .eq("id", cardId);
+
+    if (error) throw error;
+
+    res.json({ success: true });
+  } catch (error) {}
+};
+
 export {
   createDeck,
   editDeckTitle,
@@ -165,4 +184,5 @@ export {
   getDeck,
   listDecks,
   listFlashcards,
+  editFlashcard,
 };
