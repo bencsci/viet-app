@@ -29,20 +29,13 @@ const Deck = () => {
   const [reviewMode, setReviewMode] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [cardToDelete, setCardToDelete] = useState(null);
+  const [newTitle, setNewTitle] = useState();
+  const [renameModalOpen, setRenameModalOpen] = useState(false);
 
   useEffect(() => {
     loadDeck();
     listFlashcards();
   }, [deckId]);
-
-  useEffect(() => {
-    if (deck && cards.length !== deck.card_count) {
-      setDeck((prevDeck) => ({
-        ...prevDeck,
-        card_count: cards.length,
-      }));
-    }
-  }, [cards.length, deck]);
 
   const updateCardCount = async () => {
     try {
@@ -56,6 +49,8 @@ const Deck = () => {
           },
         }
       );
+
+      loadDeck();
     } catch (error) {
       console.error("Error updating card count in deck:", error);
     }
@@ -140,7 +135,7 @@ const Deck = () => {
       );
 
       updateCardCount();
-      await loadDeck();
+      //await loadDeck();
       await listFlashcards();
 
       console.log("Flashcard deleted successfully");
@@ -150,6 +145,31 @@ const Deck = () => {
     } finally {
       setIsDeleteModalOpen(false);
       setCardToDelete(null);
+    }
+  };
+
+  const editTitle = async (e) => {
+    e.preventDefault();
+
+    try {
+      const token = await getToken();
+      await axios.post(
+        `${backendUrl}/api/decks/edit`,
+        {
+          deckId,
+          title: newTitle,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setRenameModalOpen(false);
+      loadDeck();
+    } catch (error) {
+      console.log("Error updating deck title", error);
     }
   };
 
@@ -239,9 +259,14 @@ const Deck = () => {
             <span>Start Review</span>
           </button>
 
-          <button className="flex items-center gap-2 px-6 py-3 bg-white hover:bg-gray-50 text-gray-700 rounded-lg font-medium shadow-sm border border-gray-200">
+          <button
+            onClick={() => {
+              setRenameModalOpen(true);
+            }}
+            className="flex items-center gap-2 px-6 py-3 bg-white hover:bg-gray-50 text-gray-700 rounded-lg font-medium shadow-sm border border-gray-200"
+          >
             <MdEdit className="text-xl" />
-            <span>Edit Deck</span>
+            <span>Rename Deck</span>
           </button>
 
           <button className="flex items-center gap-2 px-6 py-3 bg-white hover:bg-gray-50 text-gray-700 rounded-lg font-medium shadow-sm border border-gray-200">
@@ -305,7 +330,11 @@ const Deck = () => {
               </div>
             )}
 
-            <AddFlashcards deck={deck} listFlashcards={listFlashcards} />
+            <AddFlashcards
+              deck={deck}
+              listFlashcards={listFlashcards}
+              loadDeck={loadDeck}
+            />
           </div>
         )}
 
@@ -378,6 +407,61 @@ const Deck = () => {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {renameModalOpen && (
+        <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
+          <div
+            className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="bg-red-500 text-white px-4 py-3 flex items-center justify-between">
+              <h3 className="font-medium">Rename Deck</h3>
+              <button
+                onClick={() => setRenameModalOpen(false)}
+                className="p-1 hover:bg-red-600 rounded transition-colors"
+              >
+                <MdClose className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={editTitle} className="p-4">
+              <div className="mb-4">
+                <label
+                  htmlFor="title"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  New Title
+                </label>
+                <input
+                  type="text"
+                  id="title"
+                  value={newTitle}
+                  onChange={(e) => setNewTitle(e.target.value)}
+                  placeholder="Enter a new title"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  autoFocus
+                />
+              </div>
+
+              <div className="flex justify-end space-x-2">
+                <button
+                  type="button"
+                  onClick={() => setRenameModalOpen(false)}
+                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                >
+                  Save
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

@@ -4,7 +4,7 @@ import axios from "axios";
 import { UserContext } from "../context/userContext";
 import { toast } from "react-toastify";
 
-const AddFlashcards = ({ deck, listFlashcards }) => {
+const AddFlashcards = ({ deck, listFlashcards, loadDeck }) => {
   const { backendUrl, getToken } = useContext(UserContext);
   const [newFlashcards, setNewFlashcards] = useState([
     { id: 0, front: "", back: "" },
@@ -22,6 +22,8 @@ const AddFlashcards = ({ deck, listFlashcards }) => {
           },
         }
       );
+
+      loadDeck();
     } catch (error) {
       console.error("Error updating card count in deck:", error);
     }
