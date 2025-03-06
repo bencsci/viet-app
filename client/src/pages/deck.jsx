@@ -30,38 +30,56 @@ const Deck = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [cardToDelete, setCardToDelete] = useState(null);
 
-  useEffect(
-    () => {
-      loadDeck();
-      listFlashcards();
-    },
-    [deckId],
-    [cards]
-  );
+  useEffect(() => {
+    loadDeck();
+    listFlashcards();
+  }, [deckId]);
+
+  useEffect(() => {
+    if (deck && cards.length !== deck.card_count) {
+      setDeck((prevDeck) => ({
+        ...prevDeck,
+        card_count: cards.length,
+      }));
+    }
+  }, [cards.length, deck]);
+
+  const updateCardCount = async () => {
+    try {
+      const token = await getToken();
+      await axios.post(
+        `${backendUrl}/api/decks/edit`,
+        { deckId: deckId, card_count: deck.card_count - 1 },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+    } catch (error) {
+      console.error("Error updating card count in deck:", error);
+    }
+  };
 
   const loadDeck = async () => {
     try {
-      try {
-        setLoading(true);
-        const token = await getToken();
-        const res = await axios.post(
-          `${backendUrl}/api/decks/get`,
-          { deckId: deckId },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+      setLoading(true);
+      const token = await getToken();
+      const res = await axios.post(
+        `${backendUrl}/api/decks/get`,
+        { deckId: deckId },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-        setDeck(res.data);
-      } catch (error) {
-        console.error("Error loading deck:", error);
-      } finally {
-        setLoading(false);
-      }
+      setDeck(res.data);
     } catch (error) {
-      console.log(error);
+      console.error("Error loading deck:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -121,8 +139,9 @@ const Deck = () => {
         )
       );
 
-      loadDeck();
-      listFlashcards();
+      updateCardCount();
+      await loadDeck();
+      await listFlashcards();
 
       console.log("Flashcard deleted successfully");
     } catch (error) {
@@ -183,7 +202,7 @@ const Deck = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
             <div className="bg-red-700 bg-opacity-30 rounded-lg p-4">
               <p className="text-red-200 text-sm">Cards</p>
-              <p className="text-2xl font-bold">{cards.length}</p>
+              <p className="text-2xl font-bold">{deck.card_count}</p>
             </div>
             <div className="bg-red-700 bg-opacity-30 rounded-lg p-4">
               <p className="text-red-200 text-sm">Mastery</p>
@@ -286,7 +305,7 @@ const Deck = () => {
               </div>
             )}
 
-            <AddFlashcards deckId={deckId} listFlashcards={listFlashcards} />
+            <AddFlashcards deck={deck} listFlashcards={listFlashcards} />
           </div>
         )}
 

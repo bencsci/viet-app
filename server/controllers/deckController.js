@@ -82,7 +82,48 @@ const listDecks = async (req, res) => {
   }
 };
 
-const editDeckTitle = async (req, res) => {};
+const editDeck = async (req, res) => {
+  try {
+    const supabase = await supabaseClient(
+      req.auth.getToken({ template: "supabase" })
+    );
+
+    const userId = req.auth.userId;
+    const { deckId, ...updateFields } = req.body;
+
+    // Only include fields that were actually provided in the request
+    const fieldsToUpdate = {};
+
+    // Check each possible field and only include it if it was provided
+    if ("title" in updateFields) fieldsToUpdate.title = updateFields.title;
+    if ("total_reviews" in updateFields)
+      fieldsToUpdate.total_reviews = updateFields.total_reviews;
+    if ("card_count" in updateFields)
+      fieldsToUpdate.card_count = updateFields.card_count;
+    if ("mastery" in updateFields)
+      fieldsToUpdate.mastery = updateFields.mastery;
+
+    // If no fields to update were provided, return an error
+    if (Object.keys(fieldsToUpdate).length === 0) {
+      return res
+        .status(400)
+        .json({ error: "No fields to update were provided" });
+    }
+
+    const { error } = await supabase
+      .from("decks")
+      .update(fieldsToUpdate)
+      .eq("user_id", userId)
+      .eq("id", deckId);
+
+    if (error) throw error;
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error updating deck:", error);
+    res.status(500).json({ error: "Failed to update deck" });
+  }
+};
 
 const removeDeck = async (req, res) => {};
 
@@ -170,12 +211,15 @@ const editFlashcard = async (req, res) => {
     if (error) throw error;
 
     res.json({ success: true });
-  } catch (error) {}
+  } catch (error) {
+    console.error("Error updating flashcard:", error);
+    res.status(500).json({ error: "Failed to update flashcard" });
+  }
 };
 
 export {
   createDeck,
-  editDeckTitle,
+  editDeck,
   removeDeck,
   addFlashcard,
   removeFlashcard,

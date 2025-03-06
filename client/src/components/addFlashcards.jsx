@@ -4,11 +4,28 @@ import axios from "axios";
 import { UserContext } from "../context/userContext";
 import { toast } from "react-toastify";
 
-const AddFlashcards = ({ deckId, listFlashcards }) => {
+const AddFlashcards = ({ deck, listFlashcards }) => {
   const { backendUrl, getToken } = useContext(UserContext);
   const [newFlashcards, setNewFlashcards] = useState([
     { id: 0, front: "", back: "" },
   ]);
+
+  const updateCardCount = async () => {
+    try {
+      const token = await getToken();
+      await axios.post(
+        `${backendUrl}/api/decks/edit`,
+        { deckId: deck.id, card_count: deck.card_count + 1 },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+    } catch (error) {
+      console.error("Error updating card count in deck:", error);
+    }
+  };
 
   const addNewFlashcardField = () => {
     setNewFlashcards([
@@ -49,12 +66,13 @@ const AddFlashcards = ({ deckId, listFlashcards }) => {
       for (const card of cardsToSubmit) {
         await axios.post(
           `${backendUrl}/api/decks/add-flashcard`,
-          { deckId, front: card.front, back: card.back },
+          { deckId: deck.id, front: card.front, back: card.back },
           { headers: { Authorization: `Bearer ${token}` } }
         );
       }
 
       setNewFlashcards([{ id: 0, front: "", back: "" }]);
+      await updateCardCount();
       await listFlashcards();
 
       let updateMessage =

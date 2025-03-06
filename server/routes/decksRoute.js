@@ -3,7 +3,7 @@ import express from "express";
 import { requireAuth } from "@clerk/express";
 import {
   createDeck,
-  editDeckTitle,
+  editDeck,
   removeDeck,
   addFlashcard,
   removeFlashcard,
@@ -18,7 +18,7 @@ import {
 const decksRoute = express.Router();
 
 decksRoute.post("/create", requireAuth(), createDeck);
-decksRoute.post("/edit-title", requireAuth(), editDeckTitle);
+decksRoute.post("/edit", requireAuth(), editDeck);
 decksRoute.post("/remove", requireAuth(), removeDeck);
 decksRoute.post("/add-flashcard", requireAuth(), addFlashcard);
 decksRoute.post("/remove-flashcard", requireAuth(), removeFlashcard);
