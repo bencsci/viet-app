@@ -27,7 +27,7 @@ const Deck = () => {
   const [activeTab, setActiveTab] = useState("cards");
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [cardToDelete, setCardToDelete] = useState(null);
-  const [newTitle, setNewTitle] = useState();
+  const [newTitle, setNewTitle] = useState("");
   const [renameModalOpen, setRenameModalOpen] = useState(false);
 
   useEffect(() => {
@@ -226,22 +226,24 @@ const Deck = () => {
       <div className="max-w-6xl mx-auto px-4 md:px-8 py-6">
         {/* Action Buttons */}
         <div className="flex flex-wrap gap-4 mb-8">
-          <button
-            disabled={cards.length === 0}
-            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium shadow-sm ${
-              cards.length === 0
-                ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                : "bg-red-600 hover:bg-red-700 text-white"
-            }`}
-          >
-            <MdPlayArrow className="text-xl" />
-            <Link to={`/decks/${deckId}/review`}>
+          <Link to={`/decks/${deckId}/review`}>
+            <button
+              disabled={cards.length === 0}
+              className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium shadow-sm ${
+                cards.length === 0
+                  ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                  : "bg-red-600 hover:bg-red-700 text-white"
+              }`}
+            >
+              <MdPlayArrow className="text-xl" />
+
               <span>Start Review</span>
-            </Link>
-          </button>
+            </button>
+          </Link>
 
           <button
             onClick={() => {
+              setNewTitle(deck.title);
               setRenameModalOpen(true);
             }}
             className="flex items-center gap-2 px-6 py-3 bg-white hover:bg-gray-50 text-gray-700 rounded-lg font-medium shadow-sm border border-gray-200"
@@ -421,7 +423,6 @@ const Deck = () => {
                   id="title"
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
-                  placeholder="Enter a new title"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                   autoFocus
                 />
