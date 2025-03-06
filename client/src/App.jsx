@@ -8,6 +8,7 @@ import Login from "./pages/login";
 import NavbarSO from "./components/navbarSO";
 import NavbarSI from "./components/navbarSI";
 import Deck from "./pages/deck";
+import ReviewDeck from "./pages/reviewDeck";
 function App() {
   return (
     <div>
@@ -16,8 +17,9 @@ function App() {
         <NavbarSI />
         <Routes>
           <Route path="/" element={<Conversation />} />
-          <Route path="/review" element={<Review />} />
+          <Route path="/decks" element={<Review />} />
           <Route path="/decks/:deckId" element={<Deck />} />
+          <Route path="/decks/:deckId/review" element={<ReviewDeck />} />
         </Routes>
       </SignedIn>
       <SignedOut>

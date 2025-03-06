@@ -1,5 +1,5 @@
 import React from "react";
-import { MdMoreVert, MdPlayArrow } from "react-icons/md";
+import { MdPlayArrow } from "react-icons/md";
 import { Link } from "react-router";
 
 const DeckCard = ({ id, title, cardCount, lastReviewed }) => {
@@ -13,25 +13,18 @@ const DeckCard = ({ id, title, cardCount, lastReviewed }) => {
           <h3 className="text-lg font-semibold text-gray-800 line-clamp-2">
             {title}
           </h3>
-          <button className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100">
-            <MdMoreVert className="text-xl" />
-          </button>
         </div>
         <div className="flex items-center text-sm text-gray-500 mb-6">
           <span className="mr-4">{cardCount} cards</span>
           <span>Last reviewed: {lastReviewed}</span>
         </div>
-        <div className="flex gap-3">
-          <Link to={`/decks/${id}`}>
-            <button className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors cursor-pointer">
+        <div className="flex w-full">
+          <Link to={`/decks/${id}`} className="w-full">
+            <button className="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors cursor-pointer">
               <MdPlayArrow className="text-lg" />
-
-              <span>Study</span>
+              <span>View Deck</span>
             </button>
           </Link>
-          <button className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-4 rounded-lg transition-colors">
-            Edit
-          </button>
         </div>
       </div>
       <div className="h-2 bg-red-500"></div>

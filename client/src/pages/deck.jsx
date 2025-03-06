@@ -14,7 +14,6 @@ import {
 import axios from "axios";
 import { UserContext } from "../context/userContext";
 import AddFlashcards from "../components/addFlashcards";
-import ReviewDeck from "../components/reviewDeck";
 import Statistics from "../components/statistics";
 import Flashcard from "../components/flashcard";
 
@@ -26,7 +25,6 @@ const Deck = () => {
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("cards");
-  const [reviewMode, setReviewMode] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [cardToDelete, setCardToDelete] = useState(null);
   const [newTitle, setNewTitle] = useState();
@@ -173,29 +171,11 @@ const Deck = () => {
     }
   };
 
-  const startReview = () => {
-    if (cards.length === 0) {
-      alert("Add some flashcards first!");
-      return;
-    }
-    setReviewMode(true);
-  };
-
   if (loading) {
     return (
       <div className="pt-16 min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="w-12 h-12 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
       </div>
-    );
-  }
-
-  if (reviewMode) {
-    return (
-      <ReviewDeck
-        cards={cards}
-        deckTitle={deck?.title || "Deck"}
-        onClose={() => setReviewMode(false)}
-      />
     );
   }
 
@@ -206,7 +186,7 @@ const Deck = () => {
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center mb-4">
             <Link
-              to="/review"
+              to="/decks"
               className="mr-4 p-2 hover:bg-red-700 rounded-full transition-colors"
             >
               <MdArrowBack className="text-xl" />
@@ -247,7 +227,6 @@ const Deck = () => {
         {/* Action Buttons */}
         <div className="flex flex-wrap gap-4 mb-8">
           <button
-            onClick={startReview}
             disabled={cards.length === 0}
             className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium shadow-sm ${
               cards.length === 0
@@ -256,7 +235,9 @@ const Deck = () => {
             }`}
           >
             <MdPlayArrow className="text-xl" />
-            <span>Start Review</span>
+            <Link to={`/decks/${deckId}/review`}>
+              <span>Start Review</span>
+            </Link>
           </button>
 
           <button

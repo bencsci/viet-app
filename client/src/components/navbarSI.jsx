@@ -28,7 +28,7 @@ const NavbarSI = () => {
               Chat
             </Link>
             <Link
-              to="/review"
+              to="/decks"
               className="text-gray-600 hover:text-red-500 px-3 py-2 rounded-md font-medium"
             >
               Review
@@ -69,7 +69,7 @@ const NavbarSI = () => {
                 Chat
               </Link>
               <Link
-                to="/review"
+                to="/decks"
                 onClick={() => setIsOpen(false)}
                 className="block text-gray-600 hover:text-red-500 px-3 py-2 rounded-md font-medium"
               >
