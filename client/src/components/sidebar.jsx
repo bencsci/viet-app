@@ -11,17 +11,15 @@ import {
 } from "react-icons/md";
 import { AiOutlineMenuUnfold } from "react-icons/ai";
 import { UserContext } from "../context/userContext";
+import { useNavigate, useParams } from "react-router";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
-  const {
-    setSelectedConvoId,
-    selectedConvoId,
-    conversations,
-    setConversations,
-    loadConversations,
-  } = useContext(UserContext);
+  const { setPrevConvoId, conversations, setConversations, loadConversations } =
+    useContext(UserContext);
+  const { convoId } = useParams();
+  const navigate = useNavigate();
   const { getToken } = useAuth();
   const [activeMenu, setActiveMenu] = useState(null);
   const [renameModalOpen, setRenameModalOpen] = useState(false);
@@ -58,7 +56,10 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
           },
         }
       );
-      setSelectedConvoId(res.data.id);
+
+      navigate(`/c/${res.data.id}`);
+      //setSelectedConvoId(res.data.id);
+      setPrevConvoId(res.data.id);
       loadConversations();
       setIsSidebarOpen(false); // Close sidebar on mobile after creating new chat
     } catch (error) {
@@ -71,26 +72,43 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
     e.stopPropagation();
     setActiveMenu(null);
 
-    // If we're deleting the currently selected conversation
-    if (selectedConvoId === id) {
-      setSelectedConvoId(null);
-    }
+    if (convoId.toString() === id.toString()) {
+      // First delete the conversation
+      try {
+        const token = await getToken();
+        await axios.post(
+          `${BACKEND_URL}/api/history/delete`,
+          { convoId: id },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
-    try {
-      const token = await getToken();
-      await axios.post(
-        `${BACKEND_URL}/api/history/delete`,
-        { convoId: id },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      loadConversations();
-    } catch (error) {
-      console.error("Error deleting conversation:", error);
+        // Then navigate to home and reset
+        navigate("/");
+        loadConversations();
+      } catch (error) {
+        console.error("Error deleting conversation:", error);
+      }
+    } else {
+      // If not the current conversation, just delete normally
+      try {
+        const token = await getToken();
+        await axios.post(
+          `${BACKEND_URL}/api/history/delete`,
+          { convoId: id },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        loadConversations();
+      } catch (error) {
+        console.error("Error deleting conversation:", error);
+      }
     }
   };
 
@@ -156,8 +174,10 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
     }
   };
 
-  const handleConversationSelect = (id) => {
-    setSelectedConvoId(id);
+  const handleConversationSelect = (convoId) => {
+    navigate(`/c/${convoId}`);
+    //setSelectedConvoId(convoId);
+    setPrevConvoId(convoId);
     setIsSidebarOpen(false);
   };
 
@@ -202,7 +222,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
                 key={conv.id}
                 onClick={() => handleConversationSelect(conv.id)}
                 className={`group flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all ${
-                  selectedConvoId === conv.id
+                  convoId === conv.id.toString()
                     ? "bg-red-100 text-red-700"
                     : "hover:bg-gray-100 text-gray-700"
                 }`}
@@ -211,7 +231,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
                 <div className="flex items-center gap-3 truncate max-w-[80%]">
                   <div
                     className={`p-2 rounded-lg ${
-                      selectedConvoId === conv.id
+                      convoId === conv.id.toString()
                         ? "bg-red-200"
                         : "bg-gray-200 group-hover:bg-gray-300"
                     }`}
@@ -229,7 +249,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
                     data-menu-button={conv.id}
                     onClick={(e) => toggleMenu(conv.id, e)}
                     className={`p-2 rounded-lg ${
-                      selectedConvoId === conv.id
+                      convoId === conv.id.toString()
                         ? "hover:bg-red-200 text-red-600"
                         : "hover:bg-gray-200 text-gray-500"
                     }`}

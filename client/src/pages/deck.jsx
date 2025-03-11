@@ -117,7 +117,7 @@ const Deck = () => {
         `${backendUrl}/api/decks/remove-flashcard`,
         {
           deckId,
-          flashcardId: cardToDelete.id || cardToDelete._id,
+          flashcardId: cardToDelete.id,
         },
         {
           headers: {
@@ -128,7 +128,7 @@ const Deck = () => {
 
       setCards((prevCards) =>
         prevCards.filter(
-          (c) => c.id !== cardToDelete.id && c._id !== cardToDelete._id
+          (c) => c.id !== cardToDelete.id
         )
       );
 

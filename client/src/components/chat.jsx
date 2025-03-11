@@ -4,13 +4,13 @@ import { useAuth } from "@clerk/clerk-react";
 import { MdTranslate, MdClear, MdAdd, MdRestartAlt } from "react-icons/md";
 import { AiOutlineMenuFold, AiOutlineMenuUnfold } from "react-icons/ai";
 import { UserContext } from "../context/userContext";
+import { useParams, useNavigate } from "react-router";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
   const { getToken } = useAuth();
-  const { selectedConvoId, conversations, setSelectedConvoId } =
-    useContext(UserContext);
+  const { conversations, setPrevConvoId } = useContext(UserContext);
   const messagesEndRef = useRef(null);
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
@@ -18,46 +18,69 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
   const [messageStates, setMessageStates] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [titleGenerated, setTitleGenerated] = useState(false);
+  const navigate = useNavigate();
+  const { convoId } = useParams();
 
-  useEffect(() => {
-    if (selectedConvoId !== null) {
-      const loadMessages = async () => {
-        try {
-          setIsLoading(true);
-          const token = await getToken();
-          const res = await axios.post(
-            `${BACKEND_URL}/api/history/get`,
-            { convoId: selectedConvoId },
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-          if (res.data && res.data.messages) {
-            setMessages(res.data.messages);
-          }
-        } catch (error) {
-          console.error("Error loading conversation:", error);
-        } finally {
-          setIsLoading(false);
+  const loadMessages = async () => {
+    try {
+      setIsLoading(true);
+      const token = await getToken();
+      const res = await axios.post(
+        `${BACKEND_URL}/api/history/get`,
+        { convoId: convoId },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-      };
-
-      loadMessages();
-      setTitleGenerated(false);
+      );
+      if (res.data && res.data.messages) {
+        setMessages(res.data.messages);
+      }
+    } catch (error) {
+      console.error("Error loading conversation:", error);
+    } finally {
+      setIsLoading(false);
     }
-  }, [selectedConvoId]);
+  };
 
   useEffect(() => {
-    if (
-      messages.length === 6 &&
-      selectedConvoId &&
-      conversations.find((c) => c.id === selectedConvoId)?.title === null &&
-      !titleGenerated
-    ) {
-      setTitleGenerated(true);
-      generateTitle();
+    if (convoId) {
+      loadMessages();
+      setPrevConvoId(convoId);
+    } else {
+      setIsLoading(false);
+      setMessages([]);
+    }
+  }, [convoId]);
+
+  useEffect(() => {
+    if (convoId) {
+      const convo = conversations.find(
+        (c) => c.id.toString() === convoId.toString()
+      );
+
+      // console.log("message.length", messages.length === 4);
+      // console.log("convoId", convoId !== null);
+      // console.log("conversations", !convo?.title);
+      // console.log("titleGenerated", !titleGenerated);
+
+      if (convo?.title) {
+        setTitleGenerated(true);
+      } else {
+        setTitleGenerated(false);
+      }
+
+      if (
+        messages.length === 4 &&
+        convoId &&
+        !convo?.title &&
+        !titleGenerated
+      ) {
+        console.log("Generating title...");
+        //setTitleGenerated(true);
+        generateTitle();
+      }
     }
   }, [messages]);
 
@@ -68,7 +91,7 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
         `${BACKEND_URL}/api/history/generate-title`,
         {
           messages: messages,
-          convoId: selectedConvoId,
+          convoId: convoId,
         },
         {
           headers: {
@@ -76,9 +99,10 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
           },
         }
       );
-      console.log("Title generated successfully");
+      console.log("Title generated successfully:", res.data);
     } catch (error) {
       console.error("Error generating title for conversation:", error);
+      //setTitleGenerated(false);
     }
   };
 
@@ -102,7 +126,7 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
       setMessages(updatedMessages);
 
       // Saves user conversation if there are no other conversations
-      if (!selectedConvoId) {
+      if (!convoId) {
         createNewConversation(updatedMessages);
       }
     } catch (error) {
@@ -128,8 +152,9 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
       );
       // Set the new conversation ID as the selected conversation
       // if (res.data && res.data.convoId) {
-      //   setSelectedConvoId(res.data.convoId);
+      //   setconvoId(res.data.convoId);
       // }
+      navigate(`/c/${res.data.id}`);
     } catch (error) {
       console.error("Error creating conversation:", error);
     }
@@ -275,7 +300,7 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
 
   useEffect(() => {
     const updateDatabase = async () => {
-      if (messages.length === 0 || selectedConvoId === null) return;
+      if (messages.length === 0 || convoId === null) return;
 
       try {
         const token = await getToken();
@@ -283,7 +308,7 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
           `${BACKEND_URL}/api/history/update`,
           {
             messages,
-            convoId: selectedConvoId,
+            convoId: convoId,
           },
           {
             headers: {
@@ -320,7 +345,7 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
       {isLoading ? (
         <div className="flex-1 flex items-center justify-center">
           <div className="flex flex-col items-center space-y-4">
-            <div className="w-12 h-12 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+            <div className="w-12 h-12"></div>
           </div>
         </div>
       ) : (

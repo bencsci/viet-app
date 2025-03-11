@@ -1,13 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { Link, useLocation } from "react-router";
 import { FaLanguage } from "react-icons/fa";
 import { HiMenu, HiX } from "react-icons/hi";
 import { IoSettingsSharp } from "react-icons/io5";
 import { UserButton } from "@clerk/clerk-react";
+import { UserContext } from "../context/userContext";
 
 const NavbarSI = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const { prevConvoId } = useContext(UserContext);
 
   return (
     <nav className="bg-white shadow-lg fixed top-0 left-0 right-0 z-50">
@@ -22,7 +24,7 @@ const NavbarSI = () => {
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-4">
             <Link
-              to="/"
+              to={prevConvoId ? `/c/${prevConvoId}` : "/"}
               className="text-gray-600 hover:text-red-500 px-3 py-2 rounded-md font-medium"
             >
               Chat

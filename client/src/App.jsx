@@ -17,6 +17,7 @@ function App() {
         <NavbarSI />
         <Routes>
           <Route path="/" element={<Conversation />} />
+          <Route path="/c/:convoId" element={<Conversation />} />
           <Route path="/decks" element={<Review />} />
           <Route path="/decks/:deckId" element={<Deck />} />
           <Route path="/decks/:deckId/review" element={<ReviewDeck />} />

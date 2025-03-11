@@ -8,23 +8,13 @@ export const UserContextProvider = ({ children }) => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const { getToken } = useAuth();
 
-  // Retrieve selectedConvoId from localStorage or set to null
-  const [selectedConvoId, setSelectedConvoId] = useState(() => {
-    const storedId = localStorage.getItem("selectedConvoId");
-    return storedId && storedId !== "undefined" ? JSON.parse(storedId) : null;
-  });
-
+  const [prevConvoId, setPrevConvoId] = useState();
   const [conversations, setConversations] = useState([]);
 
   useEffect(() => {
-    // Save selected conversation ID to localStorage when it changes
-    if (selectedConvoId !== null) {
-      localStorage.setItem("selectedConvoId", JSON.stringify(selectedConvoId));
-    }
-
     // Load conversations when the component mounts
     loadConversations();
-  }, [selectedConvoId]);
+  }, [prevConvoId]);
 
   const loadConversations = async () => {
     try {
@@ -46,8 +36,8 @@ export const UserContextProvider = ({ children }) => {
   };
 
   const contextValue = {
-    selectedConvoId,
-    setSelectedConvoId,
+    prevConvoId,
+    setPrevConvoId,
     backendUrl,
     conversations,
     setConversations,
