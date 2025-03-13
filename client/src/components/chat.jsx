@@ -484,7 +484,7 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
                 <div
                   className={`flex ${
                     message.role === "user" ? "justify-end" : "justify-start"
-                  }`}
+                  } lg:px-5`}
                 >
                   <div className="bg-white shadow-md border border-gray-100 rounded-lg px-4 py-2 text-sm text-gray-600 max-w-[70%]">
                     <div className="text-xs text-gray-400 mb-1">

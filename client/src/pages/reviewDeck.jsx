@@ -150,29 +150,40 @@ const ReviewDeck = () => {
           <div className="w-full max-w-2xl bg-white rounded-xl shadow-md overflow-hidden">
             {currentCard && (
               <div
-                className="p-8 min-h-[300px] flex items-center justify-center cursor-pointer"
+                className="p-8 min-h-[300px] flex flex-col justify-center cursor-pointer relative"
                 onClick={() => !showAnswer && setShowAnswer(true)}
               >
                 <div className="text-center">
-                  <p className="text-gray-500 mb-2 text-sm">
-                    {showAnswer ? "Answer" : "Question"}
-                  </p>
+                  <p className="text-gray-500 mb-2 text-sm">Question</p>
                   <h2 className="text-2xl font-bold text-gray-800">
-                    {showAnswer ? currentCard.back : currentCard.front}
+                    {currentCard.front}
                   </h2>
+                </div>
 
-                  {!showAnswer && (
+                {!showAnswer ? (
+                  <div className="flex justify-center mt-8">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         setShowAnswer(true);
                       }}
-                      className="mt-6 text-red-600 hover:text-red-700 font-medium"
+                      className="w-3/4 py-4 bg-sky-400 text-white rounded-lg shadow-md font-medium text-lg"
                     >
-                      Show Answer
+                      Flip Card
                     </button>
-                  )}
-                </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="w-full h-px bg-gray-200 my-6"></div>
+
+                    <div className="text-center mb-4">
+                      <p className="text-gray-500 mb-2 text-sm">Answer</p>
+                      <h2 className="text-2xl font-bold text-gray-800">
+                        {currentCard.back}
+                      </h2>
+                    </div>
+                  </>
+                )}
               </div>
             )}
 
