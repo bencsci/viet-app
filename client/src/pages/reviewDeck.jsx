@@ -14,7 +14,12 @@ const ReviewDeck = () => {
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
   const [reviewComplete, setReviewComplete] = useState(false);
-  const [correctCount, setCorrectCount] = useState(0);
+  const [results, setResults] = useState({
+    fail: 0,
+    hard: 0,
+    good: 0,
+    easy: 0,
+  });
   const [totalReviewed, setTotalReviewed] = useState(0);
   const [loading, setLoading] = useState(true);
 
@@ -77,10 +82,12 @@ const ReviewDeck = () => {
   // Check if we have a current card
   const currentCard = cards.length > 0 ? cards[currentCardIndex] : null;
 
-  const handleNextCard = (correct) => {
-    if (correct) {
-      setCorrectCount((prev) => prev + 1);
-    }
+  const handleRateCard = (rating) => {
+    // Update the results based on the rating
+    setResults((prev) => ({
+      ...prev,
+      [rating]: prev[rating] + 1,
+    }));
 
     setTotalReviewed((prev) => prev + 1);
 
@@ -96,9 +103,17 @@ const ReviewDeck = () => {
     setCurrentCardIndex(0);
     setShowAnswer(false);
     setReviewComplete(false);
-    setCorrectCount(0);
+    setResults({
+      fail: 0,
+      hard: 0,
+      good: 0,
+      easy: 0,
+    });
     setTotalReviewed(0);
   };
+
+  // Calculate correct answers (good + easy)
+  const correctCount = results.good + results.easy;
 
   // Show loading state
   if (loading || !deck || cards.length === 0) {
@@ -162,21 +177,33 @@ const ReviewDeck = () => {
             )}
 
             {showAnswer && (
-              <div className="bg-gray-50 p-4 flex justify-center gap-4">
-                <button
-                  onClick={() => handleNextCard(false)}
-                  className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg flex items-center gap-2"
-                >
-                  <MdClose className="text-xl" />
-                  <span>Incorrect</span>
-                </button>
-                <button
-                  onClick={() => handleNextCard(true)}
-                  className="px-6 py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg flex items-center gap-2"
-                >
-                  <MdCheck className="text-xl" />
-                  <span>Correct</span>
-                </button>
+              <div className="bg-gray-50 p-6">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <button
+                    onClick={() => handleRateCard("fail")}
+                    className="px-4 py-4 bg-red-400 hover:bg-red-500 text-white rounded-lg flex items-center justify-center transition-colors text-lg font-medium"
+                  >
+                    <span>Fail</span>
+                  </button>
+                  <button
+                    onClick={() => handleRateCard("hard")}
+                    className="px-4 py-4 bg-orange-400 hover:bg-orange-500 text-white rounded-lg flex items-center justify-center transition-colors text-lg font-medium"
+                  >
+                    <span>Hard</span>
+                  </button>
+                  <button
+                    onClick={() => handleRateCard("good")}
+                    className="px-4 py-4 bg-blue-400 hover:bg-blue-500 text-white rounded-lg flex items-center justify-center transition-colors text-lg font-medium"
+                  >
+                    <span>Good</span>
+                  </button>
+                  <button
+                    onClick={() => handleRateCard("easy")}
+                    className="px-4 py-4 bg-green-400 hover:bg-green-500 text-white rounded-lg flex items-center justify-center transition-colors text-lg font-medium"
+                  >
+                    <span>Easy</span>
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -204,7 +231,35 @@ const ReviewDeck = () => {
                 </p>
               </div>
 
-              <div className="flex justify-center gap-4">
+              {/* Results breakdown */}
+              <div className="mb-8 grid grid-cols-4 gap-2">
+                <div className="bg-red-100 p-3 rounded-lg">
+                  <div className="text-red-600 font-bold text-xl">
+                    {results.fail}
+                  </div>
+                  <div className="text-sm text-gray-600">Fail</div>
+                </div>
+                <div className="bg-orange-100 p-3 rounded-lg">
+                  <div className="text-orange-600 font-bold text-xl">
+                    {results.hard}
+                  </div>
+                  <div className="text-sm text-gray-600">Hard</div>
+                </div>
+                <div className="bg-blue-100 p-3 rounded-lg">
+                  <div className="text-blue-600 font-bold text-xl">
+                    {results.good}
+                  </div>
+                  <div className="text-sm text-gray-600">Good</div>
+                </div>
+                <div className="bg-green-100 p-3 rounded-lg">
+                  <div className="text-green-600 font-bold text-xl">
+                    {results.easy}
+                  </div>
+                  <div className="text-sm text-gray-600">Easy</div>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap justify-center gap-4">
                 <button
                   onClick={restartReview}
                   className="px-6 py-3 bg-red-100 text-red-600 hover:bg-red-200 rounded-lg flex items-center gap-2"
