@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { useParams, Link } from "react-router";
+import { useParams, Link, useNavigate } from "react-router";
 import { useAuth } from "@clerk/clerk-react";
 import {
   MdAdd,
@@ -29,11 +29,33 @@ const Deck = () => {
   const [cardToDelete, setCardToDelete] = useState(null);
   const [newTitle, setNewTitle] = useState("");
   const [renameModalOpen, setRenameModalOpen] = useState(false);
+  const [isDeleteDeckModalOpen, setIsDeleteDeckModalOpen] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadDeck();
     listFlashcards();
   }, [deckId]);
+
+  const removeDeck = async () => {
+    try {
+      const token = await getToken();
+      await axios.post(
+        `${backendUrl}/api/decks/remove`,
+        { deckId: deckId },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      navigate("/decks");
+    } catch (error) {
+      console.log("Error deleting deck:", error);
+      alert("Failed to delete deck. Please try again.");
+    }
+  };
 
   const updateCardCount = async () => {
     try {
@@ -127,9 +149,7 @@ const Deck = () => {
       );
 
       setCards((prevCards) =>
-        prevCards.filter(
-          (c) => c.id !== cardToDelete.id
-        )
+        prevCards.filter((c) => c.id !== cardToDelete.id)
       );
 
       updateCardCount();
@@ -236,7 +256,6 @@ const Deck = () => {
               }`}
             >
               <MdPlayArrow className="text-xl" />
-
               <span>Start Review</span>
             </button>
           </Link>
@@ -255,6 +274,14 @@ const Deck = () => {
           <button className="flex items-center gap-2 px-6 py-3 bg-white hover:bg-gray-50 text-gray-700 rounded-lg font-medium shadow-sm border border-gray-200">
             <MdBarChart className="text-xl" />
             <span>Detailed Stats</span>
+          </button>
+
+          <button
+            onClick={() => setIsDeleteDeckModalOpen(true)}
+            className="flex items-center gap-2 px-6 py-3 bg-white hover:bg-red-50 text-red-600 rounded-lg font-medium shadow-sm border border-red-200"
+          >
+            <MdDelete className="text-xl" />
+            <span>Delete Deck</span>
           </button>
         </div>
 
@@ -444,6 +471,53 @@ const Deck = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Deck Confirmation Modal */}
+      {isDeleteDeckModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden">
+            <div className="bg-red-500 text-white px-4 py-3 flex items-center justify-between">
+              <h3 className="font-medium">Delete Deck</h3>
+              <button
+                onClick={() => setIsDeleteDeckModalOpen(false)}
+                className="p-1 hover:bg-red-600 rounded transition-colors"
+              >
+                <MdClose className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6">
+              <div className="flex items-center justify-center mb-4 text-red-500">
+                <MdDelete className="w-16 h-16" />
+              </div>
+
+              <h3 className="text-xl font-bold text-center mb-2">
+                Delete "{deck.title}"?
+              </h3>
+
+              <p className="mb-6 text-gray-700 text-center">
+                This will permanently delete this deck and all {deck.card_count}{" "}
+                flashcards it contains. This action cannot be undone.
+              </p>
+
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => setIsDeleteDeckModalOpen(false)}
+                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={removeDeck}
+                  className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+                >
+                  Delete Deck
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

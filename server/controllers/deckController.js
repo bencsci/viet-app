@@ -125,7 +125,45 @@ const editDeck = async (req, res) => {
   }
 };
 
-const removeDeck = async (req, res) => {};
+const removeDeck = async (req, res) => {
+  try {
+    const supabase = await supabaseClient(
+      req.auth.getToken({ template: "supabase" })
+    );
+
+    const userId = req.auth.userId;
+    const { deckId } = req.body;
+
+    // Delete all flashcards in the deck
+    try {
+      const { error: flashcardsError } = await supabase
+        .from("flashcards")
+        .delete()
+        .eq("deck_id", deckId);
+
+      if (flashcardsError) throw flashcardsError;
+    } catch (error) {
+      console.error("Error deleting flashcards from deck:", error);
+      return res
+        .status(500)
+        .json({ error: "Failed to delete flashcards from deck" });
+    }
+
+    // Delete the deck  
+    const { data, error } = await supabase
+      .from("decks")
+      .delete()
+      .eq("id", deckId)
+      .eq("user_id", userId);
+
+    if (error) throw error;
+
+    res.json({ success: true, data: data });
+  } catch (error) {
+    console.error("Error deleting deck:", error);
+    res.status(500).json({ error: "Failed to delete deck" });
+  }
+};
 
 const listFlashcards = async (req, res) => {
   try {
