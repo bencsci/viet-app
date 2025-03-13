@@ -5,12 +5,11 @@ import { MdTranslate, MdClear, MdAdd, MdRestartAlt } from "react-icons/md";
 import { AiOutlineMenuFold, AiOutlineMenuUnfold } from "react-icons/ai";
 import { UserContext } from "../context/userContext";
 import { useParams, useNavigate } from "react-router";
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+import { toast } from "react-toastify";
 
 const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
   const { getToken } = useAuth();
-  const { conversations, setPrevConvoId } = useContext(UserContext);
+  const { conversations, setPrevConvoId, backendUrl } = useContext(UserContext);
   const messagesEndRef = useRef(null);
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
@@ -20,13 +19,22 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
   const [titleGenerated, setTitleGenerated] = useState(false);
   const navigate = useNavigate();
   const { convoId } = useParams();
+  const [showFlashcardModal, setShowFlashcardModal] = useState(false);
+  const [decks, setDecks] = useState([]);
+  const [selectedDeck, setSelectedDeck] = useState({});
+  const [flashcardFront, setFlashcardFront] = useState("");
+  const [flashcardBack, setFlashcardBack] = useState("");
+  const [currentTranslation, setCurrentTranslation] = useState("");
+  const [isLoadingDecks, setIsLoadingDecks] = useState(false);
+  const [showNewDeckForm, setShowNewDeckForm] = useState(false);
+  const [newDeckTitle, setNewDeckTitle] = useState("");
 
   const loadMessages = async () => {
     try {
       setIsLoading(true);
       const token = await getToken();
       const res = await axios.post(
-        `${BACKEND_URL}/api/history/get`,
+        `${backendUrl}/api/history/get`,
         { convoId: convoId },
         {
           headers: {
@@ -88,7 +96,7 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
     try {
       const token = await getToken();
       const res = await axios.post(
-        `${BACKEND_URL}/api/history/generate-title`,
+        `${backendUrl}/api/history/generate-title`,
         {
           messages: messages,
           convoId: convoId,
@@ -110,7 +118,7 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
     try {
       const token = await getToken();
       const res = await axios.post(
-        `${BACKEND_URL}/api/chat/send`,
+        `${backendUrl}/api/chat/send`,
         { messages },
         {
           headers: {
@@ -142,7 +150,7 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
     try {
       const token = await getToken();
       const res = await axios.post(
-        `${BACKEND_URL}/api/history/save`,
+        `${backendUrl}/api/history/save`,
         { messages: messageToSave },
         {
           headers: {
@@ -164,7 +172,7 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
     try {
       const token = await getToken();
       const res = await axios.post(
-        `${BACKEND_URL}/api/chat/translate`,
+        `${backendUrl}/api/chat/translate`,
         {
           words: typeof words === "string" ? words : words.join(" "),
           context: messages.slice(-1)[0]?.content || "", // Get the last message content
@@ -205,7 +213,10 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
         .sort((a, b) => a.position - b.position)
         .map((item) => item.word);
 
+      // Set the flashcard front to the selected words
       if (orderedWords.length > 0) {
+        setFlashcardFront(orderedWords.join(" "));
+
         // Set loading state before translation
         setMessageStates((current) => ({
           ...current,
@@ -228,6 +239,9 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
             },
           }));
         });
+      } else {
+        // Clear flashcard front if no words are selected
+        setFlashcardFront("");
       }
 
       return {
@@ -305,7 +319,7 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
       try {
         const token = await getToken();
         await axios.post(
-          `${BACKEND_URL}/api/history/update`,
+          `${backendUrl}/api/history/update`,
           {
             messages,
             convoId: convoId,
@@ -323,6 +337,114 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
 
     updateDatabase();
   }, [messages]);
+
+  const fetchDecks = async () => {
+    try {
+      setIsLoadingDecks(true);
+      const token = await getToken();
+      const res = await axios.get(`${backendUrl}/api/decks/list`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setDecks(res.data);
+    } catch (error) {
+      console.error("Error fetching decks:", error);
+    } finally {
+      setIsLoadingDecks(false);
+    }
+  };
+
+  const handleAddToFlashcards = (translation, index) => {
+    setCurrentTranslation(translation);
+
+    // Get the selected words from the message state
+    if (messageStates[index]?.selectedWords) {
+      const orderedWords = Array.from(
+        messageStates[index].selectedWords.values()
+      )
+        .sort((a, b) => a.position - b.position)
+        .map((item) => item.word)
+        .join(" ");
+
+      // If there are selected words, use them for the front
+      if (orderedWords) {
+        setFlashcardFront(orderedWords);
+      }
+    }
+
+    setFlashcardBack(translation);
+    setShowFlashcardModal(true);
+    fetchDecks();
+  };
+
+  const createNewDeck = async () => {
+    if (!newDeckTitle.trim()) return;
+
+    try {
+      const token = await getToken();
+      const res = await axios.post(
+        `${backendUrl}/api/decks/create`,
+        { deckName: newDeckTitle },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      fetchDecks();
+      setDecks([...decks, res.data]);
+      setSelectedDeck(res.data);
+      setShowNewDeckForm(false);
+      setNewDeckTitle("");
+    } catch (error) {
+      console.error("Error creating deck:", error);
+    }
+  };
+
+  const updateCardCount = async () => {
+    try {
+      const token = await getToken();
+      await axios.post(
+        `${backendUrl}/api/decks/edit`,
+        { deckId: selectedDeck.id, card_count: selectedDeck.card_count + 1 },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      loadDeck();
+    } catch (error) {
+      console.error("Error updating card count in deck:", error);
+    }
+  };
+
+  const addFlashcard = async () => {
+    try {
+      const token = await getToken();
+      await axios.post(
+        `${backendUrl}/api/decks/add-flashcard`,
+        {
+          deckId: selectedDeck.id,
+          front: flashcardFront,
+          back: flashcardBack,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setShowFlashcardModal(false);
+      setFlashcardFront("");
+      setFlashcardBack("");
+      setSelectedDeck({});
+      updateCardCount();
+
+      toast.success(`Flashcard successfully added to ${selectedDeck.title}!`);
+    } catch (error) {
+      console.error("Error adding flashcard:", error);
+    }
+  };
 
   return (
     <div
@@ -373,12 +495,18 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
                         <div className="w-5 h-5 border-2 border-gray-300 border-t-red-500 rounded-full animate-spin"></div>
                       </div>
                     ) : (
-                      <div>{messageStates[index].translation}</div>
+                      <div>{messageStates[index]?.translation}</div>
                     )}
                     <div className="mt-2 pt-2 border-t border-gray-400/30 flex space-x-2">
                       <button
                         className="p-1.5 bg-green-100 hover:bg-green-200 rounded-full text-green-600 transition-colors"
                         title="Add to flashcards"
+                        onClick={() =>
+                          handleAddToFlashcards(
+                            messageStates[index]?.translation,
+                            index
+                          )
+                        }
                       >
                         <MdAdd className="w-3.5 h-3.5" />
                       </button>
@@ -412,14 +540,14 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
                       : message.content.split(" ").map((word, wordIndex) => (
                           <span
                             key={wordIndex}
-                            onClick={() =>
+                            onClick={() => {
                               handleWordTranslation(
                                 word,
                                 index,
                                 message.content,
                                 wordIndex
-                              )
-                            }
+                              );
+                            }}
                             className={`cursor-pointer transition-colors duration-200 ${
                               messageStates[index]?.selectedWords?.has(
                                 `${word}-${wordIndex}`
@@ -486,6 +614,136 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
           </button>
         </div>
       </form>
+
+      {/* Flashcard Modal */}
+      {showFlashcardModal && (
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h2 className="text-xl font-bold mb-4">Add to Flashcards</h2>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Select Deck
+              </label>
+              {isLoadingDecks ? (
+                <div className="flex justify-center py-2">
+                  <div className="w-5 h-5 border-2 border-gray-300 border-t-red-500 rounded-full animate-spin"></div>
+                </div>
+              ) : (
+                <>
+                  {showNewDeckForm ? (
+                    <div className="mb-3">
+                      <div className="flex items-center gap-2 mb-2">
+                        <input
+                          type="text"
+                          value={newDeckTitle}
+                          onChange={(e) => setNewDeckTitle(e.target.value)}
+                          placeholder="Enter deck title"
+                          className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm"
+                        />
+                        <button
+                          onClick={createNewDeck}
+                          disabled={!newDeckTitle.trim()}
+                          className={`px-3 py-2 rounded-md text-white text-sm ${
+                            !newDeckTitle.trim()
+                              ? "bg-gray-400 cursor-not-allowed"
+                              : "bg-red-500 hover:bg-red-600"
+                          }`}
+                        >
+                          Create
+                        </button>
+                      </div>
+                      <button
+                        onClick={() => {
+                          setShowNewDeckForm(false);
+                          setNewDeckTitle("");
+                        }}
+                        className="text-sm text-gray-500 hover:text-gray-700"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <select
+                        value={selectedDeck.id || ""}
+                        onChange={(e) => {
+                          const selected = decks.find(
+                            (deck) => deck.id === e.target.value
+                          );
+                          setSelectedDeck(selected || {});
+                        }}
+                        className="w-full border border-gray-300 rounded-md px-3 py-2 mb-2"
+                      >
+                        <option value="">Select a deck</option>
+                        {decks.map((deck) => (
+                          <option key={deck.id} value={deck.id}>
+                            {deck.title}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        onClick={() => setShowNewDeckForm(true)}
+                        className="text-sm text-red-500 hover:text-red-700"
+                      >
+                        + Create new deck
+                      </button>
+                    </>
+                  )}
+                </>
+              )}
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Front (Translation)
+              </label>
+              <textarea
+                value={flashcardFront}
+                onChange={(e) => setFlashcardFront(e.target.value)}
+                className="w-full border border-gray-300 rounded-md px-3 py-2"
+                rows="2"
+              />
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Back (Original Text)
+              </label>
+              <textarea
+                value={flashcardBack}
+                onChange={(e) => setFlashcardBack(e.target.value)}
+                className="w-full border border-gray-300 rounded-md px-3 py-2"
+                rows="2"
+              />
+            </div>
+
+            <div className="flex justify-end space-x-2">
+              <button
+                onClick={() => {
+                  setShowFlashcardModal(false);
+                  setShowNewDeckForm(false);
+                  setNewDeckTitle("");
+                }}
+                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={addFlashcard}
+                disabled={!selectedDeck.id || !flashcardFront || !flashcardBack}
+                className={`px-4 py-2 rounded-md text-white ${
+                  !selectedDeck.id || !flashcardFront || !flashcardBack
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-red-500 hover:bg-red-600"
+                }`}
+              >
+                Add to Deck
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

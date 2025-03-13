@@ -16,7 +16,10 @@ const NavbarSI = () => {
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between items-center h-16">
           {/* Logo and Brand Name */}
-          <Link to="/" className="flex items-center space-x-2">
+          <Link
+            to={prevConvoId ? `/c/${prevConvoId}` : "/"}
+            className="flex items-center space-x-2"
+          >
             <FaLanguage className="text-red-500 text-3xl" />
             <span className="text-red-500 font-bold text-xl">VietAI</span>
           </Link>
