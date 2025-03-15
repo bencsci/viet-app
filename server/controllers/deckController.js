@@ -229,10 +229,6 @@ const removeFlashcard = async (req, res) => {
   }
 };
 
-const editFront = async (req, res) => {};
-
-const editBack = async (req, res) => {};
-
 const editFlashcard = async (req, res) => {
   try {
     const supabase = await supabaseClient(
@@ -261,8 +257,6 @@ export {
   removeDeck,
   addFlashcard,
   removeFlashcard,
-  editFront,
-  editBack,
   getDeck,
   listDecks,
   listFlashcards,
