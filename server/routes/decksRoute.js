@@ -11,6 +11,7 @@ import {
   listDecks,
   listFlashcards,
   editFlashcard,
+  updateFlashcard,
 } from "../controllers/deckController.js";
 
 const decksRoute = express.Router();
@@ -24,5 +25,6 @@ decksRoute.post("/get", requireAuth(), getDeck);
 decksRoute.get("/list", requireAuth(), listDecks);
 decksRoute.post("/list-flashcards", requireAuth(), listFlashcards);
 decksRoute.post("/edit-flashcard", requireAuth(), editFlashcard);
+decksRoute.post("/update-flashcard", requireAuth(), updateFlashcard);
 
 export default decksRoute;

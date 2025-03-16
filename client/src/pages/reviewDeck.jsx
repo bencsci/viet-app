@@ -22,6 +22,7 @@ const ReviewDeck = () => {
   });
   const [totalReviewed, setTotalReviewed] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [timeToAnswer, setTimeToAnswer] = useState(null);
 
   useEffect(() => {
     loadDeck();
@@ -50,6 +51,7 @@ const ReviewDeck = () => {
     }
   };
 
+  // TODO: Get the due cards or cards with due date === null
   const listFlashcards = async () => {
     try {
       setLoading(true);
@@ -82,6 +84,41 @@ const ReviewDeck = () => {
   // Check if we have a current card
   const currentCard = cards.length > 0 ? cards[currentCardIndex] : null;
 
+  const calculateScore = (rating, timeToAnswer) => {
+    let score;
+    
+    // timeToAnswer in seconds
+    if (rating === "easy") {
+      if (timeToAnswer <= 5) {
+        score = 5;
+      } else {
+        score = 4;
+      }
+    } else if (rating === "good") {
+      if (timeToAnswer <= 10) {
+        score = 4;
+      } else {
+        score = 3;
+      }
+    } else if (rating === "hard") {
+      if (timeToAnswer <= 30) {
+        score = 3;
+      } else {
+        score = 2;
+      }
+    } else if (rating === "fail") {
+      if (timeToAnswer <= 20) {
+        score = 2;
+      } else {
+        score = 1;
+      }
+    }
+
+    return score;
+  };
+
+  const updateFlashcard = async () => {};
+
   const handleRateCard = (rating) => {
     // Update the results based on the rating
     setResults((prev) => ({
@@ -89,11 +126,18 @@ const ReviewDeck = () => {
       [rating]: prev[rating] + 1,
     }));
 
+    const currentTime = new Date();
+    const elapsedTimeMs = timeToAnswer ? currentTime - timeToAnswer : 0;
+    const elapsedTimeSeconds = Math.floor(elapsedTimeMs / 1000);
+
+    console.log(`Rating: ${rating}, Time: ${elapsedTimeSeconds} seconds`);
+    console.log(`Score: ${calculateScore(rating, elapsedTimeSeconds)}`);
     setTotalReviewed((prev) => prev + 1);
 
     if (currentCardIndex < cards.length - 1) {
       setCurrentCardIndex(currentCardIndex + 1);
       setShowAnswer(false);
+      setTimeToAnswer(null);
     } else {
       setReviewComplete(true);
     }
@@ -166,6 +210,7 @@ const ReviewDeck = () => {
                       onClick={(e) => {
                         e.stopPropagation();
                         setShowAnswer(true);
+                        setTimeToAnswer(new Date());
                       }}
                       className="w-3/4 py-4 bg-sky-400 text-white rounded-lg shadow-md font-medium text-lg"
                     >

@@ -1,4 +1,5 @@
 import { supabaseClient } from "../config/supabaseClient.js";
+import { srsFunc } from "../srs/FC3.js";
 
 const createDeck = async (req, res) => {
   try {
@@ -149,7 +150,7 @@ const removeDeck = async (req, res) => {
         .json({ error: "Failed to delete flashcards from deck" });
     }
 
-    // Delete the deck  
+    // Delete the deck
     const { data, error } = await supabase
       .from("decks")
       .delete()
@@ -246,6 +247,40 @@ const editFlashcard = async (req, res) => {
 
     res.json({ success: true });
   } catch (error) {
+    console.error("Error editing flashcard:", error);
+    res.status(500).json({ error: "Failed to edit flashcard" });
+  }
+};
+
+const updateFlashcard = async (req, res) => {
+  try {
+    const supabase = await supabaseClient(
+      req.auth.getToken({ template: "supabase" })
+    );
+
+    const { cardId, streak, eFactor, interval, score, lateness } = req.body;
+
+    const card = { streak, eFactor, interval };
+    const evaluation = { score, lateness };
+    const data = srsFunc(card, evaluation);
+
+    const newDueDate = Date.now() + interval;
+    const newMastery = 0;
+    const { error } = await supabase
+      .from("flashcards")
+      .update({
+        streak: data.streak,
+        e_factor: data.eFactor,
+        interval: data.interval,
+        due_date: newDueDate,
+        mastery: newMastery,
+      })
+      .eq("id", cardId);
+
+    if (error) throw error;
+
+    res.json({ success: true });
+  } catch (error) {
     console.error("Error updating flashcard:", error);
     res.status(500).json({ error: "Failed to update flashcard" });
   }
@@ -261,4 +296,5 @@ export {
   listDecks,
   listFlashcards,
   editFlashcard,
+  updateFlashcard,
 };
