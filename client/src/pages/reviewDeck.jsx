@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, act } from "react";
 import { MdClose, MdArrowBack, MdCheck, MdRefresh } from "react-icons/md";
 import { Link, useNavigate } from "react-router";
 import { useParams } from "react-router";
@@ -86,7 +86,7 @@ const ReviewDeck = () => {
 
   const calculateScore = (rating, timeToAnswer) => {
     let score;
-    
+
     // timeToAnswer in seconds
     if (rating === "easy") {
       if (timeToAnswer <= 5) {
@@ -101,11 +101,7 @@ const ReviewDeck = () => {
         score = 3;
       }
     } else if (rating === "hard") {
-      if (timeToAnswer <= 30) {
-        score = 3;
-      } else {
-        score = 2;
-      }
+      score = 3;
     } else if (rating === "fail") {
       if (timeToAnswer <= 20) {
         score = 2;
@@ -117,7 +113,52 @@ const ReviewDeck = () => {
     return score;
   };
 
-  const updateFlashcard = async () => {};
+  const calculateLateness = () => {
+    let lateness;
+    if (currentCard.due_date == null) {
+      return (lateness = 0);
+    }
+
+    const now = new Date();
+    const due = currentCard.due.Date;
+    const diffTime = due.getTime() - now.getTime(); // Time in ,iliseconds
+    const diffHours = diffTime / (1000 * 60 * 60);
+
+    return (lateness = diffHours);
+  };
+
+  const updateFlashcard = async (rating) => {
+    try {
+      const currentTime = new Date();
+      const elapsedTimeMs = timeToAnswer ? currentTime - timeToAnswer : 0;
+      const elapsedTimeSeconds = Math.floor(elapsedTimeMs / 1000);
+      const score = calculateScore(rating, elapsedTimeSeconds);
+
+      const lateness = calculateLateness();
+
+      console.log(`Score: ${score}, Lateness: ${lateness}`);
+
+      const token = getToken();
+      const res = await axios.post(
+        `${backendUrl}/api/decks/update-flashcard`,
+        {
+          cardId: currentCard.id,
+          streak: currentCard.streak,
+          interval: currentCard.interval,
+          score: score,
+          lateness: lateness,
+          mastery: currentCard.mastery,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+    } catch (error) {
+      console.error("Error updating flashcards:", error);
+    }
+  };
 
   const handleRateCard = (rating) => {
     // Update the results based on the rating
@@ -126,12 +167,11 @@ const ReviewDeck = () => {
       [rating]: prev[rating] + 1,
     }));
 
-    const currentTime = new Date();
-    const elapsedTimeMs = timeToAnswer ? currentTime - timeToAnswer : 0;
-    const elapsedTimeSeconds = Math.floor(elapsedTimeMs / 1000);
+    // console.log(`Rating: ${rating}, Time: ${elapsedTimeSeconds} seconds`);
+    // console.log(`Score: ${calculateScore(rating, elapsedTimeSeconds)}`);
 
-    console.log(`Rating: ${rating}, Time: ${elapsedTimeSeconds} seconds`);
-    console.log(`Score: ${calculateScore(rating, elapsedTimeSeconds)}`);
+    updateFlashcard(rating);
+
     setTotalReviewed((prev) => prev + 1);
 
     if (currentCardIndex < cards.length - 1) {

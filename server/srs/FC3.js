@@ -16,15 +16,13 @@
  * Visit https://www.ussherpress.com/freshcards/ to check out the app.
  */
 function srsFunc(card, evaluation) {
-  var n = card.streak,
-    eFactor,
-    interval;
+  var n, eFactor, interval;
 
   if (card == null) {
     card = { n: 0, eFactor: 2.5, interval: 0.0 };
   }
 
-  if (card.n < 3) {
+  if (card.streak < 3) {
     // Still in learning phase, so do not change eFactor
     eFactor = card.eFactor;
 
@@ -33,7 +31,7 @@ function srsFunc(card, evaluation) {
       n = 0;
       interval = (30 * 1.0) / (24.0 * 60.0);
     } else {
-      n = card.n + 1;
+      n = card.streak + 1;
 
       // first interval = 30min
       // second interval = 12h
@@ -71,7 +69,7 @@ function srsFunc(card, evaluation) {
       if (evaluation.lateness >= -0.1) {
         // Review was not too early, so handle normally
 
-        n = card.n + 1;
+        n = card.streak + 1;
 
         var latenessScoreBonus = 0;
         var intervalAdjustment = 1.0;
@@ -107,9 +105,9 @@ function srsFunc(card, evaluation) {
         );
 
         // Figure out interval. First review is in 1d, then 6d, then based on eFactor and card interval.
-        if (card.n == 0) {
+        if (card.streak == 0) {
           interval = 1;
-        } else if (card.n == 1) {
+        } else if (card.streak == 1) {
           interval = 6;
         } else {
           interval = Math.ceil(card.interval * intervalAdjustment * eFactor);
@@ -130,7 +128,7 @@ function srsFunc(card, evaluation) {
         // we don't progress through the schedule too quickly if you review a card frequently.
 
         // Still increment the 'n' value as it really has no effect on 'reviewing stage' cards.
-        n = card.n + 1;
+        n = card.streak + 1;
 
         // Figure out the weight for the card and next intervals.
         // First, normalize the lateness factor into a range of 0.0 to 1.0 instead of -1.0 to 0.0
@@ -163,9 +161,9 @@ function srsFunc(card, evaluation) {
         var futureInterval;
 
         // Figure out interval. First review is in 1d, then 6d, then based on eFactor and card interval.
-        if (card.n == 0) {
+        if (card.streak == 0) {
           futureInterval = 1;
-        } else if (card.n == 1) {
+        } else if (card.streak == 1) {
           futureInterval = 6;
         } else {
           futureInterval = Math.ceil(card.interval * futureeFactor);

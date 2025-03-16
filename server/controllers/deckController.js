@@ -1,5 +1,6 @@
 import { supabaseClient } from "../config/supabaseClient.js";
 import { srsFunc } from "../srs/FC3.js";
+import { getNewDueDate, updateMastery } from "../srs/helperFunctions.js";
 
 const createDeck = async (req, res) => {
   try {
@@ -264,7 +265,7 @@ const updateFlashcard = async (req, res) => {
     const evaluation = { score, lateness };
     const data = srsFunc(card, evaluation);
 
-    const newDueDate = Date.now() + interval;
+    const newDueDate = getNewDueDate(interval);
     const newMastery = 0;
     const { error } = await supabase
       .from("flashcards")
