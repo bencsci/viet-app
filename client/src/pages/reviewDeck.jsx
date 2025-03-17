@@ -29,6 +29,29 @@ const ReviewDeck = () => {
     listFlashcards();
   }, [deckId]);
 
+  const updateDeckStats = async () => {
+    try {
+      const token = await getToken();
+      await axios.post(
+        `${backendUrl}/api/decks/edit`,
+        {
+          deckId,
+          total_reviews: (deck.total_reviews || 0) + 1,
+          last_reviewed: new Date().toISOString(),
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      await loadDeck();
+    } catch (error) {
+      console.log("Error updating deck stats:", error);
+    }
+  };
+
   const loadDeck = async () => {
     try {
       setLoading(true);
@@ -76,8 +99,11 @@ const ReviewDeck = () => {
     }
   };
 
-  // Return to the deck page
-  const handleReturn = () => {
+  // Modify handleReturn to handle both review completion and restart
+  const handleReturn = async () => {
+    if (reviewComplete || totalReviewed > 0) {
+      await updateDeckStats();
+    }
     navigate(`/decks/${deckId}`);
   };
 
@@ -160,17 +186,14 @@ const ReviewDeck = () => {
     }
   };
 
-  const handleRateCard = (rating) => {
+  const handleRateCard = async (rating) => {
     // Update the results based on the rating
     setResults((prev) => ({
       ...prev,
       [rating]: prev[rating] + 1,
     }));
 
-    // console.log(`Rating: ${rating}, Time: ${elapsedTimeSeconds} seconds`);
-    // console.log(`Score: ${calculateScore(rating, elapsedTimeSeconds)}`);
-
-    updateFlashcard(rating);
+    await updateFlashcard(rating);
 
     setTotalReviewed((prev) => prev + 1);
 
@@ -183,7 +206,14 @@ const ReviewDeck = () => {
     }
   };
 
-  const restartReview = () => {
+  // Modify restartReview to handle stats properly
+  const restartReview = async () => {
+    // Update stats for the completed review session
+    if (totalReviewed > 0) {
+      await updateDeckStats();
+    }
+
+    // Reset the review session
     setCurrentCardIndex(0);
     setShowAnswer(false);
     setReviewComplete(false);
@@ -195,7 +225,9 @@ const ReviewDeck = () => {
     });
     setTotalReviewed(0);
 
-    listFlashcards();
+    // Reload deck and cards
+    await loadDeck();
+    await listFlashcards();
   };
 
   // Calculate correct answers (good + easy)

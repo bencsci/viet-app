@@ -98,12 +98,19 @@ const editDeck = async (req, res) => {
 
     // Check each possible field and only include it if it was provided
     if ("title" in updateFields) fieldsToUpdate.title = updateFields.title;
-    if ("total_reviews" in updateFields)
-      fieldsToUpdate.total_reviews = updateFields.total_reviews;
+    if ("total_reviews" in updateFields) {
+      // Ensure total_reviews is a number and not negative
+      fieldsToUpdate.total_reviews = Math.max(
+        0,
+        parseInt(updateFields.total_reviews) || 0
+      );
+    }
     if ("card_count" in updateFields)
       fieldsToUpdate.card_count = updateFields.card_count;
     if ("mastery" in updateFields)
       fieldsToUpdate.mastery = updateFields.mastery;
+    if ("last_reviewed" in updateFields)
+      fieldsToUpdate.last_reviewed = updateFields.last_reviewed;
 
     // If no fields to update were provided, return an error
     if (Object.keys(fieldsToUpdate).length === 0) {

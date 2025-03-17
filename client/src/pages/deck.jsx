@@ -37,6 +37,12 @@ const Deck = () => {
     listFlashcards();
   }, [deckId]);
 
+  useEffect(() => {
+    if (cards.length > 0) {
+      calculateDeckMastery();
+    }
+  }, [cards]);
+
   const removeDeck = async () => {
     try {
       const token = await getToken();
@@ -100,39 +106,32 @@ const Deck = () => {
 
   const calculateDeckMastery = async () => {
     try {
-      if (!cards || cards.length === 0) {
-        return 0;
-      }
-
-      // Calculate average mastery from all cards
-      const totalMastery = cards.reduce(
-        (sum, card) => sum + (card.mastery || 0),
-        0
-      );
-      const averageMastery = Math.round(totalMastery / cards.length);
-
-      // Update deck mastery in database
-      const token = await getToken();
-      await axios.post(
-        `${backendUrl}/api/decks/edit`,
-        {
-          deckId,
-          mastery: averageMastery,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+      if (cards.length != 0) {
+        let totalMastery = 0;
+        for (const card of cards) {
+          if (
+            card.mastery !== null &&
+            card.mastery !== undefined &&
+            card.mastery !== 0
+          ) {
+            totalMastery += Number(card.mastery);
+            console.log("Card Mastery:", card.mastery);
+          }
         }
-      );
 
-      // Update local deck state
-      setDeck((prev) => ({
-        ...prev,
-        mastery: averageMastery,
-      }));
-
-      return averageMastery;
+        const averageMastery = Math.ceil(totalMastery / cards.length);
+        console.log("Average Mastery:", averageMastery);
+        const token = await getToken();
+        const res = await axios.post(
+          `${backendUrl}/api/decks/edit`,
+          { deckId: deckId, mastery: averageMastery },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+      }
     } catch (error) {
       console.error("Error updating deck mastery:", error);
     }
@@ -154,7 +153,6 @@ const Deck = () => {
       );
 
       setCards(res.data);
-      // Calculate and update deck mastery whenever cards are loaded
       await calculateDeckMastery();
     } catch (error) {
       console.error("Error listing flashcards:", error);
@@ -194,9 +192,9 @@ const Deck = () => {
         prevCards.filter((c) => c.id !== cardToDelete.id)
       );
 
-      await updateCardCount();
-      await calculateDeckMastery(); // Add mastery recalculation
-      await listFlashcards();
+      updateCardCount();
+      calculateDeckMastery();
+      listFlashcards();
 
       console.log("Flashcard deleted successfully");
     } catch (error) {
