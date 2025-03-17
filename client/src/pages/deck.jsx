@@ -35,13 +35,8 @@ const Deck = () => {
   useEffect(() => {
     loadDeck();
     listFlashcards();
+    //calculateDeckMastery();
   }, [deckId]);
-
-  useEffect(() => {
-    if (cards.length > 0) {
-      calculateDeckMastery();
-    }
-  }, [cards]);
 
   const removeDeck = async () => {
     try {
@@ -106,7 +101,7 @@ const Deck = () => {
 
   const calculateDeckMastery = async () => {
     try {
-      if (cards.length != 0) {
+      if (cards.length !== 0) {
         let totalMastery = 0;
         for (const card of cards) {
           if (
@@ -115,14 +110,12 @@ const Deck = () => {
             card.mastery !== 0
           ) {
             totalMastery += Number(card.mastery);
-            console.log("Card Mastery:", card.mastery);
           }
         }
 
         const averageMastery = Math.ceil(totalMastery / cards.length);
-        console.log("Average Mastery:", averageMastery);
         const token = await getToken();
-        const res = await axios.post(
+        await axios.post(
           `${backendUrl}/api/decks/edit`,
           { deckId: deckId, mastery: averageMastery },
           {
@@ -131,6 +124,8 @@ const Deck = () => {
             },
           }
         );
+
+        setDeck((prev) => ({ ...prev, mastery: averageMastery }));
       }
     } catch (error) {
       console.error("Error updating deck mastery:", error);
@@ -153,7 +148,7 @@ const Deck = () => {
       );
 
       setCards(res.data);
-      await calculateDeckMastery();
+      //calculateDeckMastery();
     } catch (error) {
       console.error("Error listing flashcards:", error);
     }
@@ -193,7 +188,6 @@ const Deck = () => {
       );
 
       updateCardCount();
-      calculateDeckMastery();
       listFlashcards();
 
       console.log("Flashcard deleted successfully");
@@ -327,6 +321,9 @@ const Deck = () => {
         <div className="flex flex-wrap gap-4 mb-8">
           <Link to={`/decks/${deckId}/review`}>
             <button
+              onClick={() => {
+                setUpdateMastery(true);
+              }}
               disabled={cards.length === 0}
               className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium shadow-sm ${
                 cards.length === 0

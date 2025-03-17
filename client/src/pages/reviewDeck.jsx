@@ -46,7 +46,8 @@ const ReviewDeck = () => {
         }
       );
 
-      await loadDeck();
+      //loadDeck();
+      calculateDeckMastery();
     } catch (error) {
       console.log("Error updating deck stats:", error);
     }
@@ -99,12 +100,44 @@ const ReviewDeck = () => {
     }
   };
 
-  // Modify handleReturn to handle both review completion and restart
+  const calculateDeckMastery = async () => {
+    try {
+      if (cards.length != 0) {
+        let totalMastery = 0;
+        for (const card of cards) {
+          if (
+            card.mastery !== null &&
+            card.mastery !== undefined &&
+            card.mastery !== 0
+          ) {
+            totalMastery += Number(card.mastery);
+            console.log("Card Mastery:", card.mastery);
+          }
+        }
+
+        const averageMastery = Math.ceil(totalMastery / cards.length);
+        console.log("Average Mastery:", averageMastery);
+        const token = await getToken();
+        const res = await axios.post(
+          `${backendUrl}/api/decks/edit`,
+          { deckId: deckId, mastery: averageMastery },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+      }
+    } catch (error) {
+      console.error("Error updating deck mastery:", error);
+    }
+  };
+
   const handleReturn = async () => {
     if (reviewComplete || totalReviewed > 0) {
       await updateDeckStats();
     }
-    navigate(`/decks/${deckId}`);
+    window.location.href = `/decks/${deckId}`;
   };
 
   // Check if we have a current card
@@ -181,6 +214,8 @@ const ReviewDeck = () => {
       );
 
       console.log("SENT");
+      await loadDeck();
+      await listFlashcards();
     } catch (error) {
       console.error("Error updating flashcards:", error);
     }
