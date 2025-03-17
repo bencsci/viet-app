@@ -71,10 +71,12 @@ const AddFlashcards = ({ deck, listFlashcards, loadDeck }) => {
           { deckId: deck.id, front: card.front, back: card.back },
           { headers: { Authorization: `Bearer ${token}` } }
         );
+
+        await updateCardCount();
       }
 
       setNewFlashcards([{ id: 0, front: "", back: "" }]);
-      await updateCardCount();
+
       await listFlashcards();
 
       let updateMessage =

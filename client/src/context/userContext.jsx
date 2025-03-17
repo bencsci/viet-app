@@ -10,6 +10,7 @@ export const UserContextProvider = ({ children }) => {
 
   const [prevConvoId, setPrevConvoId] = useState();
   const [conversations, setConversations] = useState([]);
+  const [reviewMode, setReviewMode] = useState("srs");
 
   useEffect(() => {
     // Load conversations when the component mounts
@@ -43,6 +44,8 @@ export const UserContextProvider = ({ children }) => {
     setConversations,
     loadConversations,
     getToken,
+    reviewMode,
+    setReviewMode,
   };
 
   return (

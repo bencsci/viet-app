@@ -10,6 +10,7 @@ import {
   MdCheck,
   MdClose,
   MdDelete,
+  MdSettings,
 } from "react-icons/md";
 import axios from "axios";
 import { UserContext } from "../context/userContext";
@@ -19,7 +20,7 @@ import Flashcard from "../components/flashcard";
 
 const Deck = () => {
   const { deckId } = useParams();
-  const { backendUrl } = useContext(UserContext);
+  const { backendUrl, reviewMode, setReviewMode } = useContext(UserContext);
   const { getToken } = useAuth();
   const [deck, setDeck] = useState(null);
   const [cards, setCards] = useState([]);
@@ -31,6 +32,7 @@ const Deck = () => {
   const [renameModalOpen, setRenameModalOpen] = useState(false);
   const [isDeleteDeckModalOpen, setIsDeleteDeckModalOpen] = useState(false);
   const navigate = useNavigate();
+  const [isReviewSettingsOpen, setIsReviewSettingsOpen] = useState(false);
 
   useEffect(() => {
     loadDeck();
@@ -318,14 +320,14 @@ const Deck = () => {
       {/* Main Content */}
       <div className="max-w-6xl mx-auto px-4 md:px-8 py-6">
         {/* Action Buttons */}
-        <div className="flex flex-wrap gap-4 mb-8">
-          <Link to={`/decks/${deckId}/review`}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <Link to={`/decks/${deckId}/review`} className="w-full">
             <button
               onClick={() => {
                 setUpdateMastery(true);
               }}
               disabled={cards.length === 0}
-              className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium shadow-sm ${
+              className={`w-full flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium shadow-sm ${
                 cards.length === 0
                   ? "bg-gray-200 text-gray-500 cursor-not-allowed"
                   : "bg-red-600 hover:bg-red-700 text-white"
@@ -341,20 +343,23 @@ const Deck = () => {
               setNewTitle(deck.title);
               setRenameModalOpen(true);
             }}
-            className="flex items-center gap-2 px-6 py-3 bg-white hover:bg-gray-50 text-gray-700 rounded-lg font-medium shadow-sm border border-gray-200"
+            className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-white hover:bg-gray-50 text-gray-700 rounded-lg font-medium shadow-sm border border-gray-200"
           >
             <MdEdit className="text-xl" />
             <span>Rename Deck</span>
           </button>
 
-          <button className="flex items-center gap-2 px-6 py-3 bg-white hover:bg-gray-50 text-gray-700 rounded-lg font-medium shadow-sm border border-gray-200">
-            <MdBarChart className="text-xl" />
-            <span>Detailed Stats</span>
+          <button
+            onClick={() => setIsReviewSettingsOpen(true)}
+            className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-white hover:bg-gray-50 text-gray-700 rounded-lg font-medium shadow-sm border border-gray-200"
+          >
+            <MdSettings className="text-xl" />
+            <span>Review Settings</span>
           </button>
 
           <button
             onClick={() => setIsDeleteDeckModalOpen(true)}
-            className="flex items-center gap-2 px-6 py-3 bg-white hover:bg-red-50 text-red-600 rounded-lg font-medium shadow-sm border border-red-200"
+            className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-white hover:bg-red-50 text-red-600 rounded-lg font-medium shadow-sm border border-red-200"
           >
             <MdDelete className="text-xl" />
             <span>Delete Deck</span>
@@ -591,6 +596,87 @@ const Deck = () => {
                   className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
                 >
                   Delete Deck
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isReviewSettingsOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden">
+            <div className="bg-red-500 text-white px-4 py-3 flex items-center justify-between">
+              <h3 className="font-medium">Review Settings</h3>
+              <button
+                onClick={() => setIsReviewSettingsOpen(false)}
+                className="p-1 hover:bg-red-600 rounded transition-colors"
+              >
+                <MdClose className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-medium text-gray-900">
+                      Spaced Repetition
+                    </h4>
+                    <p className="text-sm text-gray-500">
+                      Review cards based on your performance
+                    </p>
+                  </div>
+                  <input
+                    type="radio"
+                    name="reviewMode"
+                    checked={reviewMode === "srs"}
+                    onChange={() => setReviewMode("srs")}
+                    className="w-4 h-4 text-red-500 focus:ring-red-400"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-medium text-gray-900">
+                      All Cards (Shuffle)
+                    </h4>
+                    <p className="text-sm text-gray-500">
+                      Review entire deck in shuffled order
+                    </p>
+                  </div>
+                  <input
+                    type="radio"
+                    name="reviewMode"
+                    checked={reviewMode === "all"}
+                    onChange={() => setReviewMode("all")}
+                    className="w-4 h-4 text-red-500 focus:ring-red-400"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-medium text-gray-900">Reversed</h4>
+                    <p className="text-sm text-gray-500">
+                      Switch front and back of cards
+                    </p>
+                  </div>
+                  <input
+                    type="radio"
+                    name="reviewMode"
+                    checked={reviewMode === "reversed"}
+                    onChange={() => setReviewMode("reversed")}
+                    className="w-4 h-4 text-red-500 focus:ring-red-400"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-6 flex justify-end">
+                <button
+                  onClick={() => setIsReviewSettingsOpen(false)}
+                  className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+                >
+                  Done
                 </button>
               </div>
             </div>

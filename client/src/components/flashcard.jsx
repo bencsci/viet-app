@@ -34,6 +34,45 @@ const Flashcard = ({ card, listFlashcards, onDelete }) => {
     return { grade: "F", color: "text-red-600", bg: "bg-red-600" };
   };
 
+  const getDueStatus = (dueDate) => {
+    if (!dueDate) return { text: "" };
+
+    const now = new Date();
+    const due = new Date(dueDate);
+    const diffTime = due.getTime() - now.getTime();
+    const diffHours = diffTime / (1000 * 60 * 60);
+    const diffDays = diffHours / 24;
+
+    if (diffHours < 0) {
+      // Overdue
+      const overdueDays = Math.abs(Math.floor(diffDays));
+      const overdueHours = Math.abs(Math.floor(diffHours));
+
+      if (overdueDays > 0) {
+        return {
+          text: `${overdueDays}d overdue`,
+          color: "text-red-600",
+        };
+      }
+      return {
+        text: `${overdueHours}h overdue`,
+        color: "text-red-600",
+      };
+    }
+
+    // Due in future
+    if (diffDays > 1) {
+      return {
+        text: `Due in ${Math.floor(diffDays)}d`,
+        color: "text-green-600",
+      };
+    }
+    return {
+      text: `Due in ${Math.floor(diffHours)}h`,
+      color: "text-blue-600",
+    };
+  };
+
   const editCard = async () => {
     try {
       const token = await getToken();
@@ -102,7 +141,7 @@ const Flashcard = ({ card, listFlashcards, onDelete }) => {
       </div>
 
       <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center px-4 pb-4">
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center gap-4">
           <div className="flex items-center">
             <div className="bg-gray-200 rounded-full h-2.5 mr-2 w-24">
               <div
@@ -114,6 +153,13 @@ const Flashcard = ({ card, listFlashcards, onDelete }) => {
           </div>
           <div className={`font-bold text-lg ${gradeInfo.color}`}>
             {gradeInfo.grade}
+          </div>
+          <div
+            className={`text-sm font-medium ${
+              getDueStatus(card.due_date).color
+            }`}
+          >
+            {getDueStatus(card.due_date).text}
           </div>
         </div>
 

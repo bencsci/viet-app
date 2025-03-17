@@ -48,7 +48,7 @@ function updateMastery(card, score) {
 
     // Balance out the bonus for longer streaks
     let balance = 0;
-    if (card.streak >= 10 && card.total_reviews > 10) {
+    if (card.streak >= 30 && card.total_reviews > 10) {
       balance = -0.15;
     }
 
@@ -62,9 +62,23 @@ function updateMastery(card, score) {
       baseFraction = 0.4 + bonus + balance;
     }
 
-    // As totalReviews grows, we shrink that fraction
-    // so we don't get huge jumps after many reviews.
-    const fraction = baseFraction / (1 + 0.2 * (card.total_reviews - 1));
+    // Lose percentage if you answer hard at mastery 80-90
+    if (card.mastery >= 80 && card.mastery <= 90 && card.streak >= 5) {
+      if (score === 3) {
+        baseFraction = -0.1;
+      }
+    }
+
+    // Lose lots of percentage if you answer hard ast mastery 90-95 and lose more at 95+
+    if (card.mastery >= 90 && card.mastery <= 100 && card.streak >= 5) {
+      if (score === 3) {
+        baseFraction = -1.5;
+      } else if (score === 3 && card.mastery >= 95) {
+        baseFraction = -4;
+      }
+    }
+
+    const fraction = baseFraction / 2.5;
 
     // Move mastery up by that fraction of the "remaining gap" to 100%
     card.mastery = card.mastery + fraction * (100 - card.mastery);

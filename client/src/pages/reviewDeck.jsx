@@ -6,7 +6,7 @@ import axios from "axios";
 import { UserContext } from "../context/userContext";
 
 const ReviewDeck = () => {
-  const { backendUrl, getToken } = useContext(UserContext);
+  const { backendUrl, getToken, reviewMode } = useContext(UserContext);
   const { deckId } = useParams();
   const navigate = useNavigate();
   const [deck, setDeck] = useState(null);
@@ -14,6 +14,7 @@ const ReviewDeck = () => {
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
   const [reviewComplete, setReviewComplete] = useState(false);
+  const [isReviewing, setIsReviewing] = useState(false);
   const [results, setResults] = useState({
     fail: 0,
     hard: 0,
@@ -26,7 +27,9 @@ const ReviewDeck = () => {
 
   useEffect(() => {
     loadDeck();
-    listFlashcards();
+    if (!isReviewing) {
+      listFlashcards();
+    }
   }, [deckId]);
 
   const updateDeckStats = async () => {
@@ -68,6 +71,7 @@ const ReviewDeck = () => {
       );
 
       setDeck(res.data);
+      //console.log(reviewMode);
     } catch (error) {
       console.error("Error loading deck:", error);
     } finally {
@@ -75,7 +79,45 @@ const ReviewDeck = () => {
     }
   };
 
-  // TODO: Get the due cards or cards with due date === null
+  const shuffleArray = (array) => {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  };
+
+  const handleReviewMode = (cards) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    switch (reviewMode) {
+      case "srs":
+        // Filter cards that are due today or have no due date
+        return cards.filter((card) => {
+          if (!card.due_date) return true;
+          const dueDate = new Date(card.due_date);
+          dueDate.setHours(0, 0, 0, 0);
+          return dueDate <= today;
+        });
+
+      case "all":
+        // Return all cards in random order
+        return shuffleArray([...cards]);
+
+      case "reversed":
+        // Swap front and back of all cards
+        return cards.map((card) => ({
+          ...card,
+          front: card.back,
+          back: card.front,
+        }));
+
+      default:
+        return cards;
+    }
+  };
+
   const listFlashcards = async () => {
     try {
       setLoading(true);
@@ -92,7 +134,13 @@ const ReviewDeck = () => {
         }
       );
 
-      setCards(res.data);
+      // Only process and set cards if we're not currently reviewing
+      if (!isReviewing) {
+        const processedCards = handleReviewMode(res.data);
+        setCards(processedCards);
+      } else if (reviewComplete) {
+        setCards(res.data);
+      }
     } catch (error) {
       console.error("Error listing flashcards:", error);
     } finally {
@@ -137,7 +185,7 @@ const ReviewDeck = () => {
     if (reviewComplete || totalReviewed > 0) {
       await updateDeckStats();
     }
-    window.location.href = `/decks/${deckId}`;
+    navigate(`/decks/${deckId}`);
   };
 
   // Check if we have a current card
@@ -192,8 +240,11 @@ const ReviewDeck = () => {
       const elapsedTimeSeconds = Math.floor(elapsedTimeMs / 1000);
       const score = calculateScore(rating, elapsedTimeSeconds);
       const lateness = calculateLateness();
-      console.log(`Score: ${score}, Lateness: ${lateness}`);
       const token = await getToken();
+
+      console.log(
+        `Score: ${score}, Time: ${elapsedTimeSeconds}, Late: ${lateness}`
+      );
       await axios.post(
         `${backendUrl}/api/decks/update-flashcard`,
         {
@@ -213,7 +264,6 @@ const ReviewDeck = () => {
         }
       );
 
-      console.log("SENT");
       await loadDeck();
       await listFlashcards();
     } catch (error) {
@@ -222,14 +272,12 @@ const ReviewDeck = () => {
   };
 
   const handleRateCard = async (rating) => {
-    // Update the results based on the rating
     setResults((prev) => ({
       ...prev,
       [rating]: prev[rating] + 1,
     }));
 
     await updateFlashcard(rating);
-
     setTotalReviewed((prev) => prev + 1);
 
     if (currentCardIndex < cards.length - 1) {
@@ -238,6 +286,7 @@ const ReviewDeck = () => {
       setTimeToAnswer(null);
     } else {
       setReviewComplete(true);
+      setIsReviewing(false);
     }
   };
 
@@ -260,16 +309,68 @@ const ReviewDeck = () => {
     });
     setTotalReviewed(0);
 
-    // Reload deck and cards
-    await loadDeck();
-    await listFlashcards();
+    // Set isReviewing to false and reload cards for a fresh review
+    setIsReviewing(false);
+    loadDeck();
+    listFlashcards();
   };
 
   // Calculate correct answers (good + easy)
   const correctCount = results.good + results.easy;
 
-  // Show loading state
-  if (loading || !deck || cards.length === 0) {
+  // Modify the loading state check to include a check for SRS mode with no due cards
+  if (loading || !deck) {
+    return (
+      <div className="pt-16 min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  // Add this check after the loading check
+  if (cards.length === 0 && reviewMode === "srs") {
+    return (
+      <div className="pt-16 min-h-screen bg-gray-50 flex flex-col">
+        <div className="bg-red-600 text-white py-4 px-4 md:px-8">
+          <div className="max-w-4xl mx-auto flex items-center">
+            <button
+              onClick={handleReturn}
+              className="mr-4 p-2 hover:bg-red-700 rounded-full transition-colors"
+            >
+              <MdArrowBack className="text-xl" />
+            </button>
+            <div>
+              <h1 className="text-xl font-bold">{deck.title}</h1>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex-1 flex items-center justify-center p-4">
+          <div className="w-full max-w-2xl bg-white rounded-xl shadow-md p-8 text-center">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">
+              No Cards Due
+            </h2>
+            <p className="text-gray-600 mb-6">
+              Great job! You've completed all your due reviews. Come back later
+              or try a different review mode.
+            </p>
+            <div className="flex flex-wrap justify-center gap-4">
+              <button
+                onClick={() => handleReturn()}
+                className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg flex items-center gap-2"
+              >
+                <MdArrowBack className="text-xl" />
+                <span>Return to Deck</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Keep the existing check for empty cards in other modes
+  if (cards.length === 0) {
     return (
       <div className="pt-16 min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="w-12 h-12 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
@@ -320,6 +421,9 @@ const ReviewDeck = () => {
                         e.stopPropagation();
                         setShowAnswer(true);
                         setTimeToAnswer(new Date());
+                        if (!isReviewing) {
+                          setIsReviewing(true);
+                        }
                       }}
                       className="w-3/4 py-4 bg-sky-400 text-white rounded-lg shadow-md font-medium text-lg"
                     >
