@@ -11,6 +11,7 @@ const ReviewDeck = () => {
   const navigate = useNavigate();
   const [deck, setDeck] = useState(null);
   const [cards, setCards] = useState([]);
+  const [updatedCards, setUpdatedCards] = useState([]);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
   const [reviewComplete, setReviewComplete] = useState(false);
@@ -32,6 +33,12 @@ const ReviewDeck = () => {
     }
   }, [deckId]);
 
+  useEffect(() => {
+    if (reviewComplete) {
+      calculateDeckMastery();
+    }
+  }, [reviewComplete]);
+
   const updateDeckStats = async () => {
     try {
       const token = await getToken();
@@ -48,9 +55,6 @@ const ReviewDeck = () => {
           },
         }
       );
-
-      //loadDeck();
-      calculateDeckMastery();
     } catch (error) {
       console.log("Error updating deck stats:", error);
     }
@@ -138,9 +142,8 @@ const ReviewDeck = () => {
       if (!isReviewing) {
         const processedCards = handleReviewMode(res.data);
         setCards(processedCards);
-      } else if (reviewComplete) {
-        setCards(res.data);
       }
+
     } catch (error) {
       console.error("Error listing flashcards:", error);
     } finally {
@@ -150,23 +153,21 @@ const ReviewDeck = () => {
 
   const calculateDeckMastery = async () => {
     try {
-      if (cards.length != 0) {
+      if (updatedCards.length > 0) {
         let totalMastery = 0;
-        for (const card of cards) {
-          if (
-            card.mastery !== null &&
-            card.mastery !== undefined &&
-            card.mastery !== 0
-          ) {
+
+        for (const card of updatedCards) {
+          if (card.mastery !== null && card.mastery !== undefined) {
             totalMastery += Number(card.mastery);
-            console.log("Card Mastery:", card.mastery);
+            console.log(`Card Mastery ${card.front}:`, card.mastery);
           }
         }
 
-        const averageMastery = Math.ceil(totalMastery / cards.length);
+        // Calculate average only from cards that were reviewed
+        const averageMastery = Math.ceil(totalMastery / updatedCards.length);
         console.log("Average Mastery:", averageMastery);
         const token = await getToken();
-        const res = await axios.post(
+        await axios.post(
           `${backendUrl}/api/decks/edit`,
           { deckId: deckId, mastery: averageMastery },
           {
@@ -175,6 +176,12 @@ const ReviewDeck = () => {
             },
           }
         );
+
+        // Update local deck state
+        setDeck((prev) => ({
+          ...prev,
+          mastery: averageMastery,
+        }));
       }
     } catch (error) {
       console.error("Error updating deck mastery:", error);
@@ -245,7 +252,7 @@ const ReviewDeck = () => {
       console.log(
         `Score: ${score}, Time: ${elapsedTimeSeconds}, Late: ${lateness}`
       );
-      await axios.post(
+      const res = await axios.post(
         `${backendUrl}/api/decks/update-flashcard`,
         {
           cardId: currentCard.id,
@@ -256,6 +263,7 @@ const ReviewDeck = () => {
           lateness: lateness,
           mastery: currentCard.mastery,
           totalReviews: currentCard.total_reviews,
+          deckId: deckId,
         },
         {
           headers: {
@@ -264,8 +272,8 @@ const ReviewDeck = () => {
         }
       );
 
-      await loadDeck();
-      await listFlashcards();
+      // Add the updated card to our updatedCards array
+      setUpdatedCards(res.data);
     } catch (error) {
       console.error("Error updating flashcards:", error);
     }
@@ -309,14 +317,14 @@ const ReviewDeck = () => {
     });
     setTotalReviewed(0);
 
-    // Set isReviewing to false and reload cards for a fresh review
     setIsReviewing(false);
     loadDeck();
     listFlashcards();
+    setUpdatedCards([]);
   };
 
-  // Calculate correct answers (good + easy)
-  const correctCount = results.good + results.easy;
+  // Calculate correct answers
+  const correctCount = results.good + results.easy + results.hard;
 
   // Modify the loading state check to include a check for SRS mode with no due cards
   if (loading || !deck) {

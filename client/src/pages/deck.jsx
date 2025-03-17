@@ -37,7 +37,6 @@ const Deck = () => {
   useEffect(() => {
     loadDeck();
     listFlashcards();
-    //calculateDeckMastery();
   }, [deckId]);
 
   const removeDeck = async () => {
@@ -101,39 +100,6 @@ const Deck = () => {
     }
   };
 
-  const calculateDeckMastery = async () => {
-    try {
-      if (cards.length !== 0) {
-        let totalMastery = 0;
-        for (const card of cards) {
-          if (
-            card.mastery !== null &&
-            card.mastery !== undefined &&
-            card.mastery !== 0
-          ) {
-            totalMastery += Number(card.mastery);
-          }
-        }
-
-        const averageMastery = Math.ceil(totalMastery / cards.length);
-        const token = await getToken();
-        await axios.post(
-          `${backendUrl}/api/decks/edit`,
-          { deckId: deckId, mastery: averageMastery },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        setDeck((prev) => ({ ...prev, mastery: averageMastery }));
-      }
-    } catch (error) {
-      console.error("Error updating deck mastery:", error);
-    }
-  };
-
   const listFlashcards = async () => {
     try {
       const token = await getToken();
@@ -150,7 +116,6 @@ const Deck = () => {
       );
 
       setCards(res.data);
-      //calculateDeckMastery();
     } catch (error) {
       console.error("Error listing flashcards:", error);
     }
@@ -323,9 +288,6 @@ const Deck = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <Link to={`/decks/${deckId}/review`} className="w-full">
             <button
-              onClick={() => {
-                setUpdateMastery(true);
-              }}
               disabled={cards.length === 0}
               className={`w-full flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium shadow-sm ${
                 cards.length === 0

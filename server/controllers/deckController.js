@@ -275,6 +275,7 @@ const updateFlashcard = async (req, res) => {
       lateness,
       mastery,
       totalReviews,
+      deckId,
     } = req.body;
 
     // Initialize card with default values if needed
@@ -287,25 +288,31 @@ const updateFlashcard = async (req, res) => {
     };
 
     const evaluation = { score, lateness };
-    const data = srsFunc(card, evaluation);
+    const newData = srsFunc(card, evaluation);
 
-    const newDueDate = getNewDueDate(data.interval);
+    const newDueDate = getNewDueDate(newData.interval);
     updateMastery(card, score);
 
     const { error } = await supabase
       .from("flashcards")
       .update({
-        streak: data.streak,
-        e_factor: data.eFactor,
-        interval: data.interval,
+        streak: newData.streak,
+        e_factor: newData.eFactor,
+        interval: newData.interval,
         due_date: newDueDate,
         mastery: card.mastery.toFixed(0),
         total_reviews: card.total_reviews,
       })
       .eq("id", cardId);
 
+    const { data, error2 } = await supabase
+      .from("flashcards")
+      .select("*")
+      .eq("deck_id", deckId);
+
     if (error) throw error;
-    res.json({ success: true });
+    if (error2) throw error2;
+    res.json(data);
   } catch (error) {
     console.error("Error updating flashcard:", error);
     res.status(500).json({ error: "Failed to update flashcard" });
