@@ -98,6 +98,46 @@ const Deck = () => {
     }
   };
 
+  const calculateDeckMastery = async () => {
+    try {
+      if (!cards || cards.length === 0) {
+        return 0;
+      }
+
+      // Calculate average mastery from all cards
+      const totalMastery = cards.reduce(
+        (sum, card) => sum + (card.mastery || 0),
+        0
+      );
+      const averageMastery = Math.round(totalMastery / cards.length);
+
+      // Update deck mastery in database
+      const token = await getToken();
+      await axios.post(
+        `${backendUrl}/api/decks/edit`,
+        {
+          deckId,
+          mastery: averageMastery,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // Update local deck state
+      setDeck((prev) => ({
+        ...prev,
+        mastery: averageMastery,
+      }));
+
+      return averageMastery;
+    } catch (error) {
+      console.error("Error updating deck mastery:", error);
+    }
+  };
+
   const listFlashcards = async () => {
     try {
       const token = await getToken();
@@ -114,6 +154,8 @@ const Deck = () => {
       );
 
       setCards(res.data);
+      // Calculate and update deck mastery whenever cards are loaded
+      await calculateDeckMastery();
     } catch (error) {
       console.error("Error listing flashcards:", error);
     }
@@ -152,8 +194,8 @@ const Deck = () => {
         prevCards.filter((c) => c.id !== cardToDelete.id)
       );
 
-      updateCardCount();
-      //await loadDeck();
+      await updateCardCount();
+      await calculateDeckMastery(); // Add mastery recalculation
       await listFlashcards();
 
       console.log("Flashcard deleted successfully");
@@ -191,6 +233,28 @@ const Deck = () => {
     }
   };
 
+  const getGradeInfo = (mastery, totalReviews) => {
+    if (!totalReviews || totalReviews === 0) {
+      return {
+        grade: "New",
+        color: "text-purple-600",
+        bg: "bg-purple-500",
+      };
+    }
+
+    if (mastery >= 90)
+      return { grade: "A", color: "text-green-600", bg: "bg-green-500" };
+    if (mastery >= 80)
+      return { grade: "B", color: "text-blue-600", bg: "bg-blue-500" };
+    if (mastery >= 70)
+      return { grade: "C", color: "text-yellow-600", bg: "bg-yellow-500" };
+    if (mastery >= 60)
+      return { grade: "D", color: "text-orange-600", bg: "bg-orange-500" };
+    if (mastery >= 50)
+      return { grade: "E", color: "text-red-400", bg: "bg-red-400" };
+    return { grade: "F", color: "text-red-600", bg: "bg-red-600" };
+  };
+
   if (loading) {
     return (
       <div className="pt-16 min-h-screen bg-gray-50 flex items-center justify-center">
@@ -226,7 +290,24 @@ const Deck = () => {
             </div>
             <div className="bg-red-700 bg-opacity-30 rounded-lg p-4">
               <p className="text-red-200 text-sm">Mastery</p>
-              <p className="text-2xl font-bold">{deck.mastery}%</p>
+              <div className="flex items-center justify-between">
+                <p className="text-2xl font-bold">{deck.mastery}%</p>
+                <div
+                  className={`${
+                    getGradeInfo(deck.mastery, deck.total_reviews).color
+                  } px-3 py-1 rounded-full text-lg font-bold bg-white`}
+                >
+                  {getGradeInfo(deck.mastery, deck.total_reviews).grade}
+                </div>
+              </div>
+              <div className="mt-3 bg-white/20 rounded-full h-1.5">
+                <div
+                  className={`h-full rounded-full transition-all duration-300 ${
+                    getGradeInfo(deck.mastery, deck.total_reviews).bg
+                  }`}
+                  style={{ width: `${deck.mastery}%` }}
+                ></div>
+              </div>
             </div>
             <div className="bg-red-700 bg-opacity-30 rounded-lg p-4">
               <p className="text-red-200 text-sm">Reviews</p>

@@ -16,10 +16,10 @@
  * Visit https://www.ussherpress.com/freshcards/ to check out the app.
  */
 function srsFunc(card, evaluation) {
-  var n, eFactor, interval;
+  var streak, eFactor, interval;
 
   if (card == null) {
-    card = { n: 0, eFactor: 2.5, interval: 0.0 };
+    card = { streak: 0, eFactor: 2.5, interval: 0.0 };
   }
 
   if (card.streak < 3) {
@@ -27,19 +27,19 @@ function srsFunc(card, evaluation) {
     eFactor = card.eFactor;
 
     if (evaluation.score < 3) {
-      // Failed, so force re-review in 30 minutes and reset n count
-      n = 0;
+      // Failed, so force re-review in 30 minutes and reset streak count
+      streak = 0;
       interval = (30 * 1.0) / (24.0 * 60.0);
     } else {
-      n = card.streak + 1;
+      streak = card.streak + 1;
 
       // first interval = 30min
       // second interval = 12h
       // third interval = 24h
-      if (n == 1) {
+      if (streak == 1) {
         // in 30m
         interval = (30.0 * 1.0) / (24.0 * 60.0);
-      } else if (n == 2) {
+      } else if (streak == 2) {
         // in 12h
         interval = 0.5;
       } else {
@@ -53,8 +53,8 @@ function srsFunc(card, evaluation) {
     // Reviewing phase
 
     if (evaluation.score < 3) {
-      // Failed, so force re-review in 30 minutes and reset n count
-      n = 0;
+      // Failed, so force re-review in 30 minutes and reset streak count
+      streak = 0;
       interval = (30 * 1.0) / (24.0 * 60.0);
 
       // Reduce eFactor
@@ -69,7 +69,7 @@ function srsFunc(card, evaluation) {
       if (evaluation.lateness >= -0.1) {
         // Review was not too early, so handle normally
 
-        n = card.streak + 1;
+        streak = card.streak + 1;
 
         var latenessScoreBonus = 0;
         var intervalAdjustment = 1.0;
@@ -127,8 +127,8 @@ function srsFunc(card, evaluation) {
         // and as we approach the actual due date, we weight the next interval more. This ensures
         // we don't progress through the schedule too quickly if you review a card frequently.
 
-        // Still increment the 'n' value as it really has no effect on 'reviewing stage' cards.
-        n = card.streak + 1;
+        // Still increment the 'streak' value as it really has no effect on 'reviewing stage' cards.
+        streak = card.streak + 1;
 
         // Figure out the weight for the card and next intervals.
         // First, normalize the lateness factor into a range of 0.0 to 1.0 instead of -1.0 to 0.0
@@ -180,7 +180,7 @@ function srsFunc(card, evaluation) {
     }
   }
 
-  return { n, eFactor, interval };
+  return { streak, eFactor, interval };
 }
 
 export { srsFunc };

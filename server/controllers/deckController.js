@@ -259,14 +259,32 @@ const updateFlashcard = async (req, res) => {
       req.auth.getToken({ template: "supabase" })
     );
 
-    const { cardId, streak, eFactor, interval, score, lateness } = req.body;
+    const {
+      cardId,
+      streak,
+      eFactor,
+      interval,
+      score,
+      lateness,
+      mastery,
+      totalReviews,
+    } = req.body;
 
-    const card = { streak, eFactor, interval };
+    // Initialize card with default values if needed
+    const card = {
+      streak: streak,
+      eFactor: eFactor,
+      interval: interval,
+      mastery: mastery,
+      total_reviews: totalReviews,
+    };
+
     const evaluation = { score, lateness };
     const data = srsFunc(card, evaluation);
 
-    const newDueDate = getNewDueDate(interval);
-    const newMastery = 0;
+    const newDueDate = getNewDueDate(data.interval);
+    updateMastery(card, score);
+
     const { error } = await supabase
       .from("flashcards")
       .update({
@@ -274,12 +292,12 @@ const updateFlashcard = async (req, res) => {
         e_factor: data.eFactor,
         interval: data.interval,
         due_date: newDueDate,
-        mastery: newMastery,
+        mastery: card.mastery.toFixed(0),
+        total_reviews: card.total_reviews,
       })
       .eq("id", cardId);
 
     if (error) throw error;
-
     res.json({ success: true });
   } catch (error) {
     console.error("Error updating flashcard:", error);

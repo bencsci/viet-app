@@ -114,17 +114,16 @@ const ReviewDeck = () => {
   };
 
   const calculateLateness = () => {
-    let lateness;
-    if (currentCard.due_date == null) {
-      return (lateness = 0);
+    if (!currentCard.due_date) {
+      return 0;
     }
 
     const now = new Date();
-    const due = currentCard.due.Date;
-    const diffTime = due.getTime() - now.getTime(); // Time in ,iliseconds
+    const due = new Date(currentCard.due_date);
+    const diffTime = now.getTime() - due.getTime();
     const diffHours = diffTime / (1000 * 60 * 60);
 
-    return (lateness = diffHours);
+    return diffHours;
   };
 
   const updateFlashcard = async (rating) => {
@@ -133,21 +132,20 @@ const ReviewDeck = () => {
       const elapsedTimeMs = timeToAnswer ? currentTime - timeToAnswer : 0;
       const elapsedTimeSeconds = Math.floor(elapsedTimeMs / 1000);
       const score = calculateScore(rating, elapsedTimeSeconds);
-
       const lateness = calculateLateness();
-
       console.log(`Score: ${score}, Lateness: ${lateness}`);
-
-      const token = getToken();
-      const res = await axios.post(
+      const token = await getToken();
+      await axios.post(
         `${backendUrl}/api/decks/update-flashcard`,
         {
           cardId: currentCard.id,
           streak: currentCard.streak,
+          eFactor: currentCard.e_factor,
           interval: currentCard.interval,
           score: score,
           lateness: lateness,
           mastery: currentCard.mastery,
+          totalReviews: currentCard.total_reviews,
         },
         {
           headers: {
@@ -155,6 +153,8 @@ const ReviewDeck = () => {
           },
         }
       );
+
+      console.log("SENT");
     } catch (error) {
       console.error("Error updating flashcards:", error);
     }
@@ -194,6 +194,8 @@ const ReviewDeck = () => {
       easy: 0,
     });
     setTotalReviewed(0);
+
+    listFlashcards();
   };
 
   // Calculate correct answers (good + easy)

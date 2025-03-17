@@ -177,6 +177,8 @@ const Review = () => {
                   id={deck.id}
                   title={deck.title}
                   cardCount={deck.card_count}
+                  mastery={deck.mastery}
+                  totalReviews={deck.total_reviews}
                   lastReviewed={formatLastReviewed(deck.last_reviewed)}
                 />
               ))}
