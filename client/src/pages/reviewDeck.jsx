@@ -163,7 +163,7 @@ const ReviewDeck = () => {
           }
         }
 
-        // Calculate average only from cards that were reviewed
+        // Calculate average
         const averageMastery = Math.ceil(totalMastery / updatedCards.length);
         console.log("Average Mastery:", averageMastery);
         const token = await getToken();
@@ -177,7 +177,7 @@ const ReviewDeck = () => {
           }
         );
 
-        // Update local deck state
+
         setDeck((prev) => ({
           ...prev,
           mastery: averageMastery,

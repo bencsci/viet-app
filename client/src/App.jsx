@@ -9,6 +9,7 @@ import NavbarSO from "./components/navbarSO";
 import NavbarSI from "./components/navbarSI";
 import Deck from "./pages/deck";
 import ReviewDeck from "./pages/reviewDeck";
+import Settings from "./pages/settings";
 function App() {
   return (
     <div>
@@ -21,6 +22,7 @@ function App() {
           <Route path="/decks" element={<Review />} />
           <Route path="/decks/:deckId" element={<Deck />} />
           <Route path="/decks/:deckId/review" element={<ReviewDeck />} />
+          <Route path="/settings" element={<Settings />} />
         </Routes>
       </SignedIn>
       <SignedOut>
