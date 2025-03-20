@@ -1,7 +1,13 @@
 import React, { useState, useEffect, useRef, useContext } from "react";
 import axios from "axios";
 import { useAuth } from "@clerk/clerk-react";
-import { MdTranslate, MdClear, MdAdd, MdRestartAlt } from "react-icons/md";
+import {
+  MdTranslate,
+  MdClear,
+  MdAdd,
+  MdRestartAlt,
+  MdVolumeUp,
+} from "react-icons/md";
 import { AiOutlineMenuFold, AiOutlineMenuUnfold } from "react-icons/ai";
 import { UserContext } from "../context/userContext";
 import { useParams, useNavigate } from "react-router";
@@ -28,6 +34,7 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
   const [isLoadingDecks, setIsLoadingDecks] = useState(false);
   const [showNewDeckForm, setShowNewDeckForm] = useState(false);
   const [newDeckTitle, setNewDeckTitle] = useState("");
+  const [messageToPlay, setMessageToPlay] = useState(null);
 
   const loadMessages = async () => {
     try {
@@ -264,6 +271,8 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
       },
     }));
 
+    console.log("Translating content:", content);
+    setMessageToPlay(content);
     const translation = await translateWords(content);
 
     setMessageStates((prev) => ({
@@ -446,6 +455,41 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
     }
   };
 
+  const playAudio = async (text, language = "vi-VN") => {
+    try {
+      console.log("Playing audio:", text);
+      console.log("Language:", language);
+      const token = await getToken();
+      const response = await axios.post(
+        `${backendUrl}/api/chat/tts`,
+        {
+          text,
+          language,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          responseType: "blob", // Important for handling audio data
+        }
+      );
+
+      // Create and play audio from blob
+      const audioBlob = new Blob([response.data], { type: "audio/mp3" });
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const audio = new Audio(audioUrl);
+
+      audio.onended = () => {
+        URL.revokeObjectURL(audioUrl); // Cleanup
+      };
+
+      await audio.play();
+    } catch (error) {
+      console.error("Error playing audio:", error);
+      toast.error("Failed to play audio");
+    }
+  };
+
   return (
     <div
       className={`flex flex-col h-[calc(100vh-64px)] bg-white transition-all duration-300 ease-in-out`}
@@ -498,6 +542,26 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
                       <div>{messageStates[index]?.translation}</div>
                     )}
                     <div className="mt-2 pt-2 border-t border-gray-400/30 flex space-x-2">
+                      <button
+                        className="p-1.5 bg-blue-100 hover:bg-blue-200 rounded-full text-blue-600 transition-colors"
+                        title="Play audio"
+                        onClick={() => {
+                          if (messageToPlay) {
+                            playAudio(messageToPlay);
+                            setMessageToPlay(null);
+                          } else {
+                            playAudio(
+                              Array.from(
+                                messageStates[index]?.selectedWords.values()
+                              )
+                                .map((text) => text.word)
+                                .join(" ")
+                            );
+                          }
+                        }}
+                      >
+                        <MdVolumeUp className="w-3.5 h-3.5" />
+                      </button>
                       <button
                         className="p-1.5 bg-green-100 hover:bg-green-200 rounded-full text-green-600 transition-colors"
                         title="Add to flashcards"

@@ -5,11 +5,13 @@ import {
   sendMessageToOpenAI,
   translateWords,
   translateWordsGoogle,
+  textToSpeechGoogle,
 } from "../controllers/chatController.js";
 
 const chatRoute = express.Router();
 
 chatRoute.post("/send", requireAuth(), sendMessageToOpenAI);
 chatRoute.post("/translate", requireAuth(), translateWords);
+chatRoute.post("/tts", requireAuth(), textToSpeechGoogle);
 
 export default chatRoute;

@@ -6,8 +6,10 @@ import {
   titleGeneratorPrompt,
 } from "../prompts/beginners.js";
 import { TranslationServiceClient } from "@google-cloud/translate";
+import textToSpeech from "@google-cloud/text-to-speech";
 
 const translationClient = new TranslationServiceClient();
+const speechClient = new textToSpeech.TextToSpeechClient();
 
 // Add error checking for credentials
 if (
@@ -117,4 +119,29 @@ const translateWordsGoogle = async (req, res) => {
   }
 };
 
-export { sendMessageToOpenAI, translateWords, translateWordsGoogle };
+const textToSpeechGoogle = async (req, res) => {
+  try {
+    const { text, language } = req.body;
+
+    const request = {
+      input: { text },
+      voice: { languageCode: language, name: "vi-VN-Chirp3-HD-Aoede" },
+      audioConfig: { audioEncoding: "MP3", speakingRate: 0.85 },
+    };
+
+    const [response] = await speechClient.synthesizeSpeech(request);
+    const audioContent = response.audioContent;
+    //res.json({ audioContent });
+    res.setHeader("Content-Type", "audio/mp3");
+    res.send(audioContent);
+  } catch (error) {
+    console.error("Text to Speech error:", error);
+  }
+};
+
+export {
+  sendMessageToOpenAI,
+  translateWords,
+  translateWordsGoogle,
+  textToSpeechGoogle,
+};
