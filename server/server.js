@@ -22,13 +22,17 @@ app.get("/", (req, res) => {
   res.send("Server is working...");
 });
 
-// Mount chat routes (protected inside chatRoutes)
+// Mount chat routes
 app.use("/api/chat", chatRoute);
 app.use("/api/history", historyRoute);
 app.use("/api/decks", decksRoute);
 app.use("/api/webhooks", webhooksRoute);
 
-//app.post("/api/chat", chatRoute);
+// app.post('/api/webhooks/clerk', (req, res) => {
+//   console.log('Received Clerk webhook:', req.body);
+//   res.status(200).send('OK');
+// });
+
 
 // Start server
 const PORT = process.env.PORT || 4000;
