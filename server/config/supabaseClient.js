@@ -11,7 +11,7 @@ export const supabaseAdmin = () => {
 export const supabaseClient = async (supabaseToken) => {
   const supabase = createClient(supabaseUrl, supabaseKey, {
     global: {
-      headers: { Authorization: `Bearer ${supabaseToken}` },
+      headers: { Authrization: `Bearer ${supabaseToken}` },
     },
   });
   return supabase;
