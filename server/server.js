@@ -5,14 +5,10 @@ import cors from "cors";
 import chatRoute from "./routes/chatRoute.js";
 import historyRoute from "./routes/historyRoute.js";
 import decksRoute from "./routes/decksRoute.js";
+import webhooksRoute from "./routes/webhooksRoute.js";
 import { clerkMiddleware } from "@clerk/express";
-import OpenAI from "openai";
 
 const app = express();
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
 
 // Middleware
 app.use(cors());
@@ -30,6 +26,7 @@ app.get("/", (req, res) => {
 app.use("/api/chat", chatRoute);
 app.use("/api/history", historyRoute);
 app.use("/api/decks", decksRoute);
+app.use("/api/webhooks", webhooksRoute);
 
 //app.post("/api/chat", chatRoute);
 
