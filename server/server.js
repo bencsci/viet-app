@@ -6,6 +6,7 @@ import chatRoute from "./routes/chatRoute.js";
 import historyRoute from "./routes/historyRoute.js";
 import decksRoute from "./routes/decksRoute.js";
 import webhooksRoute from "./routes/webhooksRoute.js";
+import profileRoute from "./routes/profileRoute.js";
 import { clerkMiddleware } from "@clerk/express";
 
 const app = express();
@@ -27,7 +28,7 @@ app.use("/api/chat", chatRoute);
 app.use("/api/history", historyRoute);
 app.use("/api/decks", decksRoute);
 app.use("/api/webhooks", webhooksRoute);
-
+app.use("/api/profile", profileRoute);
 // app.post('/api/webhooks/clerk', (req, res) => {
 //   console.log('Received Clerk webhook:', req.body);
 //   res.status(200).send('OK');
