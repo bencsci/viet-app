@@ -11,11 +11,41 @@ export const UserContextProvider = ({ children }) => {
   const [prevConvoId, setPrevConvoId] = useState();
   const [conversations, setConversations] = useState([]);
   const [reviewMode, setReviewMode] = useState("srs");
+  const [language, setLanguage] = useState("");
+  const [difficulty, setDifficulty] = useState("");
+  const [profile, setProfile] = useState({});
 
   useEffect(() => {
     // Load conversations when the component mounts
     loadConversations();
   }, [prevConvoId]);
+
+  useEffect(() => {
+    loadProfile();
+  }, []);
+
+  const loadProfile = async () => {
+    try {
+      if (!getToken) return; // Skip if auth is not ready
+
+      const token = await getToken();
+      if (!token) return;
+
+      const res = await axios.get(`${backendUrl}/api/profile/get`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const profileData = res.data[0];
+      setProfile(profileData);
+      setLanguage(profileData.language);
+      setDifficulty(profileData.language_level);
+      //console.log("Profile loaded:", profileData);
+    } catch (error) {
+      console.error("Error loading profile:", error);
+    }
+  };
 
   const loadConversations = async () => {
     try {
@@ -46,6 +76,12 @@ export const UserContextProvider = ({ children }) => {
     getToken,
     reviewMode,
     setReviewMode,
+    language,
+    setLanguage,
+    difficulty,
+    setDifficulty,
+    profile,
+    loadProfile,
   };
 
   return (

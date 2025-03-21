@@ -8,7 +8,7 @@ const getProfile = async (req, res) => {
     const userId = req.auth.userId;
 
     const { data, error } = await supabase
-      .from("profile")
+      .from("profiles")
       .select("*")
       .eq("user_id", userId);
 
@@ -27,19 +27,19 @@ const updateLanguage = async (req, res) => {
     );
 
     const { language } = req.body;
-
     const userId = req.auth.userId;
 
     const { data, error } = await supabase
-      .from("profile")
+      .from("profiles")
       .update({ language: language })
-      .eq("user_id", userId);
+      .eq("user_id", userId)
+      .select();
 
     if (error) throw error;
     res.json(data);
   } catch (error) {
-    console.error("Error listing conversations:", error);
-    res.status(500).json({ error: "Failed to list conversations" });
+    console.error("Error updating language:", error);
+    res.status(500).json({ error: "Failed to update language" });
   }
 };
 
@@ -49,20 +49,20 @@ const updateDifficulty = async (req, res) => {
       req.auth.getToken({ template: "supabase" })
     );
 
-    const { difficulty } = req.body;
-
+    const { language_level } = req.body;
     const userId = req.auth.userId;
 
     const { data, error } = await supabase
-      .from("profile")
-      .update({ difficulty: difficulty })
-      .eq("user_id", userId);
+      .from("profiles")
+      .update({ language_level: language_level })
+      .eq("user_id", userId)
+      .select();
 
     if (error) throw error;
     res.json(data);
   } catch (error) {
-    console.error("Error listing conversations:", error);
-    res.status(500).json({ error: "Failed to list conversations" });
+    console.error("Error updating difficulty:", error);
+    res.status(500).json({ error: "Failed to update difficulty" });
   }
 };
 
