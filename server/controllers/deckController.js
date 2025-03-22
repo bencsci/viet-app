@@ -1,6 +1,6 @@
 import { supabaseClient } from "../config/supabaseClient.js";
-import { srsFunc } from "../srs/FC3.js";
-import { getNewDueDate, updateMastery } from "../srs/helperFunctions.js";
+import { srsFunc } from "../functions/FC3.js";
+import { getNewDueDate, updateMastery } from "../functions/srsHelperFuncs.js";
 
 const createDeck = async (req, res) => {
   try {

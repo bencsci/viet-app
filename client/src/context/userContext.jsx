@@ -16,13 +16,12 @@ export const UserContextProvider = ({ children }) => {
   const [profile, setProfile] = useState({});
 
   useEffect(() => {
-    // Load conversations when the component mounts
-    loadConversations();
-  }, [prevConvoId]);
-
-  useEffect(() => {
     loadProfile();
   }, []);
+
+  useEffect(() => {
+    loadConversations();
+  }, [prevConvoId]);
 
   const loadProfile = async () => {
     try {

@@ -1,6 +1,7 @@
 import { supabaseClient } from "../config/supabaseClient.js";
 import { titleGeneratorPrompt } from "../prompts/beginners.js";
 import OpenAI from "openai";
+import { getUserProfile } from "../functions/user.js";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -18,11 +19,14 @@ const saveConversation = async (req, res) => {
       return res.status(400).json({ error: "Invalid messages" });
     }
 
+    const profile = await getUserProfile(supabase, userId);
+
     const { data, error } = await supabase
       .from("conversations")
       .insert({
         user_id: userId,
         messages: messages,
+        language: profile.language,
       })
       .select()
       .single();
@@ -130,10 +134,15 @@ const listConversations = async (req, res) => {
     );
     const userId = req.auth.userId;
 
+    // Use the helper function
+    const profile = await getUserProfile(supabase, userId);
+
     const { data, error } = await supabase
       .from("conversations")
       .select("*")
-      .eq("user_id", userId);
+      .eq("user_id", userId)
+      .eq("language", profile.language)
+      .order("created_at", { ascending: false });
 
     if (error) throw error;
     res.json(data);

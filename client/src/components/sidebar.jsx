@@ -13,11 +13,15 @@ import { AiOutlineMenuUnfold } from "react-icons/ai";
 import { UserContext } from "../context/userContext";
 import { useNavigate, useParams } from "react-router";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-
 const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
-  const { setPrevConvoId, conversations, setConversations, loadConversations } =
-    useContext(UserContext);
+  const {
+    setPrevConvoId,
+    conversations,
+    setConversations,
+    loadConversations,
+    backendUrl,
+    language,
+  } = useContext(UserContext);
   const { convoId } = useParams();
   const navigate = useNavigate();
   const { getToken } = useAuth();
@@ -48,7 +52,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
     try {
       const token = await getToken();
       const res = await axios.post(
-        `${BACKEND_URL}/api/history/save`,
+        `${backendUrl}/api/history/save`,
         { messages: [] },
         {
           headers: {
@@ -58,10 +62,9 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
       );
 
       navigate(`/c/${res.data.id}`);
-      //setSelectedConvoId(res.data.id);
       setPrevConvoId(res.data.id);
       loadConversations();
-      setIsSidebarOpen(false); // Close sidebar on mobile after creating new chat
+      setIsSidebarOpen(false);
     } catch (error) {
       console.error("Error creating conversation:", error);
     }
@@ -77,7 +80,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
       try {
         const token = await getToken();
         await axios.post(
-          `${BACKEND_URL}/api/history/delete`,
+          `${backendUrl}/api/history/delete`,
           { convoId: id },
           {
             headers: {
@@ -97,7 +100,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
       try {
         const token = await getToken();
         await axios.post(
-          `${BACKEND_URL}/api/history/delete`,
+          `${backendUrl}/api/history/delete`,
           { convoId: id },
           {
             headers: {
@@ -153,7 +156,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
     try {
       const token = await getToken();
       await axios.post(
-        `${BACKEND_URL}/api/history/update-title`,
+        `${backendUrl}/api/history/update-title`,
         { title: newTitle, convoId: conversationToRename },
         {
           headers: {
