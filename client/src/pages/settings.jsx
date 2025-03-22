@@ -12,6 +12,7 @@ const Settings = () => {
     getToken,
     backendUrl,
     loadProfile,
+    setPrevConvoId,
   } = useContext(UserContext);
 
   useEffect(() => {
@@ -39,6 +40,7 @@ const Settings = () => {
   const handleLanguageChange = async (e) => {
     const newLanguage = e.target.value;
     setLanguage(newLanguage);
+    setPrevConvoId(null);
 
     try {
       const token = await getToken();

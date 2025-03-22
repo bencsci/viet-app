@@ -71,31 +71,36 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
   }, [convoId]);
 
   useEffect(() => {
-    if (convoId) {
-      const convo = conversations.find(
-        (c) => c.id.toString() === convoId.toString()
-      );
+    if (!isLoading) {
+      if (convoId) {
+        const convo = conversations.find(
+          (c) => c.id.toString() === convoId.toString()
+        );
 
-      // console.log("message.length", messages.length === 4);
-      // console.log("convoId", convoId !== null);
-      // console.log("conversations", !convo?.title);
-      // console.log("titleGenerated", !titleGenerated);
+        if (convo) {
+          // console.log("message.length", messages.length === 4);
+          // console.log("convoId", convoId !== null);
+          // console.log("conversations", !convo?.title);
+          // console.log("convo", convo?.title);
+          // console.log("titleGenerated", !titleGenerated);
 
-      if (convo?.title) {
-        setTitleGenerated(true);
-      } else {
-        setTitleGenerated(false);
-      }
+          if (convo.title) {
+            setTitleGenerated(true);
+          } else {
+            setTitleGenerated(false);
+          }
 
-      if (
-        messages.length === 4 &&
-        convoId &&
-        !convo?.title &&
-        !titleGenerated
-      ) {
-        console.log("Generating title...");
-        //setTitleGenerated(true);
-        generateTitle();
+          if (
+            messages.length === 4 &&
+            convoId &&
+            !convo.title &&
+            !titleGenerated
+          ) {
+            console.log("Generating title...");
+            //setTitleGenerated(true);
+            generateTitle();
+          }
+        }
       }
     }
   }, [messages]);
