@@ -336,30 +336,29 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
     console.log(messageStates);
   }, [messageStates]);
 
-  useEffect(() => {
-    const updateDatabase = async () => {
-      if (messages.length === 0 || convoId === null) return;
-
-      try {
-        const token = await getToken();
-        await axios.post(
-          `${backendUrl}/api/history/update`,
-          {
-            messages,
-            convoId: convoId,
+  const updateDatabase = async () => {
+    try {
+      const token = await getToken();
+      await axios.post(
+        `${backendUrl}/api/history/update`,
+        {
+          messages,
+          convoId: convoId,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
           },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-      } catch (error) {
-        console.error("Error updating conversation:", error);
-      }
-    };
-
-    updateDatabase();
+        }
+      );
+    } catch (error) {
+      console.error("Error updating conversation:", error);
+    }
+  };
+  useEffect(() => {
+    if (convoId) {
+      updateDatabase();
+    }
   }, [messages]);
 
   const fetchDecks = async () => {
