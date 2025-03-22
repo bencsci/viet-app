@@ -69,6 +69,14 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
       setIsLoading(false);
       setMessages([]);
     }
+
+    if (!convoId) {
+      setIsNewConversation(true);
+    } else {
+      setIsNewConversation(false);
+    }
+
+    console.log("isNewConversation", isNewConversation);
   }, [convoId]);
 
   useEffect(() => {
@@ -104,14 +112,6 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
         }
       }
     }
-
-    if (!convoId) {
-      setIsNewConversation(true);
-    } else {
-      setIsNewConversation(false);
-    }
-
-    //console.log("isNewConversation", isNewConversation);
   }, [messages]);
 
   const generateTitle = async () => {
@@ -338,6 +338,9 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
 
   const updateDatabase = async () => {
     try {
+      // Double check to prevent empty messages from being saved
+      if (!convoId || messages.length === 0) return;
+
       const token = await getToken();
       await axios.post(
         `${backendUrl}/api/history/update`,
@@ -355,9 +358,13 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
       console.error("Error updating conversation:", error);
     }
   };
+
   useEffect(() => {
-    if (convoId) {
-      updateDatabase();
+    if (conversations) {
+      // Only update if we have both convoId and messages
+      if (convoId && messages.length > 0) {
+        updateDatabase();
+      }
     }
   }, [messages]);
 
@@ -529,14 +536,14 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
             {/* User message placeholder */}
             <div className="flex justify-end lg:px-5">
               <div className="relative group max-w-[70%] rounded-2xl px-4 py-2 bg-red-600 text-white rounded-br-none">
-                <div>{messages[0].content}</div>
+                <div>{messages[0]?.content ? messages[0]?.content : "..."}</div>
               </div>
             </div>
 
             {/* Assistant message placeholder */}
             <div className="flex justify-start lg:px-5">
               <div className="relative group max-w-[70%] rounded-2xl px-4 py-2 bg-gray-300 text-black rounded-bl-none">
-                <div>{messages[1].content}</div>
+                <div>{messages[1]?.content ? messages[1]?.content : "..."}</div>
               </div>
             </div>
           </div>
