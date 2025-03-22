@@ -326,7 +326,6 @@ const ReviewDeck = () => {
   // Calculate correct answers
   const correctCount = results.good + results.easy + results.hard;
 
-  // Modify the loading state check to include a check for SRS mode with no due cards
   if (loading || !deck) {
     return (
       <div className="pt-16 min-h-screen bg-gray-50 flex items-center justify-center">
@@ -335,7 +334,6 @@ const ReviewDeck = () => {
     );
   }
 
-  // Add this check after the loading check
   if (cards.length === 0 && reviewMode === "srs") {
     return (
       <div className="pt-16 min-h-screen bg-gray-50 flex flex-col">

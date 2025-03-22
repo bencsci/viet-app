@@ -36,6 +36,7 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
   const [newDeckTitle, setNewDeckTitle] = useState("");
   const [messageToPlay, setMessageToPlay] = useState(null);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const [isNewConversation, setIsNewConversation] = useState(false);
 
   const loadMessages = async () => {
     try {
@@ -103,6 +104,14 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
         }
       }
     }
+
+    if (!convoId) {
+      setIsNewConversation(true);
+    } else {
+      setIsNewConversation(false);
+    }
+
+    //console.log("isNewConversation", isNewConversation);
   }, [messages]);
 
   const generateTitle = async () => {
@@ -516,11 +525,29 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
       </div>
 
       {isLoading ? (
-        <div className="flex-1 flex items-center justify-center">
-          <div className="flex flex-col items-center space-y-4">
-            <div className="w-12 h-12"></div>
+        isNewConversation ? (
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {/* User message placeholder */}
+            <div className="flex justify-end lg:px-5">
+              <div className="relative group max-w-[70%] rounded-2xl px-4 py-2 bg-red-600 text-white rounded-br-none">
+                <div>{messages[0].content}</div>
+              </div>
+            </div>
+
+            {/* Assistant message placeholder */}
+            <div className="flex justify-start lg:px-5">
+              <div className="relative group max-w-[70%] rounded-2xl px-4 py-2 bg-gray-300 text-black rounded-bl-none">
+                <div>{messages[1].content}</div>
+              </div>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="flex flex-col items-center space-y-4">
+              <div className="w-12 h-12"></div>
+            </div>
+          </div>
+        )
       ) : (
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {messages.length === 0 && (

@@ -2,7 +2,6 @@ import { getBeginnerPrompt } from "./beginners.js";
 import { getIntermediatePrompt } from "./intermediate.js";
 import { getAdvancedPrompt } from "./advanced.js";
 
-// Function to get the appropriate tutor prompt based on language and difficulty
 export const getLanguageTutorPrompt = (language, difficulty = "beginner") => {
   switch (difficulty.toLowerCase()) {
     case "intermediate":
@@ -15,7 +14,6 @@ export const getLanguageTutorPrompt = (language, difficulty = "beginner") => {
   }
 };
 
-// Translation prompt generator
 export const getTranslateWordsPrompt = (language) => `
   You are a helpful assistant that translates ${language} words to English. You will be given a list of words, and you need to translate them to English. 
   Don't use any other language, only English and ${language}. 
@@ -23,7 +21,6 @@ export const getTranslateWordsPrompt = (language) => `
   *Just return the translation, don't add any other text.
   `;
 
-// Context-aware translation prompt
 export function getTranslatePromptWithContext(language, content) {
   return `
       ${getTranslateWordsPrompt(language)}
@@ -31,7 +28,6 @@ export function getTranslatePromptWithContext(language, content) {
     `;
 }
 
-// Title generator prompt
 export const getTitleGeneratorPrompt = (language) => `
   You are a helpful assistant that generates titles for conversations.
   You will be given a conversation between two friends in ${language}, and you need to generate a title for the conversation.
@@ -44,8 +40,3 @@ export const getTitleGeneratorPrompt = (language) => `
   Just return the title, don't add any other text.
   `;
 
-// Example usage:
-// const tutorPrompt = getLanguageTutorPrompt('French', 'intermediate');
-// const translatePrompt = getTranslateWordsPrompt('Spanish');
-// const contextPrompt = getTranslatePrompt('Italian', 'Some context here');
-// const titlePrompt = getTitleGeneratorPrompt('Portuguese');
