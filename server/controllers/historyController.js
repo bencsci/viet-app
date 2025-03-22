@@ -1,5 +1,5 @@
 import { supabaseClient } from "../config/supabaseClient.js";
-import { titleGeneratorPrompt } from "../prompts/beginners.js";
+import { getTitleGeneratorPrompt } from "../prompts/prompts.js";
 import OpenAI from "openai";
 import { getUserProfile } from "../functions/user.js";
 
@@ -161,6 +161,8 @@ const generateTitle = async (req, res) => {
 
     const { messages, convoId } = req.body;
 
+    const profile = await getUserProfile(supabase, userId);
+
     if (!messages || !Array.isArray(messages) || !convoId) {
       return res
         .status(400)
@@ -170,7 +172,7 @@ const generateTitle = async (req, res) => {
     const promptMessages = [
       {
         role: "system",
-        content: titleGeneratorPrompt,
+        content: getTitleGeneratorPrompt(profile.language),
       },
       ...messages.map((msg) => ({
         role: msg.role,

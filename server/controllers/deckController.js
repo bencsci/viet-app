@@ -1,6 +1,7 @@
 import { supabaseClient } from "../config/supabaseClient.js";
 import { srsFunc } from "../functions/FC3.js";
 import { getNewDueDate, updateMastery } from "../functions/srsHelperFuncs.js";
+import textToSpeech from "@google-cloud/text-to-speech";
 
 const createDeck = async (req, res) => {
   try {

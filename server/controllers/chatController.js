@@ -1,12 +1,13 @@
 import OpenAI from "openai";
 import {
-  languageTutorPrompt,
-  translateWordsPrompt,
-  translatePrompt,
-  titleGeneratorPrompt,
-} from "../prompts/beginners.js";
+  getLanguageTutorPrompt,
+  getTranslatePromptWithContext,
+  getTitleGeneratorPrompt,
+} from "../prompts/prompts.js";
 import { TranslationServiceClient } from "@google-cloud/translate";
 import textToSpeech from "@google-cloud/text-to-speech";
+import { getUserProfile, getLanguageSettings } from "../functions/user.js";
+import { supabaseClient } from "../config/supabaseClient.js";
 
 const translationClient = new TranslationServiceClient();
 const speechClient = new textToSpeech.TextToSpeechClient();
@@ -31,13 +32,26 @@ const sendMessageToOpenAI = async (req, res) => {
       return res.status(400).json({ error: "Invalid messages array" });
     }
 
+    // Get user profile to get language and difficulty
+    const supabase = await supabaseClient(
+      req.auth.getToken({ template: "supabase" })
+    );
+    const userId = req.auth.userId;
+    const profile = await getUserProfile(supabase, userId);
+
+    // Get the appropriate tutor prompt based on user's settings
+    const tutorPrompt = getLanguageTutorPrompt(
+      profile.language,
+      profile.language_level
+    );
+
     // Get the last messages from the conversation
     const recentMessages = messages.slice(-10);
     console.log("Messages:", recentMessages);
-    // Add system message for Vietnamese tutor contex7
+
     const conversationContext = {
       role: "system",
-      content: languageTutorPrompt,
+      content: tutorPrompt,
     };
 
     const fullMessages = [conversationContext, ...recentMessages];
@@ -48,7 +62,6 @@ const sendMessageToOpenAI = async (req, res) => {
       temperature: 0.6,
     });
 
-    // The AI's reply is in response.choices[0].message.content
     const aiReply = response.choices[0]?.message?.content;
     console.log("OpenAI response:", aiReply);
     res.json({ reply: aiReply });
@@ -68,10 +81,17 @@ const translateWords = async (req, res) => {
       return res.status(400).json({ error: "Invalid words format" });
     }
 
+    // Get user's language preference
+    const supabase = await supabaseClient(
+      req.auth.getToken({ template: "supabase" })
+    );
+    const userId = req.auth.userId;
+    const profile = await getUserProfile(supabase, userId);
+
     const messages = [
       {
         role: "system",
-        content: translatePrompt(context),
+        content: getTranslatePromptWithContext(profile.language, context),
       },
       {
         role: "user",
@@ -85,10 +105,7 @@ const translateWords = async (req, res) => {
       temperature: 0.3,
     });
 
-    //console.log(messages);
-
     const translation = response.choices[0]?.message?.content;
-
     res.json({ translation });
   } catch (error) {
     console.error("OpenAI Translation error:", error);
@@ -102,11 +119,18 @@ const translateWords = async (req, res) => {
 const translateWordsGoogle = async (req, res) => {
   try {
     const { words } = req.body;
+    const supabase = await supabaseClient(
+      req.auth.getToken({ template: "supabase" })
+    );
+    const userId = req.auth.userId;
+    const profile = await getUserProfile(supabase, userId);
+    const { languageCode } = getLanguageSettings(profile.language);
+
     const request = {
       parent: `projects/${process.env.GOOGLE_CLOUD_PROJECT_ID}/locations/${process.env.GOOGLE_CLOUD_LOCATION}`,
       contents: [words],
       mimeType: "text/plain",
-      sourceLanguageCode: "vi",
+      sourceLanguageCode: languageCode.split("-")[0], // Get just the language code part (e.g., 'vi' from 'vi-VN')
       targetLanguageCode: "en",
     };
 
@@ -121,11 +145,21 @@ const translateWordsGoogle = async (req, res) => {
 
 const textToSpeechGoogle = async (req, res) => {
   try {
-    const { text, language } = req.body;
+    const supabase = await supabaseClient(
+      req.auth.getToken({ template: "supabase" })
+    );
+
+    const userId = req.auth.userId;
+
+    const { text } = req.body;
+
+    const profile = await getUserProfile(supabase, userId);
+    const { languageCode, voice } = getLanguageSettings(profile.language);
+    //console.log(languageCode, voice);
 
     const request = {
       input: { text },
-      voice: { languageCode: language, name: "vi-VN-Chirp3-HD-Aoede" },
+      voice: { languageCode, name: voice },
       audioConfig: { audioEncoding: "MP3", speakingRate: 0.85 },
     };
 

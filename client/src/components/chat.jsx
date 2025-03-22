@@ -35,6 +35,7 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
   const [showNewDeckForm, setShowNewDeckForm] = useState(false);
   const [newDeckTitle, setNewDeckTitle] = useState("");
   const [messageToPlay, setMessageToPlay] = useState(null);
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
 
   const loadMessages = async () => {
     try {
@@ -455,38 +456,39 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
     }
   };
 
-  const playAudio = async (text, language = "vi-VN") => {
+  const playAudio = async (text) => {
     try {
-      console.log("Playing audio:", text);
-      console.log("Language:", language);
+      if (isPlayingAudio) return;
+      setIsPlayingAudio(true);
+
       const token = await getToken();
       const response = await axios.post(
         `${backendUrl}/api/chat/tts`,
         {
           text,
-          language,
         },
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-          responseType: "blob", // Important for handling audio data
+          responseType: "blob",
         }
       );
 
-      // Create and play audio from blob
       const audioBlob = new Blob([response.data], { type: "audio/mp3" });
       const audioUrl = URL.createObjectURL(audioBlob);
       const audio = new Audio(audioUrl);
 
       audio.onended = () => {
-        URL.revokeObjectURL(audioUrl); // Cleanup
+        URL.revokeObjectURL(audioUrl);
+        setIsPlayingAudio(false);
       };
 
       await audio.play();
     } catch (error) {
       console.error("Error playing audio:", error);
       toast.error("Failed to play audio");
+      setIsPlayingAudio(false);
     }
   };
 
@@ -543,24 +545,37 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
                     )}
                     <div className="mt-2 pt-2 border-t border-gray-400/30 flex space-x-2">
                       <button
-                        className="p-1.5 bg-blue-100 hover:bg-blue-200 rounded-full text-blue-600 transition-colors"
-                        title="Play audio"
+                        className={`p-1.5 ${
+                          isPlayingAudio
+                            ? "bg-blue-200 animate-pulse cursor-not-allowed"
+                            : "bg-blue-100 hover:bg-blue-200"
+                        } rounded-full text-blue-600 transition-colors`}
+                        title={
+                          isPlayingAudio ? "Playing audio..." : "Play audio"
+                        }
                         onClick={() => {
+                          if (isPlayingAudio) return;
                           if (messageToPlay) {
                             playAudio(messageToPlay);
                             setMessageToPlay(null);
                           } else {
                             playAudio(
                               Array.from(
-                                messageStates[index]?.selectedWords.values()
+                                messageStates[index].selectedWords.values()
                               )
-                                .map((text) => text.word)
+                                .sort((a, b) => a.position - b.position)
+                                .map((item) => item.word)
                                 .join(" ")
                             );
                           }
                         }}
+                        disabled={isPlayingAudio}
                       >
-                        <MdVolumeUp className="w-3.5 h-3.5" />
+                        <MdVolumeUp
+                          className={`w-3.5 h-3.5 ${
+                            isPlayingAudio ? "opacity-75" : ""
+                          }`}
+                        />
                       </button>
                       <button
                         className="p-1.5 bg-green-100 hover:bg-green-200 rounded-full text-green-600 transition-colors"
