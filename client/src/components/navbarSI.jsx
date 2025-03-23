@@ -4,7 +4,6 @@ import { IoSettingsSharp } from "react-icons/io5";
 import { HiMenu, HiX } from "react-icons/hi";
 import { UserButton } from "@clerk/clerk-react";
 import { UserContext } from "../context/userContext";
-import QilingoLogo from "../assets/Qilingo Logo Transparent.svg";
 
 const NavbarSI = () => {
   const [isOpen, setIsOpen] = useState(false);

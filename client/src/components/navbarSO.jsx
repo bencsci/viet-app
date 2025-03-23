@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router";
-import { FaLanguage } from "react-icons/fa";
 import { HiMenu, HiX } from "react-icons/hi";
+import Logo from "../assets/QilingoLogo.png";
 
 const NavbarSO = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -9,13 +9,13 @@ const NavbarSO = () => {
   const isLoginPage = location.pathname === "/login";
 
   return (
-    <nav className="bg-red-500 shadow-lg fixed top-0 left-0 right-0 z-50">
+    <nav className="bg-[#47A1BE] shadow-lg fixed top-0 left-0 right-0 z-50">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between items-center h-16">
           {/* Logo and Brand Name */}
           <Link to="/" className="flex items-center space-x-2">
-            <FaLanguage className="text-[#FFF9C4] text-3xl" />
-            <span className="text-[#FFF9C4] font-bold text-xl">VietAI</span>
+            <img src={Logo} alt="Qilingo" className="h-8 w-8" />
+            <span className="text-[#F5E6D3] font-bold text-3xl">Qilingo</span>
           </Link>
 
           {/* Desktop Menu */}
@@ -23,10 +23,10 @@ const NavbarSO = () => {
             {!isLoginPage && (
               <Link
                 to="/login"
-                className="bg-[#FFF9C4] text-red-500 px-4 py-2 rounded-md font-medium 
-                  hover:bg-[#FFF5B6] transition duration-300"
+                className="bg-[#F5E6D3] text-[#47A1BE] px-6 py-2 rounded-full font-medium 
+                  hover:bg-white transition duration-300"
               >
-                Login
+                Start Learning
               </Link>
             )}
           </div>
@@ -35,7 +35,7 @@ const NavbarSO = () => {
           <div className="md:hidden">
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="text-[#FFFF00] hover:text-yellow-400 focus:outline-none"
+              className="text-[#F5E6D3] hover:[#F5E6D3] focus:outline-none"
             >
               {isOpen ? (
                 <HiX className="h-6 w-6" />
@@ -49,14 +49,14 @@ const NavbarSO = () => {
         {/* Mobile Menu */}
         {isOpen && (
           <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+            <div className="px-2 pt-2 pb-3 space-y-3 sm:px-3">
               {!isLoginPage && (
                 <Link
                   to="/login"
-                  className="block bg-[#FFF9C4] text-[#DA251D] px-3 py-2 rounded-md text-center font-medium 
-                    hover:bg-[#FFF5B6] transition duration-300"
+                  className="block bg-[#F5E6D3] text-[#47A1BE] px-3 py-2 rounded-full text-center font-medium 
+                    hover:bg-white transition duration-300"
                 >
-                  Login
+                  Start Learning
                 </Link>
               )}
             </div>

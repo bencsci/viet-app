@@ -1,93 +1,181 @@
 import React from "react";
-import { FaComments, FaBookOpen, FaLightbulb } from "react-icons/fa";
-import { MdTranslate } from "react-icons/md";
+import {
+  FaComments,
+  FaBookOpen,
+  FaLightbulb,
+  FaHeadphones,
+  FaArrowRight,
+} from "react-icons/fa";
 import { Link } from "react-router";
+import Qilin from "../assets/QilingoMD.png";
+
+const languages = [
+  { code: "us", name: "English", flag: "us.svg" },
+  { code: "fr", name: "French", flag: "fr.svg" },
+  { code: "es", name: "Spanish", flag: "es.svg" },
+  { code: "br", name: "Portuguese", flag: "br.svg" },
+  { code: "vn", name: "Vietnamese", flag: "vn.svg" },
+  { code: "it", name: "Italian", flag: "it.svg" },
+];
 
 const home = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-red-50 to-yellow-50">
-      <div className="container mx-auto px-4 py-12 pt-40">
-        {/* Hero Section */}
-        <div className="text-center mb-16">
-          <h1 className="text-5xl font-bold text-red-600 mb-4">
-            Học Tiếng Việt
-          </h1>
-          <p className="text-2xl text-gray-700 mb-8">
-            Learn Vietnamese through natural conversations with AI
+    <div className="min-h-screen bg-white">
+      {/* Hero Section with Qilin */}
+      <div className="bg-[#489DBA] text-white py-20 md:pt-30 overflow-hidden lg:py-0">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 items-center gap-2">
+            {/* Qilin Image - Left side */}
+            <div className="flex justify-center md:justify-start">
+              <img
+                src={Qilin}
+                alt="Qilingo Mascot"
+                className="w-full object-contain"
+              />
+            </div>
+
+            {/* Text Content - Right side */}
+            <div className="text-left max-w-xl md:pl-4 lg:pl-6">
+              <h1 className="text-4xl md:text-4xl lg:text-5xl font-bold leading-tight">
+                Learn Languages
+                <br className="hidden md:block" /> Through Natural
+                <br className="hidden md:block" /> Conversations
+                <span className="block mt-2 text-[#F5E6D3]">with Qilingo</span>
+              </h1>
+              <p className="text-lg mt-4 mb-6 text-blue-100 leading-relaxed max-w-lg">
+                Experience the joy of learning languages naturally through
+                AI-powered conversations, personalized to your pace.
+              </p>
+              <div className="flex gap-4">
+                <Link
+                  to="/login"
+                  className="bg-white text-[#47A1BE] hover:bg-[#F5E6D3] px-6 py-2.5 rounded-full font-bold transition-colors duration-300 flex items-center gap-2"
+                >
+                  Start Learning <FaArrowRight />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Language Flags Section */}
+      <div className="container mx-auto px-4 py-12 border-b border-gray-200">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-800">
+            Available Languages
+          </h2>
+          <p className="text-lg text-gray-600 mt-2">
+            Start your journey with any of these languages
           </p>
-          <Link
-            to="/login"
-            className="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-8 rounded-full text-lg transition-colors duration-300"
-          >
-            Start Chatting Now
-          </Link>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-6 gap-4 sm:gap-2 md:gap-8 max-w-4xl mx-auto">
+          {languages.map((lang) => (
+            <div
+              key={lang.code}
+              className="flex flex-col items-center p-3 hover:bg-gray-50 rounded-lg transition-all duration-300"
+            >
+              <div className="w-16 sm:w-20 h-12 sm:h-14 overflow-hidden rounded-lg shadow-md mb-3 hover:shadow-lg transition-shadow duration-300">
+                <img
+                  src={`https://flagcdn.com/${lang.flag}`}
+                  alt={`${lang.name} Flag`}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              </div>
+              <span className="font-medium text-gray-700 text-sm sm:text-base">
+                {lang.name}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-20">
+        {/* How It Works Section */}
+        <div className="text-center mb-20">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
+            Your Language Learning Journey
+          </h2>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            Learn naturally through conversation, just like you would with a
+            native speaker
+          </p>
         </div>
 
         {/* Features Grid */}
-        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-          <div className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
-            <FaComments className="text-4xl text-red-500 mb-4" />
-            <h2 className="text-xl font-bold text-gray-800 mb-3">
-              Natural Conversations
-            </h2>
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto mb-20">
+          <div className="bg-white p-8 rounded-2xl shadow-md transition-all duration-300 border border-gray-100">
+            <FaComments className="text-5xl text-[#47A1BE] mb-6" />
+            <h3 className="text-xl font-bold text-gray-800 mb-3">
+              AI Chat Partner
+            </h3>
             <p className="text-gray-600">
-              Practice Vietnamese with our AI chat partner in realistic,
-              everyday conversations
+              Chat naturally with our AI in your target language, available 24/7
             </p>
           </div>
 
-          <div className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
-            <MdTranslate className="text-4xl text-red-500 mb-4" />
-            <h2 className="text-xl font-bold text-gray-800 mb-3">
-              Instant Translations
-            </h2>
+          <div className="bg-white p-8 rounded-2xl shadow-md transition-all duration-300 border border-gray-100">
+            <FaLightbulb className="text-5xl text-[#47A1BE] mb-6" />
+            <h3 className="text-xl font-bold text-gray-800 mb-3">
+              Personalized Pace
+            </h3>
             <p className="text-gray-600">
-              Click on any word to see its translation and add it to your
-              flashcards
+              Select your level and progress at your own comfortable speed
             </p>
           </div>
 
-          <div className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
-            <FaBookOpen className="text-4xl text-red-500 mb-4" />
-            <h2 className="text-xl font-bold text-gray-800 mb-3">
+          <div className="bg-white p-8 rounded-2xl shadow-md transition-all duration-300 border border-gray-100">
+            <FaBookOpen className="text-5xl text-[#47A1BE] mb-6" />
+            <h3 className="text-xl font-bold text-gray-800 mb-3">
               Smart Flashcards
-            </h2>
+            </h3>
             <p className="text-gray-600">
-              Review vocabulary with spaced repetition for optimal learning
+              Master vocabulary with our spaced repetition learning system
+            </p>
+          </div>
+
+          <div className="bg-white p-8 rounded-2xl shadow-md transition-all duration-300 border border-gray-100">
+            <FaHeadphones className="text-5xl text-[#47A1BE] mb-6" />
+            <h3 className="text-xl font-bold text-gray-800 mb-3">
+              Interactive Tools
+            </h3>
+            <p className="text-gray-600">
+              Instant pronunciation and one-click vocabulary saving
             </p>
           </div>
         </div>
 
-        {/* Learning Philosophy Section */}
-        <div className="max-w-4xl mx-auto text-center mt-16 mb-16 bg-white p-10 rounded-xl shadow-lg">
-          <FaLightbulb className="text-5xl text-red-500 mb-6 mx-auto" />
-          <h2 className="text-3xl font-bold text-gray-800 mb-4">
-            The Secret to Language Learning? Practice!
-          </h2>
-          <p className="text-xl text-gray-600">
-            The most effective way to master any language is through active
-            conversation. But finding a patient conversation partner can be
-            challenging. Don't worry - we've created the perfect AI friend who's
-            always ready to chat with you in Vietnamese!
-          </p>
-        </div>
-
-        {/* Call to Action */}
-        <div className="text-center mt-16">
-          <h2 className="text-3xl font-bold text-gray-800 mb-4">
-            Ready to start your Vietnamese journey?
+        {/* Learning Process Section */}
+        <div className="bg-gradient-to-br from-[#47A1BE]/10 to-blue-50 rounded-3xl p-12 max-w-4xl mx-auto text-center mb-20">
+          <h2 className="text-3xl font-bold text-gray-800 mb-6">
+            Natural Learning, Powered by AI
           </h2>
           <p className="text-xl text-gray-600 mb-8">
-            Join thousands of learners mastering Vietnamese through conversation
+            Our AI adapts to your level, providing natural conversations that
+            help you learn just like you would with a native speaker. Save new
+            words, practice pronunciation, and track your progress - all in one
+            place.
           </p>
-          <div className="space-x-4">
-            <Link
-              to="/login"
-              className="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-8 rounded-full text-lg transition-colors duration-300"
-            >
-              Sign Up Free
-            </Link>
-          </div>
+        </div>
+
+        {/* Final CTA */}
+        <div className="text-center">
+          <h2 className="text-3xl font-bold text-gray-800 mb-4">
+            Ready to Start Your Language Journey?
+          </h2>
+          <p className="text-xl text-gray-600 mb-8">
+            Join thousands of learners already mastering new languages with
+            Qilingo
+          </p>
+          <Link
+            to="/login"
+            className="bg-[#47A1BE] hover:bg-[#3891AE] text-white font-bold py-3 px-8 rounded-full text-lg transition-colors duration-300 shadow-md inline-flex items-center gap-2"
+          >
+            Get Started Free <FaArrowRight />
+          </Link>
         </div>
       </div>
     </div>
