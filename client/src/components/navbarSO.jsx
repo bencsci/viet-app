@@ -15,9 +15,7 @@ const NavbarSO = () => {
           {/* Logo and Brand Name */}
           <Link to="/" className="flex items-center space-x-2">
             <FaLanguage className="text-[#FFF9C4] text-3xl" />
-            <span className="text-[#FFF9C4] font-bold text-xl">
-              VietAI
-            </span>
+            <span className="text-[#FFF9C4] font-bold text-xl">VietAI</span>
           </Link>
 
           {/* Desktop Menu */}

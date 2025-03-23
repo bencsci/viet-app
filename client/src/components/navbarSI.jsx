@@ -1,10 +1,10 @@
 import React, { useState, useContext } from "react";
 import { Link, useLocation } from "react-router";
-import { FaLanguage } from "react-icons/fa";
-import { HiMenu, HiX } from "react-icons/hi";
 import { IoSettingsSharp } from "react-icons/io5";
+import { HiMenu, HiX } from "react-icons/hi";
 import { UserButton } from "@clerk/clerk-react";
 import { UserContext } from "../context/userContext";
+import QilingoLogo from "../assets/Qilingo Logo Transparent.svg";
 
 const NavbarSI = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -15,13 +15,12 @@ const NavbarSI = () => {
     <nav className="bg-white shadow-lg fixed top-0 left-0 right-0 z-50">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between items-center h-16">
-          {/* Logo and Brand Name */}
+          {/* Logo */}
           <Link
             to={prevConvoId ? `/c/${prevConvoId}` : "/"}
-            className="flex items-center space-x-2"
+            className="flex items-center"
           >
-            <FaLanguage className="text-red-500 text-3xl" />
-            <span className="text-red-500 font-bold text-xl font-san">+
+            <span className="text-red-500 font-bold text-xl font-sans">
               QILINGO
             </span>
           </Link>
