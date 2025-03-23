@@ -78,6 +78,7 @@ const ReviewDeck = () => {
       //console.log(reviewMode);
     } catch (error) {
       console.error("Error loading deck:", error);
+      navigate("/404-not-found");
     } finally {
       setLoading(false);
     }
@@ -143,7 +144,6 @@ const ReviewDeck = () => {
         const processedCards = handleReviewMode(res.data);
         setCards(processedCards);
       }
-
     } catch (error) {
       console.error("Error listing flashcards:", error);
     } finally {
@@ -176,7 +176,6 @@ const ReviewDeck = () => {
             },
           }
         );
-
 
         setDeck((prev) => ({
           ...prev,

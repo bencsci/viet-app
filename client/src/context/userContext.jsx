@@ -1,31 +1,45 @@
 import { createContext, useState, useEffect } from "react";
+import { useNavigate } from "react-router";
 import axios from "axios";
-import { useAuth } from "@clerk/clerk-react";
+import { useAuth, useUser } from "@clerk/clerk-react";
 
 export const UserContext = createContext();
 
 export const UserContextProvider = ({ children }) => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const { getToken } = useAuth();
-
+  const { user } = useUser();
   const [prevConvoId, setPrevConvoId] = useState();
   const [conversations, setConversations] = useState([]);
   const [reviewMode, setReviewMode] = useState("srs");
   const [language, setLanguage] = useState("");
   const [difficulty, setDifficulty] = useState("");
   const [profile, setProfile] = useState({});
+  const [isOnboarding, setIsOnboarding] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    loadProfile();
-  }, []);
+    if (user && user.publicMetadata) {
+      setIsOnboarding(!user.publicMetadata.onboardingComplete);
+    }
+  }, [user]);
 
   useEffect(() => {
-    loadConversations();
-  }, [prevConvoId]);
+    if (!isOnboarding) {
+      loadProfile();
+    }
+  }, [isOnboarding]);
+
+  useEffect(() => {
+    if (!isOnboarding) {
+      console.log("Loading conversations", isOnboarding);
+      loadConversations();
+    }
+  }, [prevConvoId, isOnboarding]);
 
   const loadProfile = async () => {
     try {
-      if (!getToken) return; // Skip if auth is not ready
+      if (!getToken || isOnboarding) return; // Skip if onboarding or auth not ready
 
       const token = await getToken();
       if (!token) return;
@@ -48,7 +62,7 @@ export const UserContextProvider = ({ children }) => {
 
   const loadConversations = async () => {
     try {
-      if (!getToken) return; // Skip if auth is not ready
+      if (!getToken || isOnboarding) return; // Skip if onboarding or auth not ready
 
       const token = await getToken();
       if (!token) return;
@@ -62,6 +76,7 @@ export const UserContextProvider = ({ children }) => {
       setConversations(res.data);
     } catch (error) {
       console.error("Error loading conversations:", error);
+      navigate("/404-not-found");
     }
   };
 
@@ -81,6 +96,8 @@ export const UserContextProvider = ({ children }) => {
     setDifficulty,
     profile,
     loadProfile,
+    isOnboarding,
+    setIsOnboarding,
   };
 
   return (

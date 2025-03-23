@@ -138,6 +138,7 @@ const handleUsers = async (req, res) => {
     }
 
     try {
+      console.log("Deleting user:", id);  
       await deleteUser(id);
       return void res.status(200).json({
         success: true,

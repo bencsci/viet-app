@@ -24,11 +24,12 @@ const Settings = () => {
   }, []);
 
   const languages = [
-    { value: "vietnamese", label: "Vietnamese" },
+    { value: "english", label: "English" },
     { value: "french", label: "French" },
     { value: "spanish", label: "Spanish" },
     { value: "portuguese", label: "Portuguese" },
     { value: "italian", label: "Italian" },
+    { value: "vietnamese", label: "Vietnamese" },
   ];
 
   const difficulties = [

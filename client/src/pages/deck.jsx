@@ -95,6 +95,7 @@ const Deck = () => {
       setDeck(res.data);
     } catch (error) {
       console.error("Error loading deck:", error);
+      navigate("/404-not-found");
     } finally {
       setLoading(false);
     }
@@ -118,6 +119,7 @@ const Deck = () => {
       setCards(res.data);
     } catch (error) {
       console.error("Error listing flashcards:", error);
+      navigate("/404-not-found");
     }
   };
 

@@ -21,6 +21,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
     loadConversations,
     backendUrl,
     language,
+    isOnboarding,
   } = useContext(UserContext);
   const { convoId } = useParams();
   const navigate = useNavigate();

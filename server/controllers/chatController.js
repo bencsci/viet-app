@@ -155,12 +155,12 @@ const textToSpeechGoogle = async (req, res) => {
 
     const profile = await getUserProfile(supabase, userId);
     const { languageCode, voice } = getLanguageSettings(profile.language);
-    //console.log(languageCode, voice);
+    console.log(languageCode, voice);
 
     const request = {
       input: { text },
       voice: { languageCode, name: voice },
-      audioConfig: { audioEncoding: "MP3", speakingRate: 0.85 },
+      audioConfig: { audioEncoding: "MP3", speakingRate: 1 },
     };
 
     const [response] = await speechClient.synthesizeSpeech(request);

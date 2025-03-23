@@ -1,4 +1,11 @@
-import { SignIn, SignOutButton, SignedIn, SignedOut } from "@clerk/clerk-react";
+import { useState, useEffect, useContext } from "react";
+import {
+  SignIn,
+  SignOutButton,
+  SignedIn,
+  SignedOut,
+  useUser,
+} from "@clerk/clerk-react";
 import { Routes, Route } from "react-router";
 import { ToastContainer } from "react-toastify";
 import Review from "./pages/review";
@@ -10,7 +17,22 @@ import NavbarSI from "./components/navbarSI";
 import Deck from "./pages/deck";
 import ReviewDeck from "./pages/reviewDeck";
 import Settings from "./pages/settings";
+import Onboarding from "./pages/onboarding";
+import NotFound from "./pages/notFound";
+import { UserContext } from "./context/userContext";
+
 function App() {
+  const { user } = useUser();
+  const { isOnboarding, setIsOnboarding } = useContext(UserContext);
+
+  if (isOnboarding) {
+    return (
+      <div>
+        <Onboarding />
+      </div>
+    );
+  }
+
   return (
     <div>
       <ToastContainer autoClose={1250} />
@@ -23,6 +45,7 @@ function App() {
           <Route path="/decks/:deckId" element={<Deck />} />
           <Route path="/decks/:deckId/review" element={<ReviewDeck />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </SignedIn>
       <SignedOut>

@@ -16,6 +16,7 @@ const getLanguageCode = (language) => {
     spanish: "es-ES",
     portuguese: "pt-BR",
     italian: "it-IT",
+    english: "en-US",
   };
 
   return languageCodes[language.toLowerCase()] || "en-US";
@@ -28,6 +29,7 @@ const getVoice = (language) => {
     spanish: "es-ES-Chirp3-HD-Aoede",
     portuguese: "pt-BR-Chirp3-HD-Aoede",
     italian: "it-IT-Chirp3-HD-Aoede",
+    english: "en-US-Chirp3-HD-Aoede",
   };
 
   return voices[language.toLowerCase()] || "en-US-Neural2-F";

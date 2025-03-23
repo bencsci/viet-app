@@ -40,10 +40,6 @@ const getDeck = async (req, res) => {
     const userId = req.auth.userId;
     const { deckId } = req.body;
 
-    if (!deckId) {
-      return res.status(400).json({ error: "Deck ID is required" });
-    }
-
     const { data, error } = await supabase
       .from("decks")
       .select("*")
@@ -53,14 +49,10 @@ const getDeck = async (req, res) => {
 
     if (error) throw error;
 
-    if (!data) {
-      return res.status(404).json({ error: "Conversation not found" });
-    }
-
     res.json(data);
   } catch (error) {
-    console.error("Error getting conversation:", error);
-    res.status(500).json({ error: "Failed to get conversation" });
+    console.error("Error getting deck:", error);
+    return res.status(500).json({ error: "Failed to get deck" });
   }
 };
 
@@ -189,7 +181,7 @@ const listFlashcards = async (req, res) => {
       .eq("deck_id", deckId);
 
     if (error) throw error;
-
+    
     res.json(data);
   } catch (error) {
     console.error("Error listing flashcards:", error);

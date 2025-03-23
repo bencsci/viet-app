@@ -56,6 +56,8 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
       }
     } catch (error) {
       console.error("Error loading conversation:", error);
+      setPrevConvoId(null);
+      navigate("/404-not-found");
     } finally {
       setIsLoading(false);
     }
