@@ -28,12 +28,37 @@ const deleteUser = async (userId) => {
   try {
     const supabase = supabaseAdmin();
 
-    const { error } = await supabase
+    // Delete all flashcards from user's decks
+    const { error: flashcardsError } = await supabase
+      .from("flashcards")
+      .delete()
+      .eq("deck_id", supabase.from("decks").select("id").eq("user_id", userId));
+
+    if (flashcardsError) throw flashcardsError;
+
+    // Delete all decks
+    const { error: decksError } = await supabase
+      .from("decks")
+      .delete()
+      .eq("user_id", userId);
+
+    if (decksError) throw decksError;
+
+    // Delete all conversations
+    const { error: conversationsError } = await supabase
+      .from("conversations")
+      .delete()
+      .eq("user_id", userId);
+
+    if (conversationsError) throw conversationsError;
+
+    // Finally, delete the user profile
+    const { error: profileError } = await supabase
       .from("profiles")
       .delete()
       .match({ user_id: userId });
 
-    if (error) throw error;
+    if (profileError) throw profileError;
   } catch (error) {
     console.log("Error:", error);
     throw error;
@@ -138,7 +163,7 @@ const handleUsers = async (req, res) => {
     }
 
     try {
-      console.log("Deleting user:", id);  
+      console.log("Deleting user:", id);
       await deleteUser(id);
       return void res.status(200).json({
         success: true,

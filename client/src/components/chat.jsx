@@ -71,14 +71,6 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
       setIsLoading(false);
       setMessages([]);
     }
-
-    if (!convoId) {
-      setIsNewConversation(true);
-    } else {
-      setIsNewConversation(false);
-    }
-
-    console.log("isNewConversation", isNewConversation);
   }, [convoId]);
 
   useEffect(() => {
@@ -114,6 +106,14 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
         }
       }
     }
+
+    if (!convoId) {
+      setIsNewConversation(true);
+    } else {
+      setIsNewConversation(false);
+    }
+
+    //console.log("isNewConversation", isNewConversation);
   }, [messages]);
 
   const generateTitle = async () => {

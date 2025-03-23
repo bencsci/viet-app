@@ -32,7 +32,7 @@ export const UserContextProvider = ({ children }) => {
 
   useEffect(() => {
     if (!isOnboarding) {
-      console.log("Loading conversations", isOnboarding);
+      //console.log("Loading conversations", isOnboarding);
       loadConversations();
     }
   }, [prevConvoId, isOnboarding]);

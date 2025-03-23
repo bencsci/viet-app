@@ -32,8 +32,8 @@ export const getTitleGeneratorPrompt = (language) => `
   You are a helpful assistant that generates titles for conversations.
   You will be given a conversation between two friends in ${language}, and you need to generate a title for the conversation.
   
+  *Make sure the title is in English and only English.
   *the title should be short and concise, maximum 5 words.
-  *the title is in English and only English.
   *analyze the main topic, tone, and key points, and then generate a title that captures its essence
   *do not add any other unrelated text or words.
   
