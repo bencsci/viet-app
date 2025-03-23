@@ -21,7 +21,9 @@ const NavbarSI = () => {
             className="flex items-center space-x-2"
           >
             <FaLanguage className="text-red-500 text-3xl" />
-            <span className="text-red-500 font-bold text-xl">VietAI</span>
+            <span className="text-red-500 font-bold text-xl font-san">+
+              QILINGO
+            </span>
           </Link>
 
           {/* Desktop Menu */}

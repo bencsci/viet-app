@@ -7,6 +7,7 @@ import {
   MdMoreVert,
   MdPlayArrow,
   MdClose,
+  MdSort,
 } from "react-icons/md";
 import DeckCard from "../components/deckCard";
 import { UserContext } from "../context/userContext";
@@ -64,10 +65,33 @@ const Review = () => {
   const [newDeckName, setNewDeckName] = useState("");
   const [decks, setDecks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [sortBy, setSortBy] = useState("lastReviewed");
+  const [sortDirection, setSortDirection] = useState("desc");
 
   const filteredDecks = decks.filter((deck) =>
     deck.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const getSortedDecks = () => {
+    return [...filteredDecks].sort((a, b) => {
+      switch (sortBy) {
+        case "alphabetical":
+          return sortDirection === "desc"
+            ? a.title.localeCompare(b.title)
+            : b.title.localeCompare(a.title);
+        case "grade":
+          const gradeA = a.mastery || 0;
+          const gradeB = b.mastery || 0;
+          return sortDirection === "asc" ? gradeA - gradeB : gradeB - gradeA;
+        case "lastReviewed":
+          const dateA = new Date(a.last_reviewed || 0);
+          const dateB = new Date(b.last_reviewed || 0);
+          return sortDirection === "asc" ? dateA - dateB : dateB - dateA;
+        default:
+          return 0;
+      }
+    });
+  };
 
   const listDecks = async () => {
     try {
@@ -114,6 +138,31 @@ const Review = () => {
     }
   };
 
+  const SortDropdown = () => (
+    <div className="flex items-center gap-2 w-full md:w-auto">
+      <div className="flex items-center gap-2 bg-white px-4 py-3 rounded-lg border border-gray-200 w-full">
+        <MdSort className="text-gray-400 text-xl" />
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value)}
+          className="text-sm text-gray-700 focus:outline-none bg-transparent flex-1 min-w-[140px]"
+        >
+          <option value="lastReviewed">Recent First</option>
+          <option value="alphabetical">A → Z</option>
+          <option value="grade">Grade</option>
+        </select>
+        <button
+          onClick={() =>
+            setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"))
+          }
+          className="text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          {sortDirection === "asc" ? "↑" : "↓"}
+        </button>
+      </div>
+    </div>
+  );
+
   return (
     <div className="pt-16 min-h-screen bg-gray-50">
       {/* Header Section */}
@@ -128,26 +177,29 @@ const Review = () => {
         </div>
       </div>
 
-      {/* Search and Add Section */}
+      {/* Search, Sort and Add Section */}
       <div className="max-w-6xl mx-auto px-4 md:px-8 py-6">
-        <div className="flex flex-col md:flex-row gap-4 items-center">
-          <div className="relative flex-1 w-full">
-            <MdSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl" />
-            <input
-              type="text"
-              placeholder="Search decks..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-            />
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex flex-col md:flex-row gap-4 flex-1">
+            <div className="relative flex-1">
+              <MdSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl" />
+              <input
+                type="text"
+                placeholder="Search decks..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              />
+            </div>
+            <button
+              onClick={() => setIsCreateModalOpen(true)}
+              className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg flex items-center gap-2 transition-colors shadow-sm w-full md:w-auto justify-center"
+            >
+              <MdAdd className="text-xl" />
+              <span className="font-medium">Create Deck</span>
+            </button>
           </div>
-          <button
-            onClick={() => setIsCreateModalOpen(true)}
-            className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg flex items-center gap-2 transition-colors shadow-md w-full md:w-auto justify-center"
-          >
-            <MdAdd className="text-xl" />
-            <span className="font-medium">Create New Deck</span>
-          </button>
+          <SortDropdown />
         </div>
       </div>
 
@@ -171,7 +223,7 @@ const Review = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredDecks.map((deck) => (
+              {getSortedDecks().map((deck) => (
                 <DeckCard
                   key={deck.id}
                   id={deck.id}
