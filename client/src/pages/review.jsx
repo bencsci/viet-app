@@ -203,7 +203,7 @@ const Review = () => {
                 placeholder="Search decks..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#47A1BE] focus:border-transparent"
               />
             </div>
             <button
@@ -257,7 +257,7 @@ const Review = () => {
       {/* Empty State */}
       {!loading && decks.length === 0 && (
         <div className="max-w-md mx-auto text-center py-16">
-          <div className="bg-red-50 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
+          <div className="bg-blue-50 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
             <MdAdd className="text-[#47A1BE] text-4xl" />
           </div>
           <h2 className="text-xl font-bold text-gray-800 mb-2">

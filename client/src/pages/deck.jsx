@@ -361,8 +361,8 @@ const Deck = () => {
           <div>
             {cards.length === 0 ? (
               <div className="text-center py-16 bg-white rounded-lg shadow-sm border border-gray-100">
-                <div className="bg-red-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <MdAdd className="text-red-500 text-3xl" />
+                <div className="bg-blue-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <MdAdd className="text-[#47A1BE] text-3xl" />
                 </div>
                 <h2 className="text-xl font-bold text-gray-800 mb-2">
                   No flashcards yet
