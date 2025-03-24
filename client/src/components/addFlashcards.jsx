@@ -106,7 +106,7 @@ const AddFlashcards = ({ deck, listFlashcards, loadDeck }) => {
                 htmlFor={`front-${card.id}`}
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Front (Vietnamese)
+                Front
               </label>
               <textarea
                 id={`front-${card.id}`}
@@ -114,7 +114,7 @@ const AddFlashcards = ({ deck, listFlashcards, loadDeck }) => {
                 onChange={(e) =>
                   updateAddFlashcard(card.id, "front", e.target.value)
                 }
-                placeholder="Enter the Vietnamese word or phrase"
+                placeholder="Enter a word or phrase"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#47A1BE] focus:border-transparent resize-none bg-white"
                 rows={2}
               />
@@ -124,7 +124,7 @@ const AddFlashcards = ({ deck, listFlashcards, loadDeck }) => {
                 htmlFor={`back-${card.id}`}
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Back (English)
+                Back
               </label>
               <textarea
                 id={`back-${card.id}`}
@@ -132,7 +132,7 @@ const AddFlashcards = ({ deck, listFlashcards, loadDeck }) => {
                 onChange={(e) =>
                   updateAddFlashcard(card.id, "back", e.target.value)
                 }
-                placeholder="Enter the English translation"
+                placeholder="Enter the word or phrase"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#47A1BE] focus:border-transparent resize-none bg-white"
                 rows={2}
               />
