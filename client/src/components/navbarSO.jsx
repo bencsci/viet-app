@@ -23,7 +23,7 @@ const NavbarSO = () => {
             {!isLoginPage && (
               <Link
                 to="/login"
-                className="bg-[#FFFAE7] text-[#47A1BE] px-6 py-2 rounded-full font-medium 
+                className="bg-white text-[#47A1BE] px-6 py-2 rounded-full font-medium 
                   hover:bg-gray-300 transition duration-300"
               >
                 Start Learning
