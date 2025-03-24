@@ -166,13 +166,13 @@ const Review = () => {
   return (
     <div className="pt-16 min-h-screen bg-gray-50">
       {/* Header Section */}
-      <div className="bg-red-600 text-white py-6 px-4 md:px-8">
+      <div className="bg-[#47A1BE] text-white py-6 px-4 md:px-8">
         <div className="max-w-6xl mx-auto">
           <h1 className="text-2xl md:text-3xl font-bold mb-2">
             Flashcard Decks
           </h1>
-          <p className="text-red-100">
-            Review your vocabulary and improve your Vietnamese
+          <p className="text-blue-100">
+            Review your vocabulary and improve your conversation skills
           </p>
         </div>
       </div>
@@ -193,7 +193,7 @@ const Review = () => {
             </div>
             <button
               onClick={() => setIsCreateModalOpen(true)}
-              className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg flex items-center gap-2 transition-colors shadow-sm w-full md:w-auto justify-center"
+              className="bg-[#47A1BE] hover:bg-[#3E89A3] text-white px-6 py-3 rounded-lg flex items-center gap-2 transition-colors shadow-sm w-full md:w-auto justify-center"
             >
               <MdAdd className="text-xl" />
               <span className="font-medium">Create Deck</span>
@@ -207,7 +207,7 @@ const Review = () => {
       {loading && (
         <div className="max-w-6xl mx-auto px-4 md:px-8 py-12 flex justify-center">
           <div className="flex flex-col items-center">
-            <div className="w-12 h-12 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+            <div className="w-12 h-12 border-4 border-[#47A1BE] border-t-transparent rounded-full animate-spin"></div>
           </div>
         </div>
       )}
@@ -243,7 +243,7 @@ const Review = () => {
       {!loading && decks.length === 0 && (
         <div className="max-w-md mx-auto text-center py-16">
           <div className="bg-red-50 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
-            <MdAdd className="text-red-500 text-4xl" />
+            <MdAdd className="text-[#47A1BE] text-4xl" />
           </div>
           <h2 className="text-xl font-bold text-gray-800 mb-2">
             No flashcard decks yet
@@ -253,7 +253,7 @@ const Review = () => {
           </p>
           <button
             onClick={() => setIsCreateModalOpen(true)}
-            className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg flex items-center gap-2 transition-colors shadow-md mx-auto"
+            className="bg-[#47A1BE] hover:bg-[#3E89A3] text-white px-6 py-3 rounded-lg flex items-center gap-2 transition-colors shadow-md mx-auto"
           >
             <MdAdd className="text-xl" />
             <span className="font-medium">Create New Deck</span>
@@ -268,11 +268,11 @@ const Review = () => {
             className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="bg-red-500 text-white px-4 py-3 flex items-center justify-between">
+            <div className="bg-[#47A1BE] text-white px-4 py-3 flex items-center justify-between">
               <h3 className="font-medium">Create New Deck</h3>
               <button
                 onClick={() => setIsCreateModalOpen(false)}
-                className="p-1 hover:bg-red-600 rounded transition-colors"
+                className="p-1 hover:bg-[#47A1BE] rounded transition-colors"
               >
                 <MdClose className="w-5 h-5" />
               </button>
@@ -292,7 +292,7 @@ const Review = () => {
                   value={newDeckName}
                   onChange={(e) => setNewDeckName(e.target.value)}
                   placeholder="Enter a name for your deck"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#47A1BE] focus:border-transparent"
                   autoFocus
                 />
               </div>
@@ -307,7 +307,7 @@ const Review = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                  className="px-4 py-2 bg-[#47A1BE] text-white rounded-md hover:bg-[#47A1BE] focus:outline-none focus:ring-2 focus:ring-[#47A1BE] focus:ring-offset-2"
                 >
                   Create Deck
                 </button>

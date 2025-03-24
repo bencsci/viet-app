@@ -328,7 +328,7 @@ const ReviewDeck = () => {
   if (loading || !deck) {
     return (
       <div className="pt-16 min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-12 h-12 border-4 border-[#47A1BE] border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -336,11 +336,11 @@ const ReviewDeck = () => {
   if (cards.length === 0 && reviewMode === "srs") {
     return (
       <div className="pt-16 min-h-screen bg-gray-50 flex flex-col">
-        <div className="bg-red-600 text-white py-4 px-4 md:px-8">
+        <div className="bg-[#47A1BE] text-white py-4 px-4 md:px-8">
           <div className="max-w-4xl mx-auto flex items-center">
             <button
               onClick={handleReturn}
-              className="mr-4 p-2 hover:bg-red-700 rounded-full transition-colors"
+              className="mr-4 p-2 hover:bg-[#327085] rounded-full transition-colors"
             >
               <MdArrowBack className="text-xl" />
             </button>
@@ -362,7 +362,7 @@ const ReviewDeck = () => {
             <div className="flex flex-wrap justify-center gap-4">
               <button
                 onClick={() => handleReturn()}
-                className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg flex items-center gap-2"
+                className="px-6 py-3 bg-[#47A1BE] hover:bg-[#327085] text-white rounded-lg flex items-center gap-2"
               >
                 <MdArrowBack className="text-xl" />
                 <span>Return to Deck</span>
@@ -378,25 +378,25 @@ const ReviewDeck = () => {
   if (cards.length === 0) {
     return (
       <div className="pt-16 min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-12 h-12 border-4 border-[#47A1BE] border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
   return (
     <div className="pt-16 min-h-screen bg-gray-50 flex flex-col">
-      <div className="bg-red-600 text-white py-4 px-4 md:px-8">
+      <div className="bg-[#47A1BE] text-white py-4 px-4 md:px-8">
         <div className="max-w-4xl mx-auto flex items-center">
           <button
             onClick={handleReturn}
-            className="mr-4 p-2 hover:bg-red-700 rounded-full transition-colors"
+            className="mr-4 p-2 hover:bg-[#327085] rounded-full transition-colors"
           >
             <MdArrowBack className="text-xl" />
           </button>
           <div>
             <h1 className="text-xl font-bold">{deck.title}</h1>
             {!reviewComplete && (
-              <p className="text-sm text-red-100">
+              <p className="text-sm text-blue-100">
                 Card {currentCardIndex + 1} of {cards.length}
               </p>
             )}
@@ -430,7 +430,7 @@ const ReviewDeck = () => {
                           setIsReviewing(true);
                         }
                       }}
-                      className="w-3/4 py-4 bg-sky-400 text-white rounded-lg shadow-md font-medium text-lg"
+                      className="w-3/4 py-4 bg-sky-400 text-white rounded-lg shadow-md font-medium text-lg cursor-pointer"
                     >
                       Flip Card
                     </button>
@@ -455,7 +455,7 @@ const ReviewDeck = () => {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   <button
                     onClick={() => handleRateCard("fail")}
-                    className="px-4 py-4 bg-red-400 hover:bg-red-500 text-white rounded-lg flex items-center justify-center transition-colors text-lg font-medium"
+                    className="px-4 py-4 bg-red-400 hover:bg-[#47A1BE] text-white rounded-lg flex items-center justify-center transition-colors text-lg font-medium"
                   >
                     <span>Fail</span>
                   </button>
@@ -536,14 +536,14 @@ const ReviewDeck = () => {
               <div className="flex flex-wrap justify-center gap-4">
                 <button
                   onClick={restartReview}
-                  className="px-6 py-3 bg-red-100 text-red-600 hover:bg-red-200 rounded-lg flex items-center gap-2"
+                  className="px-6 py-3 bg-blue-100 text-[#47A1BE] hover:bg-red-200 rounded-lg flex items-center gap-2"
                 >
                   <MdRefresh className="text-xl" />
                   <span>Review Again</span>
                 </button>
                 <button
                   onClick={handleReturn}
-                  className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg"
+                  className="px-6 py-3 bg-[#47A1BE] hover:bg-[#327085] text-white rounded-lg"
                 >
                   Return to Deck
                 </button>

@@ -59,14 +59,14 @@ const DeckCard = ({
         </div>
         <div className="flex w-full">
           <Link to={`/decks/${id}`} className="w-full">
-            <button className="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors cursor-pointer">
+            <button className="w-full bg-[#47A1BE] hover:bg-[#327085] text-white py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors cursor-pointer">
               <MdPlayArrow className="text-lg" />
               <span>View Deck</span>
             </button>
           </Link>
         </div>
       </div>
-      <div className="h-2 bg-red-500"></div>
+      <div className="h-2 bg-[#489DBA]"></div>
     </div>
   );
 };

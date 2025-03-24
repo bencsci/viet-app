@@ -22,6 +22,8 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
     backendUrl,
     language,
     isOnboarding,
+    isNewConversation,
+    setIsNewConversation,
   } = useContext(UserContext);
   const { convoId } = useParams();
   const navigate = useNavigate();
@@ -179,6 +181,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
   };
 
   const handleConversationSelect = (convoId) => {
+    setIsNewConversation(false);
     navigate(`/c/${convoId}`);
     //setSelectedConvoId(convoId);
     setPrevConvoId(convoId);
@@ -199,10 +202,10 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
       >
         <div className="h-full flex flex-col w-72">
           {/* Header section */}
-          <div className="bg-red-500 text-white p-4 flex items-center justify-between">
+          <div className="bg-[#47A1BE] text-white p-4 flex items-center justify-between">
             <button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="p-1 hover:bg-red-600 rounded transition-colors"
+              className="p-1 hover:bg-[#489DBA] rounded transition-colors"
             >
               <AiOutlineMenuUnfold size={20} />
             </button>
@@ -212,7 +215,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
           <div className="px-4 py-3 border-b border-gray-200">
             <button
               onClick={createNewConversation}
-              className="flex items-center justify-center gap-2 w-full bg-red-500 text-white hover:bg-red-600 rounded-lg p-3 transition-colors shadow-sm font-medium"
+              className="flex items-center justify-center gap-2 w-full bg-[#47A1BE] text-white hover:bg-[#3E89A3] rounded-lg p-3 transition-colors shadow-sm font-medium"
             >
               <MdAdd className="w-5 h-5" />
               New Chat
@@ -227,7 +230,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
                 onClick={() => handleConversationSelect(conv.id)}
                 className={`group flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all ${
                   convoId === conv.id.toString()
-                    ? "bg-red-100 text-red-700"
+                    ? "bg-[#D2E8EF] text-[#327085]"
                     : "hover:bg-gray-100 text-gray-700"
                 }`}
                 title={conv.title || "New Conversation"}
@@ -236,7 +239,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
                   <div
                     className={`p-2 rounded-lg ${
                       convoId === conv.id.toString()
-                        ? "bg-red-200"
+                        ? "bg-[#95C9DA]"
                         : "bg-gray-200 group-hover:bg-gray-300"
                     }`}
                   >
@@ -254,7 +257,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
                     onClick={(e) => toggleMenu(conv.id, e)}
                     className={`p-2 rounded-lg ${
                       convoId === conv.id.toString()
-                        ? "hover:bg-red-200 text-red-600"
+                        ? "hover:bg-[#95C9DA] text-[#489DBA]"
                         : "hover:bg-gray-200 text-gray-500"
                     }`}
                   >
@@ -309,11 +312,11 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
             className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="bg-red-500 text-white px-4 py-3 flex items-center justify-between">
+            <div className="bg-[#47A1BE] text-white px-4 py-3 flex items-center justify-between">
               <h3 className="font-medium">Rename Conversation</h3>
               <button
                 onClick={() => setRenameModalOpen(false)}
-                className="p-1 hover:bg-red-600 rounded transition-colors"
+                className="p-1 hover:bg-[#489DBA] rounded transition-colors"
               >
                 <MdClose className="w-5 h-5" />
               </button>
@@ -333,7 +336,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
                   placeholder="Enter a new title"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#47A1BE] focus:border-transparent"
                   autoFocus
                 />
               </div>
@@ -348,7 +351,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                  className="px-4 py-2 bg-[#47A1BE] text-white rounded-md hover:bg-[#489DBA] focus:outline-none focus:ring-2 focus:ring-[#47A1BE] focus:ring-offset-2"
                 >
                   Save
                 </button>

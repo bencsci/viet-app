@@ -213,13 +213,13 @@ const Deck = () => {
       return { grade: "D", color: "text-orange-600", bg: "bg-orange-500" };
     if (mastery >= 50)
       return { grade: "E", color: "text-red-400", bg: "bg-red-400" };
-    return { grade: "F", color: "text-red-600", bg: "bg-red-600" };
+    return { grade: "F", color: "text-red-600", bg: "bg-red-400" };
   };
 
   if (loading) {
     return (
       <div className="pt-16 min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-12 h-12 border-4 border-[#47A1BE] border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -227,12 +227,12 @@ const Deck = () => {
   return (
     <div className="pt-16 min-h-screen bg-gray-50">
       {/* Header Section */}
-      <div className="bg-red-600 text-white py-6 px-4 md:px-8">
+      <div className="bg-[#47A1BE] text-white py-6 px-4 md:px-8">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center mb-4">
             <Link
               to="/decks"
-              className="mr-4 p-2 hover:bg-red-700 rounded-full transition-colors"
+              className="mr-4 p-2 hover:bg-[#3E89A3] rounded-full transition-colors"
             >
               <MdArrowBack className="text-xl" />
             </Link>
@@ -245,11 +245,11 @@ const Deck = () => {
 
           {/* Stats Overview */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-            <div className="bg-red-700 bg-opacity-30 rounded-lg p-4">
+            <div className="bg-[#3E89A3] bg-opacity-30 rounded-lg p-4">
               <p className="text-red-200 text-sm">Cards</p>
               <p className="text-2xl font-bold">{deck.card_count}</p>
             </div>
-            <div className="bg-red-700 bg-opacity-30 rounded-lg p-4">
+            <div className="bg-[#3E89A3] bg-opacity-30 rounded-lg p-4">
               <p className="text-red-200 text-sm">Mastery</p>
               <div className="flex items-center justify-between">
                 <p className="text-2xl font-bold">{deck.mastery}%</p>
@@ -270,11 +270,11 @@ const Deck = () => {
                 ></div>
               </div>
             </div>
-            <div className="bg-red-700 bg-opacity-30 rounded-lg p-4">
+            <div className="bg-[#3E89A3] bg-opacity-30 rounded-lg p-4">
               <p className="text-red-200 text-sm">Reviews</p>
               <p className="text-2xl font-bold">{deck.total_reviews}</p>
             </div>
-            <div className="bg-red-700 bg-opacity-30 rounded-lg p-4">
+            <div className="bg-[#3E89A3] bg-opacity-30 rounded-lg p-4">
               <p className="text-red-200 text-sm">Last Reviewed</p>
               <p className="text-2xl font-bold">
                 {new Date(deck.last_reviewed).toLocaleDateString()}
@@ -294,7 +294,7 @@ const Deck = () => {
               className={`w-full flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium shadow-sm ${
                 cards.length === 0
                   ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                  : "bg-red-600 hover:bg-red-700 text-white"
+                  : "bg-[#47A1BE] hover:bg-[#3E89A3] text-white"
               }`}
             >
               <MdPlayArrow className="text-xl" />
@@ -337,7 +337,7 @@ const Deck = () => {
               onClick={() => setActiveTab("cards")}
               className={`py-4 px-1 font-medium text-sm border-b-2 ${
                 activeTab === "cards"
-                  ? "border-red-500 text-red-600"
+                  ? "border-[#47A1BE] text-[#47A1BE]"
                   : "border-transparent text-gray-500 hover:text-gray-700"
               }`}
             >
@@ -347,7 +347,7 @@ const Deck = () => {
               onClick={() => setActiveTab("stats")}
               className={`py-4 px-1 font-medium text-sm border-b-2 ${
                 activeTab === "stats"
-                  ? "border-red-500 text-red-600"
+                  ? "border-[#47A1BE] text-[#47A1BE]"
                   : "border-transparent text-gray-500 hover:text-gray-700"
               }`}
             >
@@ -400,14 +400,14 @@ const Deck = () => {
       {isDeleteModalOpen && cardToDelete && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden">
-            <div className="bg-red-500 text-white px-4 py-3 flex items-center justify-between">
+            <div className="bg-[#47A1BE] text-white px-4 py-3 flex items-center justify-between">
               <h3 className="font-medium">Confirm Deletion</h3>
               <button
                 onClick={() => {
                   setIsDeleteModalOpen(false);
                   setCardToDelete(null);
                 }}
-                className="p-1 hover:bg-red-600 rounded transition-colors"
+                className="p-1 hover:bg-[#47A1BE] rounded transition-colors"
               >
                 <MdClose className="w-5 h-5" />
               </button>
@@ -456,7 +456,7 @@ const Deck = () => {
                 </button>
                 <button
                   onClick={confirmDeleteFlashcard}
-                  className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+                  className="px-4 py-2 bg-[#47A1BE] text-white rounded-md hover:bg-[#47A1BE]"
                 >
                   Delete Flashcard
                 </button>
@@ -472,11 +472,11 @@ const Deck = () => {
             className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="bg-red-500 text-white px-4 py-3 flex items-center justify-between">
+            <div className="bg-[#47A1BE] text-white px-4 py-3 flex items-center justify-between">
               <h3 className="font-medium">Rename Deck</h3>
               <button
                 onClick={() => setRenameModalOpen(false)}
-                className="p-1 hover:bg-red-600 rounded transition-colors"
+                className="p-1 hover:bg-[#47A1BE] rounded transition-colors"
               >
                 <MdClose className="w-5 h-5" />
               </button>
@@ -495,7 +495,7 @@ const Deck = () => {
                   id="title"
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#47A1BE] focus:border-transparent"
                   autoFocus
                 />
               </div>
@@ -510,7 +510,7 @@ const Deck = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                  className="px-4 py-2 bg-[#47A1BE] text-white rounded-md hover:bg-[#47A1BE] focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
                 >
                   Save
                 </button>
@@ -524,11 +524,11 @@ const Deck = () => {
       {isDeleteDeckModalOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden">
-            <div className="bg-red-500 text-white px-4 py-3 flex items-center justify-between">
+            <div className="bg-[#47A1BE] text-white px-4 py-3 flex items-center justify-between">
               <h3 className="font-medium">Delete Deck</h3>
               <button
                 onClick={() => setIsDeleteDeckModalOpen(false)}
-                className="p-1 hover:bg-red-600 rounded transition-colors"
+                className="p-1 hover:bg-[#47A1BE] rounded transition-colors"
               >
                 <MdClose className="w-5 h-5" />
               </button>
@@ -557,7 +557,7 @@ const Deck = () => {
                 </button>
                 <button
                   onClick={removeDeck}
-                  className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+                  className="px-4 py-2 bg-[#47A1BE] text-white rounded-md hover:bg-[#47A1BE]"
                 >
                   Delete Deck
                 </button>
@@ -570,11 +570,11 @@ const Deck = () => {
       {isReviewSettingsOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden">
-            <div className="bg-red-500 text-white px-4 py-3 flex items-center justify-between">
+            <div className="bg-[#47A1BE] text-white px-4 py-3 flex items-center justify-between">
               <h3 className="font-medium">Review Settings</h3>
               <button
                 onClick={() => setIsReviewSettingsOpen(false)}
-                className="p-1 hover:bg-red-600 rounded transition-colors"
+                className="p-1 hover:bg-[#47A1BE] rounded transition-colors"
               >
                 <MdClose className="w-5 h-5" />
               </button>
@@ -638,7 +638,7 @@ const Deck = () => {
               <div className="mt-6 flex justify-end">
                 <button
                   onClick={() => setIsReviewSettingsOpen(false)}
-                  className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+                  className="px-4 py-2 bg-[#47A1BE] text-white rounded-md hover:bg-[#47A1BE]"
                 >
                   Done
                 </button>

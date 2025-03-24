@@ -16,6 +16,7 @@ export const UserContextProvider = ({ children }) => {
   const [difficulty, setDifficulty] = useState("");
   const [profile, setProfile] = useState({});
   const [isOnboarding, setIsOnboarding] = useState(false);
+  const [isNewConversation, setIsNewConversation] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -98,6 +99,8 @@ export const UserContextProvider = ({ children }) => {
     loadProfile,
     isOnboarding,
     setIsOnboarding,
+    isNewConversation,
+    setIsNewConversation,
   };
 
   return (

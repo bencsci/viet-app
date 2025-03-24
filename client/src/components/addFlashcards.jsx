@@ -115,7 +115,7 @@ const AddFlashcards = ({ deck, listFlashcards, loadDeck }) => {
                   updateAddFlashcard(card.id, "front", e.target.value)
                 }
                 placeholder="Enter the Vietnamese word or phrase"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none bg-white"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#47A1BE] focus:border-transparent resize-none bg-white"
                 rows={2}
               />
             </div>
@@ -133,14 +133,14 @@ const AddFlashcards = ({ deck, listFlashcards, loadDeck }) => {
                   updateAddFlashcard(card.id, "back", e.target.value)
                 }
                 placeholder="Enter the English translation"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none bg-white"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#47A1BE] focus:border-transparent resize-none bg-white"
                 rows={2}
               />
             </div>
             <button
               type="button"
               onClick={() => removeFlashcardField(card.id)}
-              className="absolute -right-2 -top-2 p-1 bg-red-100 hover:bg-red-200 text-red-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute -right-2 -top-2 p-1 bg-blue-100 hover:bg-[#D2E8EF] text-[#47A1BE] rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
               title="Remove card"
             >
               <MdClose className="text-lg" />
@@ -153,7 +153,7 @@ const AddFlashcards = ({ deck, listFlashcards, loadDeck }) => {
         <button
           type="button"
           onClick={addNewFlashcardField}
-          className="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-md transition-colors"
+          className="flex items-center gap-2 px-4 py-2 text-[#47A1BE] hover:bg-blue-50 rounded-md transition-colors"
         >
           <MdAdd className="text-xl" />
           <span>Add Another Card</span>
@@ -161,7 +161,7 @@ const AddFlashcards = ({ deck, listFlashcards, loadDeck }) => {
         <button
           type="button"
           onClick={handleCreateFlashcards}
-          className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 ml-auto"
+          className="px-6 py-2 bg-[#47A1BE] hover:bg-[#327085] text-white rounded-md focus:outline-none focus:ring-2 focus:ring-[#47A1BE] focus:ring-offset-2 ml-auto"
         >
           Save All Cards
         </button>
