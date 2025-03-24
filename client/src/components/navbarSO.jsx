@@ -23,8 +23,8 @@ const NavbarSO = () => {
             {!isLoginPage && (
               <Link
                 to="/login"
-                className="bg-[#F5E6D3] text-[#47A1BE] px-6 py-2 rounded-full font-medium 
-                  hover:bg-white transition duration-300"
+                className="bg-[#FFFAE7] text-[#47A1BE] px-6 py-2 rounded-full font-medium 
+                  hover:bg-gray-300 transition duration-300"
               >
                 Start Learning
               </Link>
@@ -53,8 +53,8 @@ const NavbarSO = () => {
               {!isLoginPage && (
                 <Link
                   to="/login"
-                  className="block bg-[#F5E6D3] text-[#47A1BE] px-3 py-2 rounded-full text-center font-medium 
-                    hover:bg-white transition duration-300"
+                  className="block bg-[#FFFAE7] text-[#47A1BE] px-3 py-2 rounded-full text-center font-medium 
+                    hover:bg-gray-300 transition duration-300"
                 >
                   Start Learning
                 </Link>

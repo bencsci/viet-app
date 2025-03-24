@@ -246,11 +246,11 @@ const Deck = () => {
           {/* Stats Overview */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
             <div className="bg-[#3E89A3] bg-opacity-30 rounded-lg p-4">
-              <p className="text-red-200 text-sm">Cards</p>
+              <p className="text-blue-200 text-sm">Cards</p>
               <p className="text-2xl font-bold">{deck.card_count}</p>
             </div>
             <div className="bg-[#3E89A3] bg-opacity-30 rounded-lg p-4">
-              <p className="text-red-200 text-sm">Mastery</p>
+              <p className="text-blue-200 text-sm">Mastery</p>
               <div className="flex items-center justify-between">
                 <p className="text-2xl font-bold">{deck.mastery}%</p>
                 <div
@@ -271,11 +271,11 @@ const Deck = () => {
               </div>
             </div>
             <div className="bg-[#3E89A3] bg-opacity-30 rounded-lg p-4">
-              <p className="text-red-200 text-sm">Reviews</p>
+              <p className="text-blue-200 text-sm">Reviews</p>
               <p className="text-2xl font-bold">{deck.total_reviews}</p>
             </div>
             <div className="bg-[#3E89A3] bg-opacity-30 rounded-lg p-4">
-              <p className="text-red-200 text-sm">Last Reviewed</p>
+              <p className="text-blue-200 text-sm">Last Reviewed</p>
               <p className="text-2xl font-bold">
                 {new Date(deck.last_reviewed).toLocaleDateString()}
               </p>
