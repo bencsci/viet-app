@@ -5,7 +5,6 @@ import { useParams } from "react-router";
 import axios from "axios";
 import { UserContext } from "../context/userContext";
 
-
 const ReviewDeck = () => {
   const { backendUrl, getToken, reviewMode } = useContext(UserContext);
   const { deckId } = useParams();
@@ -537,7 +536,7 @@ const ReviewDeck = () => {
               <div className="flex flex-wrap justify-center gap-4">
                 <button
                   onClick={restartReview}
-                  className="px-6 py-3 bg-blue-100 text-[#47A1BE] hover:bg-red-200 rounded-lg flex items-center gap-2"
+                  className="px-6 py-3 bg-blue-100 text-[#47A1BE] hover:bg-blue-200 rounded-lg flex items-center gap-2"
                 >
                   <MdRefresh className="text-xl" />
                   <span>Review Again</span>
