@@ -49,7 +49,7 @@ const home = () => {
               <div className="flex gap-4">
                 <Link
                   to="/login"
-                  className="bg-[#FFFAE7] text-[#47A1BE] hover:bg-gray-300 px-6 py-2.5 rounded-full font-bold transition-colors duration-300 flex items-center gap-2"
+                  className="bg-[#FFFAE7] text-[#47A1BE] hover:bg-[#FFF2C2] px-6 py-2.5 rounded-full font-bold transition-colors duration-300 flex items-center gap-2"
                 >
                   Start Learning <FaArrowRight />
                 </Link>

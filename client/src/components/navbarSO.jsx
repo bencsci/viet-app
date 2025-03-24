@@ -54,7 +54,7 @@ const NavbarSO = () => {
                 <Link
                   to="/login"
                   className="block bg-[#FFFAE7] text-[#47A1BE] px-3 py-2 rounded-full text-center font-medium 
-                    hover:bg-gray-300 transition duration-300"
+                    hover:bg-[#FFF2C2] transition duration-300"
                 >
                   Start Learning
                 </Link>
