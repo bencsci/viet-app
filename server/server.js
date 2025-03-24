@@ -29,11 +29,6 @@ app.use("/api/history", historyRoute);
 app.use("/api/decks", decksRoute);
 app.use("/api/webhooks", webhooksRoute);
 app.use("/api/profile", profileRoute);
-// app.post('/api/webhooks/clerk', (req, res) => {
-//   console.log('Received Clerk webhook:', req.body);
-//   res.status(200).send('OK');
-// });
-
 
 // Start server
 const PORT = process.env.PORT || 4000;
