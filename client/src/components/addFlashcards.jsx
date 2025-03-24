@@ -132,7 +132,7 @@ const AddFlashcards = ({ deck, listFlashcards, loadDeck }) => {
                 onChange={(e) =>
                   updateAddFlashcard(card.id, "back", e.target.value)
                 }
-                placeholder="Enter the word or phrase"
+                placeholder="Enter a word or phrase"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#47A1BE] focus:border-transparent resize-none bg-white"
                 rows={2}
               />
