@@ -15,7 +15,7 @@ const NavbarSO = () => {
           {/* Logo and Brand Name */}
           <Link to="/" className="flex items-center space-x-2">
             <img src={Logo} alt="Qilingo" className="h-8 w-8" />
-            <span className="text-[#F5E6D3] font-bold text-3xl">Qilingo</span>
+            <span className="text-[#FFFAE7] font-bold text-3xl">Qilingo</span>
           </Link>
 
           {/* Desktop Menu */}

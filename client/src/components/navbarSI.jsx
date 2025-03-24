@@ -11,7 +11,7 @@ const NavbarSI = () => {
   const { prevConvoId } = useContext(UserContext);
 
   return (
-    <nav className="bg-[#F5E6D3] shadow-md fixed top-0 left-0 right-0 z-50">
+    <nav className="bg-[#FFFAE7] shadow-md fixed top-0 left-0 right-0 z-50">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
@@ -62,7 +62,7 @@ const NavbarSI = () => {
 
         {/* Mobile Menu */}
         {isOpen && (
-          <div className="md:hidden bg-white">
+          <div className="md:hidden bg-[#FFFAE7]">
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
               <Link
                 to={prevConvoId ? `/c/${prevConvoId}` : "/"}

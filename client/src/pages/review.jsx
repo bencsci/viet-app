@@ -12,7 +12,7 @@ import {
 import DeckCard from "../components/deckCard";
 import { UserContext } from "../context/userContext";
 import axios from "axios";
-import Qilin from "../assets/QilingoLeft.png";
+import Qilin from "../assets/QilingoLeft.svg";
 
 const formatLastReviewed = (dateString) => {
   if (!dateString || dateString === "null") return "Never reviewed";

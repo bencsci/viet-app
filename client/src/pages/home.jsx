@@ -7,7 +7,7 @@ import {
   FaArrowRight,
 } from "react-icons/fa";
 import { Link } from "react-router";
-import Qilin from "../assets/QilingoMD.png";
+import Qilin from "../assets/QilingoMD.svg";
 
 const languages = [
   { code: "us", name: "English", flag: "us.svg" },
