@@ -17,7 +17,7 @@ const NotFound = () => {
           </p>
           <button
             onClick={() => navigate("/")}
-            className="px-6 py-3 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-full font-medium 
+            className="px-6 py-3 bg-[#47A1BE] text-white rounded-full font-medium 
               transition-all hover:shadow-lg transform hover:-translate-y-0.5"
           >
             Return Home

@@ -19,9 +19,7 @@ const NavbarSI = () => {
             to={prevConvoId ? `/c/${prevConvoId}` : "/"}
             className="flex items-center"
           >
-            <span className="text-[#489DBA] font-bold text-xl font-sans">
-              QILINGO
-            </span>
+            <span className="text-[#489DBA] font-bold text-2xl">Qilingo</span>
           </Link>
 
           {/* Desktop Menu */}
