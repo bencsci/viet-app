@@ -339,10 +339,6 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
     scrollToBottom();
   }, [messages, isTyping]);
 
-  useEffect(() => {
-    console.log(messageStates);
-  }, [messageStates]);
-
   const updateDatabase = async () => {
     try {
       // Double check to prevent empty messages from being saved

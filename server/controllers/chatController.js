@@ -189,7 +189,8 @@ const translateWordsGoogle = async (req, res) => {
 
     const [response] = await translationClient.translateText(request);
     const translation = response.translations[0].translatedText;
-    console.log(`Words: ${words}, translation: ${translation}`);
+    
+    c//onsole.log(`Words: ${words}, translation: ${translation}`);
     res.json({ translation: translation });
   } catch (error) {
     console.error("Google Translate error:", error);
