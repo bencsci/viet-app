@@ -228,23 +228,14 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
               <div
                 key={conv.id}
                 onClick={() => handleConversationSelect(conv.id)}
-                className={`group flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all ${
+                className={`group flex items-center justify-between p-2 rounded-lg cursor-pointer transition-all ${
                   convoId === conv.id.toString()
                     ? "bg-[#D2E8EF] text-[#327085]"
-                    : "hover:bg-gray-100 text-gray-700"
+                    : "hover:bg-gray-300 text-gray-700"
                 }`}
                 title={conv.title || "New Conversation"}
               >
                 <div className="flex items-center gap-3 truncate max-w-[80%]">
-                  <div
-                    className={`p-2 rounded-lg ${
-                      convoId === conv.id.toString()
-                        ? "bg-[#95C9DA]"
-                        : "bg-gray-200 group-hover:bg-gray-300"
-                    }`}
-                  >
-                    <MdChat className="w-4 h-4" />
-                  </div>
                   <span className="truncate font-medium text-sm">
                     {conv.title || "New Conversation"}
                   </span>
