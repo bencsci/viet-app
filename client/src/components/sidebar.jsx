@@ -78,7 +78,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
     e.stopPropagation();
     setActiveMenu(null);
 
-    if (convoId.toString() === id.toString()) {
+    if (convoId === id) {
       // First delete the conversation
       try {
         const token = await getToken();
