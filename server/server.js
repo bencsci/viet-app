@@ -12,23 +12,7 @@ import { clerkMiddleware } from "@clerk/express";
 const app = express();
 
 // Middleware
-
-let corsOptions;
-if (process.env.ENV === "production") {
-  corsOptions = {
-    origin: "https://qilingo.vercel.app",
-    credentials: true,
-  };
-} else {
-  corsOptions = {
-    origin: "http://localhost:5173",
-    credentials: true,
-  };
-}
-
-console.log(`ENV: ${process.env.ENV}`);
-
-app.use(cors(corsOptions));
+app.use(cors());
 app.use(express.json());
 
 // Update Clerk middleware configuration

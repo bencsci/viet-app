@@ -18,6 +18,14 @@ const GCP_WORKLOAD_IDENTITY_POOL_ID = process.env.GCP_WORKLOAD_IDENTITY_POOL_ID;
 const GCP_WORKLOAD_IDENTITY_POOL_PROVIDER_ID =
   process.env.GCP_WORKLOAD_IDENTITY_POOL_PROVIDER_ID;
 
+console.log(
+  GCP_PROJECT_ID,
+  GCP_PROJECT_NUMBER,
+  GCP_SERVICE_ACCOUNT_EMAIL,
+  GCP_WORKLOAD_IDENTITY_POOL_ID,
+  GCP_WORKLOAD_IDENTITY_POOL_PROVIDER_ID
+);
+
 // Initialize the External Account Client
 const authClient = ExternalAccountClient.fromJSON({
   type: "external_account",
@@ -34,6 +42,7 @@ const authClient = ExternalAccountClient.fromJSON({
 let translationClient;
 let speechClient;
 if (process.env.ENV === "production") {
+  console.log("Production mode");
   translationClient = new TranslationServiceClient({
     project: GCP_PROJECT_ID,
     location: "us-central1",
@@ -51,17 +60,18 @@ if (process.env.ENV === "production") {
     },
   });
 } else {
+  console.log("Development mode");
   translationClient = new TranslationServiceClient();
   speechClient = new textToSpeech.TextToSpeechClient();
 }
 
 // Add error checking for credentials
-if (
-  !process.env.GOOGLE_APPLICATION_CREDENTIALS ||
-  !process.env.GOOGLE_CLOUD_PROJECT_ID
-) {
-  console.error("Missing Google Cloud credentials or project ID");
-}
+// if (
+//   !process.env.GOOGLE_APPLICATION_CREDENTIALS ||
+//   !process.env.GOOGLE_CLOUD_PROJECT_ID
+// ) {
+//   console.error("Missing Google Cloud credentials or project ID");
+// }
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
