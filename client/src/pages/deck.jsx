@@ -570,77 +570,123 @@ const Deck = () => {
       {isReviewSettingsOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden">
-            <div className="bg-[#47A1BE] text-white px-4 py-3 flex items-center justify-between">
-              <h3 className="font-medium">Review Settings</h3>
+            <div className="bg-[#47A1BE] text-white px-6 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <MdSettings className="text-xl" />
+                <h3 className="text-lg font-medium">Review Settings</h3>
+              </div>
               <button
                 onClick={() => setIsReviewSettingsOpen(false)}
-                className="p-1 hover:bg-[#47A1BE] rounded transition-colors"
+                className="p-2 hover:bg-[#3E89A3] rounded-full transition-colors"
               >
                 <MdClose className="w-5 h-5" />
               </button>
             </div>
 
             <div className="p-6">
+              <p className="text-gray-600 mb-6">
+                Choose how you want to review your flashcards:
+              </p>
               <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-medium text-gray-900">
-                      Spaced Repetition
-                    </h4>
-                    <p className="text-sm text-gray-500">
-                      Review cards based on your performance
-                    </p>
+                {/* SRS Option */}
+                <label
+                  className={`
+                  block p-4 rounded-lg border-2 cursor-pointer transition-all
+                  ${
+                    reviewMode === "srs"
+                      ? "border-[#47A1BE] bg-blue-50"
+                      : "border-gray-200 hover:border-gray-300"
+                  }
+                `}
+                >
+                  <div className="flex items-center gap-4">
+                    <input
+                      type="radio"
+                      name="reviewMode"
+                      checked={reviewMode === "srs"}
+                      onChange={() => setReviewMode("srs")}
+                      className="w-5 h-5 text-[#47A1BE] focus:ring-[#47A1BE]"
+                    />
+                    <div className="flex-1">
+                      <h4 className="font-medium text-gray-900 mb-1">
+                        Spaced Repetition
+                      </h4>
+                      <p className="text-sm text-gray-600">
+                        Smart review system that prioritizes cards based on your
+                        performance and review history
+                      </p>
+                    </div>
                   </div>
-                  <input
-                    type="radio"
-                    name="reviewMode"
-                    checked={reviewMode === "srs"}
-                    onChange={() => setReviewMode("srs")}
-                    className="w-4 h-4 text-red-500 focus:ring-red-400"
-                  />
-                </div>
+                </label>
 
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-medium text-gray-900">
-                      All Cards (Shuffle)
-                    </h4>
-                    <p className="text-sm text-gray-500">
-                      Review entire deck in shuffled order
-                    </p>
+                {/* All Cards Option */}
+                <label
+                  className={`
+                  block p-4 rounded-lg border-2 cursor-pointer transition-all
+                  ${
+                    reviewMode === "all"
+                      ? "border-[#47A1BE] bg-blue-50"
+                      : "border-gray-200 hover:border-gray-300"
+                  }
+                `}
+                >
+                  <div className="flex items-center gap-4">
+                    <input
+                      type="radio"
+                      name="reviewMode"
+                      checked={reviewMode === "all"}
+                      onChange={() => setReviewMode("all")}
+                      className="w-5 h-5 text-[#47A1BE] focus:ring-[#47A1BE]"
+                    />
+                    <div className="flex-1">
+                      <h4 className="font-medium text-gray-900 mb-1">
+                        All Cards (Shuffled)
+                      </h4>
+                      <p className="text-sm text-gray-600">
+                        Review all cards in your deck in a random order
+                      </p>
+                    </div>
                   </div>
-                  <input
-                    type="radio"
-                    name="reviewMode"
-                    checked={reviewMode === "all"}
-                    onChange={() => setReviewMode("all")}
-                    className="w-4 h-4 text-red-500 focus:ring-red-400"
-                  />
-                </div>
+                </label>
 
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-medium text-gray-900">Reversed</h4>
-                    <p className="text-sm text-gray-500">
-                      Switch front and back of cards
-                    </p>
+                {/* Reversed Option */}
+                <label
+                  className={`
+                  block p-4 rounded-lg border-2 cursor-pointer transition-all
+                  ${
+                    reviewMode === "reversed"
+                      ? "border-[#47A1BE] bg-blue-50"
+                      : "border-gray-200 hover:border-gray-300"
+                  }
+                `}
+                >
+                  <div className="flex items-center gap-4">
+                    <input
+                      type="radio"
+                      name="reviewMode"
+                      checked={reviewMode === "reversed"}
+                      onChange={() => setReviewMode("reversed")}
+                      className="w-5 h-5 text-[#47A1BE] focus:ring-[#47A1BE]"
+                    />
+                    <div className="flex-1">
+                      <h4 className="font-medium text-gray-900 mb-1">
+                        Reversed Cards
+                      </h4>
+                      <p className="text-sm text-gray-600">
+                        Test yourself by switching the front and back of all
+                        cards
+                      </p>
+                    </div>
                   </div>
-                  <input
-                    type="radio"
-                    name="reviewMode"
-                    checked={reviewMode === "reversed"}
-                    onChange={() => setReviewMode("reversed")}
-                    className="w-4 h-4 text-red-500 focus:ring-red-400"
-                  />
-                </div>
+                </label>
               </div>
 
-              <div className="mt-6 flex justify-end">
+              <div className="mt-8 flex justify-end">
                 <button
                   onClick={() => setIsReviewSettingsOpen(false)}
-                  className="px-4 py-2 bg-[#47A1BE] text-white rounded-md hover:bg-[#47A1BE]"
+                  className="px-6 py-2.5 bg-[#47A1BE] text-white rounded-lg hover:bg-[#3E89A3] transition-colors font-medium"
                 >
-                  Done
+                  Save
                 </button>
               </div>
             </div>

@@ -99,7 +99,7 @@ const ReviewDeck = () => {
     switch (reviewMode) {
       case "srs":
         // Filter cards that are due today or have no due date
-        return cards.filter((card) => {
+        return shuffleArray(cards).filter((card) => {
           if (!card.due_date) return true;
           const dueDate = new Date(card.due_date);
           dueDate.setHours(0, 0, 0, 0);
@@ -112,14 +112,14 @@ const ReviewDeck = () => {
 
       case "reversed":
         // Swap front and back of all cards
-        return cards.map((card) => ({
+        return shuffleArray(cards).map((card) => ({
           ...card,
           front: card.back,
           back: card.front,
         }));
 
       default:
-        return cards;
+        return shuffleArray(cards);
     }
   };
 
