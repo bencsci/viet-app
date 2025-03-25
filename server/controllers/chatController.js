@@ -209,6 +209,8 @@ const textToSpeechGoogle = async (req, res) => {
     const [response] = await speechClient.synthesizeSpeech(request);
     const audioContent = response.audioContent;
     //res.json({ audioContent });
+    console.log("Inside TTS");
+
     res.setHeader("Content-Type", "audio/mp3");
     res.send(audioContent);
   } catch (error) {
