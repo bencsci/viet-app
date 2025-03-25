@@ -39,26 +39,26 @@ const authClient = ExternalAccountClient.fromJSON({
   },
 });
 
+export const getGCPCredentials = () => {
+  // for Vercel, use environment variables
+  return process.env.GCP_PRIVATE_KEY
+    ? {
+        credentials: {
+          client_email: process.env.GCP_SERVICE_ACCOUNT_EMAIL,
+          private_key: process.env.GCP_PRIVATE_KEY,
+        },
+        projectId: process.env.GCP_PROJECT_ID,
+      }
+    : // for local development, use gcloud CLI
+      {};
+};
+
 let translationClient;
 let speechClient;
 if (process.env.ENV === "production") {
   console.log("Production mode");
-  translationClient = new TranslationServiceClient({
-    project: GCP_PROJECT_ID,
-    location: "us-central1",
-    googleAuthOptions: {
-      authClient,
-      projectId: GCP_PROJECT_ID,
-    },
-  });
-  speechClient = new textToSpeech.TextToSpeechClient({
-    project: GCP_PROJECT_ID,
-    location: "us-central1",
-    googleAuthOptions: {
-      authClient,
-      projectId: GCP_PROJECT_ID,
-    },
-  });
+  translationClient = new TranslationServiceClient(getGCPCredentials());
+  speechClient = new textToSpeech.TextToSpeechClient(getGCPCredentials());
 } else {
   console.log("Development mode");
   translationClient = new TranslationServiceClient();
