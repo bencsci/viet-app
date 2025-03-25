@@ -204,7 +204,7 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
         `${backendUrl}/api/chat/translate`,
         {
           words: typeof words === "string" ? words : words.join(" "),
-          context: messages.slice(-1)[0]?.content || "", // Get the last message content
+          //context: messages.slice(-1)[0]?.content || "",
         },
         {
           headers: {

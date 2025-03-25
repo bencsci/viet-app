@@ -183,12 +183,13 @@ const translateWordsGoogle = async (req, res) => {
       parent: `projects/${process.env.GOOGLE_CLOUD_PROJECT_ID}/locations/${process.env.GOOGLE_CLOUD_LOCATION}`,
       contents: [words],
       mimeType: "text/plain",
-      sourceLanguageCode: languageCode.split("-")[0], // Get just the language code part (e.g., 'vi' from 'vi-VN')
+      sourceLanguageCode: languageCode.split("-")[0],
       targetLanguageCode: "en",
     };
 
     const [response] = await translationClient.translateText(request);
     const translation = response.translations[0].translatedText;
+    console.log(`Words: ${words}, translation: ${translation}`);
     res.json({ translation: translation });
   } catch (error) {
     console.error("Google Translate error:", error);
