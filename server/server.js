@@ -12,7 +12,17 @@ import { clerkMiddleware } from "@clerk/express";
 const app = express();
 
 // Middleware
-app.use(cors());
+
+if (process.env.ENV === "production") {
+  app.use(
+    cors({
+      origin: "https://qilingo.vercel.app/",
+      credentials: true,
+    })
+  );
+} else {
+  app.use(cors());
+}
 app.use(express.json());
 
 // Update Clerk middleware configuration
