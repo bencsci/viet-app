@@ -16,7 +16,7 @@ const app = express();
 let corsOptions;
 if (process.env.ENV === "production") {
   corsOptions = {
-    origin: "https://qilingo.vercel.app/",
+    origin: "https://qilingo.vercel.app",
     credentials: true,
   };
 } else {
