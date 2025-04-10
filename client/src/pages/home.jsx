@@ -8,6 +8,11 @@ import {
 } from "react-icons/fa";
 import { Link } from "react-router";
 import Qilin from "../assets/QilingoMD.svg";
+import ConversationImg from "../assets/home/Main.png";
+import TranslationImg from "../assets/home/Translation.png";
+import DecksImg from "../assets/home/Decks.png";
+import FlashcardImg from "../assets/home/Flashcard.png";
+import ReviewImg from "../assets/home/Review.png";
 
 const languages = [
   { code: "us", name: "English", flag: "us.svg" },
@@ -148,16 +153,128 @@ const home = () => {
           </div>
         </div>
 
+        {/* Features Showcase with Images */}
+        <div className="mb-20">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-10 text-center">
+            Explore Our Features
+          </h2>
+
+          {/* Conversation Feature */}
+          <div className="grid md:grid-cols-2 gap-8 items-center mb-16">
+            <div className="order-2 md:order-1">
+              <h3 className="text-2xl font-bold text-gray-800 mb-4">
+                Natural Conversations
+              </h3>
+              <p className="text-gray-600 text-lg mb-4">
+                Practice your language skills with AI-powered conversations that
+                feel like chatting with a native speaker. You can choose your
+                level and progress at your own comfortable pace. Conversation
+                history is saved so you can review your progress.
+              </p>
+            </div>
+            <div className="order-1 md:order-2 shadow-xl rounded-xl overflow-hidden">
+              <img
+                src={ConversationImg}
+                alt="Conversation Feature"
+                className="w-full h-auto object-cover"
+              />
+            </div>
+          </div>
+
+          {/* Translation Feature */}
+          <div className="grid md:grid-cols-2 gap-8 items-center mb-16">
+            <div className="shadow-xl rounded-xl overflow-hidden">
+              <img
+                src={TranslationImg}
+                alt="Translation Feature"
+                className="w-full h-auto object-cover"
+              />
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold text-gray-800 mb-4">
+                One-Click Translations
+              </h3>
+              <p className="text-gray-600 text-lg mb-4">
+                Get instant translations with one click. Our contextual
+                translation system helps you understand meanings better than
+                traditional dictionaries.
+              </p>
+            </div>
+          </div>
+
+          {/* Decks Feature */}
+          <div className="grid md:grid-cols-2 gap-8 items-center mb-16">
+            <div className="order-2 md:order-1">
+              <h3 className="text-2xl font-bold text-gray-800 mb-4">
+                Customized Decks
+              </h3>
+              <p className="text-gray-600 text-lg mb-4">
+                Organize your vocabulary by topics, difficulty, or any system
+                that works for you. Create personalized decks to focus on areas
+                you want to improve.
+              </p>
+            </div>
+            <div className="order-1 md:order-2 shadow-xl rounded-xl overflow-hidden">
+              <img
+                src={DecksImg}
+                alt="Vocabulary Decks"
+                className="w-full h-auto object-cover"
+              />
+            </div>
+          </div>
+
+          {/* Flashcards Feature */}
+          <div className="grid md:grid-cols-2 gap-8 items-center mb-16">
+            <div className="shadow-xl rounded-xl overflow-hidden">
+              <img
+                src={FlashcardImg}
+                alt="Flashcard System"
+                className="w-full h-auto object-cover"
+              />
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold text-gray-800 mb-4">
+                Interactive Flashcards
+              </h3>
+              <p className="text-gray-600 text-lg mb-4">
+                Master vocabulary with our interactive flashcard system. Add new
+                words from conversations and review them with visual and audio
+                cues.
+              </p>
+            </div>
+          </div>
+
+          {/* Spaced Repetition Feature */}
+          <div className="grid md:grid-cols-2 gap-8 items-center">
+            <div className="order-2 md:order-1">
+              <h3 className="text-2xl font-bold text-gray-800 mb-4">
+                Spaced Repetition
+              </h3>
+              <p className="text-gray-600 text-lg mb-4">
+                Our intelligent review system ensures you review words just when
+                you're about to forget them, optimizing your memory retention
+                and learning efficiency.
+              </p>
+            </div>
+            <div className="order-1 md:order-2 shadow-xl rounded-xl overflow-hidden">
+              <img
+                src={ReviewImg}
+                alt="Spaced Repetition System"
+                className="w-full h-auto object-cover"
+              />
+            </div>
+          </div>
+        </div>
+
         {/* Learning Process Section */}
         <div className="bg-gradient-to-br from-[#47A1BE]/10 to-blue-50 rounded-3xl p-12 max-w-4xl mx-auto text-center mb-20">
           <h2 className="text-3xl font-bold text-gray-800 mb-6">
             Natural Learning, Powered by AI
           </h2>
           <p className="text-xl text-gray-600 mb-8">
-            Our AI adapts to your level, providing natural conversations that
-            help you learn just like you would with a native speaker. Save new
-            words, practice pronunciation, and track your progress - all in one
-            place.
+            Our AI provides natural conversations that will help you learn just
+            like you would with a native speaker. Save new words, practice
+            pronunciation, and track your progress - all in one place.
           </p>
         </div>
 
