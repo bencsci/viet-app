@@ -34,8 +34,10 @@ A **language-learning web app** that uses **natural conversation** to teach Viet
 
 
 
-### Chat
+
 ## Screenshots
+
+### Chat
 ![MainNew](https://github.com/user-attachments/assets/f425ac25-1676-45df-96c8-17b77787177b)
 
 ### Translation
