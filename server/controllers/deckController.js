@@ -181,7 +181,7 @@ const listFlashcards = async (req, res) => {
       .eq("deck_id", deckId);
 
     if (error) throw error;
-    
+
     res.json(data);
   } catch (error) {
     console.error("Error listing flashcards:", error);
@@ -205,6 +205,52 @@ const addFlashcard = async (req, res) => {
     res.json({ success: true });
   } catch (error) {
     console.error("Error adding flashcards:", error);
+    res.status(500).json({ error: "Failed to add flashcards" });
+  }
+};
+
+const addMultipleFlashcards = async (req, res) => {
+  try {
+    const supabase = await supabaseClient(
+      req.auth.getToken({ template: "supabase" })
+    );
+
+    const { deckId, cards } = req.body;
+
+    if (!Array.isArray(cards) || cards.length === 0) {
+      return res.status(400).json({ error: "No valid cards provided" });
+    }
+
+    const cardsToInsert = cards.map((card) => ({
+      deck_id: deckId,
+      front: card.front,
+      back: card.back,
+    }));
+
+    const { error } = await supabase.from("flashcards").insert(cardsToInsert);
+
+    if (error) throw error;
+
+    const { data: deckData, error: fetchError } = await supabase
+      .from("decks")
+      .select("card_count")
+      .eq("id", deckId)
+      .single();
+
+    if (fetchError) throw fetchError;
+
+    const newCardCount = (deckData.card_count || 0) + cards.length;
+
+    const { error: deckError } = await supabase
+      .from("decks")
+      .update({ card_count: newCardCount })
+      .eq("id", deckId);
+
+    if (deckError) throw deckError;
+
+    res.json({ success: true, count: cards.length });
+  } catch (error) {
+    console.error("Error adding multiple flashcards:", error);
     res.status(500).json({ error: "Failed to add flashcards" });
   }
 };
@@ -317,6 +363,7 @@ export {
   editDeck,
   removeDeck,
   addFlashcard,
+  addMultipleFlashcards,
   removeFlashcard,
   getDeck,
   listDecks,

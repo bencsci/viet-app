@@ -6,6 +6,7 @@ import {
   editDeck,
   removeDeck,
   addFlashcard,
+  addMultipleFlashcards,
   removeFlashcard,
   getDeck,
   listDecks,
@@ -20,6 +21,11 @@ decksRoute.post("/create", requireAuth(), createDeck);
 decksRoute.post("/edit", requireAuth(), editDeck);
 decksRoute.post("/remove", requireAuth(), removeDeck);
 decksRoute.post("/add-flashcard", requireAuth(), addFlashcard);
+decksRoute.post(
+  "/add-multiple-flashcards",
+  requireAuth(),
+  addMultipleFlashcards
+);
 decksRoute.post("/remove-flashcard", requireAuth(), removeFlashcard);
 decksRoute.post("/get", requireAuth(), getDeck);
 decksRoute.get("/list", requireAuth(), listDecks);

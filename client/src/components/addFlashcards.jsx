@@ -9,25 +9,7 @@ const AddFlashcards = ({ deck, listFlashcards, loadDeck }) => {
   const [newFlashcards, setNewFlashcards] = useState([
     { id: 0, front: "", back: "" },
   ]);
-
-  const updateCardCount = async () => {
-    try {
-      const token = await getToken();
-      await axios.post(
-        `${backendUrl}/api/decks/edit`,
-        { deckId: deck.id, card_count: deck.card_count + 1 },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      loadDeck();
-    } catch (error) {
-      console.error("Error updating card count in deck:", error);
-    }
-  };
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const addNewFlashcardField = () => {
     setNewFlashcards([
@@ -60,33 +42,34 @@ const AddFlashcards = ({ deck, listFlashcards, loadDeck }) => {
 
     if (validCards.length === 0) return;
 
+    setIsSubmitting(true);
+
     try {
       const token = await getToken();
 
-      const cardsToSubmit = [...validCards];
-
-      for (const card of cardsToSubmit) {
-        await axios.post(
-          `${backendUrl}/api/decks/add-flashcard`,
-          { deckId: deck.id, front: card.front, back: card.back },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-
-        await updateCardCount();
-      }
+      await axios.post(
+        `${backendUrl}/api/decks/add-multiple-flashcards`,
+        {
+          deckId: deck.id,
+          cards: validCards,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       setNewFlashcards([{ id: 0, front: "", back: "" }]);
-
       await listFlashcards();
+      await loadDeck();
 
-      let updateMessage =
-        cardsToSubmit.length === 1 ? "Added Flashcard!" : "Added Flashcards!";
-
+      const updateMessage =
+        validCards.length === 1 ? "Added Flashcard!" : "Added Flashcards!";
       toast.success(updateMessage);
-
-      console.log("All flashcards added successfully");
     } catch (error) {
       console.error("Error creating flashcards:", error);
+      toast.error("Failed to add flashcards");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -161,9 +144,19 @@ const AddFlashcards = ({ deck, listFlashcards, loadDeck }) => {
         <button
           type="button"
           onClick={handleCreateFlashcards}
-          className="px-6 py-2 bg-[#47A1BE] hover:bg-[#327085] text-white rounded-md focus:outline-none focus:ring-2 focus:ring-[#47A1BE] focus:ring-offset-2 ml-auto"
+          disabled={isSubmitting}
+          className={`px-6 py-2 ${
+            isSubmitting ? "bg-gray-400" : "bg-[#47A1BE] hover:bg-[#327085]"
+          } text-white rounded-md focus:outline-none focus:ring-2 focus:ring-[#47A1BE] focus:ring-offset-2 ml-auto flex items-center justify-center`}
         >
-          Save All Cards
+          {isSubmitting ? (
+            <>
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+              Saving...
+            </>
+          ) : (
+            "Save All Cards"
+          )}
         </button>
       </div>
     </div>
