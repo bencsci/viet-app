@@ -21,6 +21,11 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
     backendUrl,
     isNewConversation,
     setIsNewConversation,
+    decks,
+    setDecks,
+    isLoadingDecks,
+    setIsLoadingDecks,
+    listDecks,
   } = useContext(UserContext);
   const messagesEndRef = useRef(null);
   const [messages, setMessages] = useState([]);
@@ -32,12 +37,12 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
   const navigate = useNavigate();
   const { convoId } = useParams();
   const [showFlashcardModal, setShowFlashcardModal] = useState(false);
-  const [decks, setDecks] = useState([]);
+  //const [decks, setDecks] = useState([]);
   const [selectedDeck, setSelectedDeck] = useState({});
   const [flashcardFront, setFlashcardFront] = useState("");
   const [flashcardBack, setFlashcardBack] = useState("");
   const [currentTranslation, setCurrentTranslation] = useState("");
-  const [isLoadingDecks, setIsLoadingDecks] = useState(false);
+  //const [isLoadingDecks, setIsLoadingDecks] = useState(false);
   const [showNewDeckForm, setShowNewDeckForm] = useState(false);
   const [newDeckTitle, setNewDeckTitle] = useState("");
   const [messageToPlay, setMessageToPlay] = useState(null);
@@ -409,7 +414,7 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
 
     setFlashcardBack(translation);
     setShowFlashcardModal(true);
-    fetchDecks();
+    //fetchDecks();
   };
 
   const createNewDeck = async () => {
@@ -426,11 +431,13 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
           },
         }
       );
-      fetchDecks();
+      //fetchDecks();
+
       setDecks([...decks, res.data]);
       setSelectedDeck(res.data);
       setShowNewDeckForm(false);
       setNewDeckTitle("");
+      listDecks();
     } catch (error) {
       console.error("Error creating deck:", error);
     }
@@ -467,13 +474,14 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
+
+      toast.success(`Flashcard successfully added to ${selectedDeck.title}!`);
       setShowFlashcardModal(false);
       setFlashcardFront("");
       setFlashcardBack("");
       setSelectedDeck({});
-      updateCardCount();
-
-      toast.success(`Flashcard successfully added to ${selectedDeck.title}!`);
+      listDecks();
+      //updateCardCount();
     } catch (error) {
       console.error("Error adding flashcard:", error);
     }

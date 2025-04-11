@@ -20,7 +20,8 @@ import Flashcard from "../components/flashcard";
 
 const Deck = () => {
   const { deckId } = useParams();
-  const { backendUrl, reviewMode, setReviewMode } = useContext(UserContext);
+  const { backendUrl, reviewMode, setReviewMode, listDecks } =
+    useContext(UserContext);
   const { getToken } = useAuth();
   const [deck, setDeck] = useState(null);
   const [cards, setCards] = useState([]);
@@ -52,29 +53,11 @@ const Deck = () => {
         }
       );
 
+      listDecks();
       navigate("/decks");
     } catch (error) {
       console.log("Error deleting deck:", error);
       alert("Failed to delete deck. Please try again.");
-    }
-  };
-
-  const updateCardCount = async () => {
-    try {
-      const token = await getToken();
-      await axios.post(
-        `${backendUrl}/api/decks/edit`,
-        { deckId: deckId, card_count: deck.card_count - 1 },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      loadDeck();
-    } catch (error) {
-      console.error("Error updating card count in deck:", error);
     }
   };
 
@@ -156,8 +139,8 @@ const Deck = () => {
         prevCards.filter((c) => c.id !== cardToDelete.id)
       );
 
-      updateCardCount();
-      listFlashcards();
+      loadDeck();
+      listDecks();
 
       console.log("Flashcard deleted successfully");
     } catch (error) {

@@ -1,5 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
-import { useAuth } from "@clerk/clerk-react";
+import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router";
 import {
   MdAdd,
@@ -58,14 +57,12 @@ const formatLastReviewed = (dateString) => {
 };
 
 const Review = () => {
-  //const { getToken } = useAuth();
   const navigate = useNavigate();
-  const { backendUrl, getToken } = useContext(UserContext);
+  const { backendUrl, getToken, decks, listDecks, loadingDecks } =
+    useContext(UserContext);
   const [searchQuery, setSearchQuery] = useState("");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newDeckName, setNewDeckName] = useState("");
-  const [decks, setDecks] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState("lastReviewed");
   const [sortDirection, setSortDirection] = useState("desc");
 
@@ -94,28 +91,6 @@ const Review = () => {
     });
   };
 
-  const listDecks = async () => {
-    try {
-      setLoading(true);
-      const token = await getToken();
-      const res = await axios.get(`${backendUrl}/api/decks/list`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      setDecks(res.data);
-    } catch (error) {
-      console.log("Error listing decks:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    listDecks();
-  }, []);
-
   const handleCreateDeck = async (e) => {
     e.preventDefault();
 
@@ -133,10 +108,16 @@ const Review = () => {
         }
       );
 
+      setIsCreateModalOpen(false);
+      listDecks();
       navigate(`/decks/${res.data.id}`);
     } catch (error) {
       console.error("Error creating deck:", error);
     }
+
+    useEffect(() => {
+      listDecks();
+    }, [decks]);
   };
 
   const SortDropdown = () => (
@@ -219,7 +200,7 @@ const Review = () => {
       </div>
 
       {/* Loading State */}
-      {loading && (
+      {loadingDecks && (
         <div className="max-w-6xl mx-auto px-4 md:px-8 py-12 flex justify-center">
           <div className="flex flex-col items-center">
             <div className="w-12 h-12 border-4 border-[#47A1BE] border-t-transparent rounded-full animate-spin"></div>
@@ -228,7 +209,7 @@ const Review = () => {
       )}
 
       {/* Decks Grid */}
-      {!loading && (
+      {!loadingDecks && (
         <div className="max-w-6xl mx-auto px-4 md:px-8 pb-12">
           {filteredDecks.length === 0 ? (
             <div className="text-center py-12 bg-white rounded-lg shadow-sm border border-gray-100">
@@ -255,7 +236,7 @@ const Review = () => {
       )}
 
       {/* Empty State */}
-      {!loading && decks.length === 0 && (
+      {!loadingDecks && decks.length === 0 && (
         <div className="max-w-md mx-auto text-center py-16">
           <div className="bg-blue-50 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
             <MdAdd className="text-[#47A1BE] text-4xl" />

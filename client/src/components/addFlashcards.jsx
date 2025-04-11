@@ -5,7 +5,7 @@ import { UserContext } from "../context/userContext";
 import { toast } from "react-toastify";
 
 const AddFlashcards = ({ deck, listFlashcards, loadDeck }) => {
-  const { backendUrl, getToken } = useContext(UserContext);
+  const { backendUrl, getToken, listDecks } = useContext(UserContext);
   const [newFlashcards, setNewFlashcards] = useState([
     { id: 0, front: "", back: "" },
   ]);
@@ -61,6 +61,7 @@ const AddFlashcards = ({ deck, listFlashcards, loadDeck }) => {
       setNewFlashcards([{ id: 0, front: "", back: "" }]);
       await listFlashcards();
       await loadDeck();
+      listDecks();
 
       const updateMessage =
         validCards.length === 1 ? "Added Flashcard!" : "Added Flashcards!";

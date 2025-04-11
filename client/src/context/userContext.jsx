@@ -17,6 +17,8 @@ export const UserContextProvider = ({ children }) => {
   const [profile, setProfile] = useState({});
   const [isOnboarding, setIsOnboarding] = useState(false);
   const [isNewConversation, setIsNewConversation] = useState(false);
+  const [decks, setDecks] = useState([]);
+  const [loadingDecks, setLoadingDecks] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -35,8 +37,27 @@ export const UserContextProvider = ({ children }) => {
     if (!isOnboarding) {
       //console.log("Loading conversations", isOnboarding);
       loadConversations();
+      listDecks();
     }
   }, [prevConvoId, isOnboarding]);
+
+  const listDecks = async () => {
+    try {
+      setLoadingDecks(true);
+      const token = await getToken();
+      const res = await axios.get(`${backendUrl}/api/decks/list`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setDecks(res.data);
+    } catch (error) {
+      console.log("Error listing decks:", error);
+    } finally {
+      setLoadingDecks(false);
+    }
+  };
 
   const loadProfile = async () => {
     try {
@@ -101,6 +122,10 @@ export const UserContextProvider = ({ children }) => {
     setIsOnboarding,
     isNewConversation,
     setIsNewConversation,
+    decks,
+    setDecks,
+    listDecks,
+    loadingDecks,
   };
 
   return (

@@ -25,7 +25,8 @@ const createDeck = async (req, res) => {
       .single();
 
     if (error) throw error;
-    res.json({ success: true, id: data.id });
+
+    res.json(data);
   } catch (error) {
     console.error("Error saving deck:", error);
     res.status(500).json({ error: "Failed to save deck" });
@@ -197,15 +198,37 @@ const addFlashcard = async (req, res) => {
 
     const { deckId, front, back } = req.body;
 
+    // Insert the new flashcard
     const { error } = await supabase
       .from("flashcards")
       .insert({ deck_id: deckId, front: front, back: back });
 
     if (error) throw error;
+
+    // Get current card count from deck
+    const { data: deckData, error: fetchError } = await supabase
+      .from("decks")
+      .select("card_count")
+      .eq("id", deckId)
+      .single();
+
+    if (fetchError) throw fetchError;
+
+    // Increment card count
+    const newCardCount = (deckData.card_count || 0) + 1;
+
+    // Update the deck's card count
+    const { error: deckError } = await supabase
+      .from("decks")
+      .update({ card_count: newCardCount })
+      .eq("id", deckId);
+
+    if (deckError) throw deckError;
+
     res.json({ success: true });
   } catch (error) {
-    console.error("Error adding flashcards:", error);
-    res.status(500).json({ error: "Failed to add flashcards" });
+    console.error("Error adding flashcard:", error);
+    res.status(500).json({ error: "Failed to add flashcard" });
   }
 };
 
@@ -263,17 +286,49 @@ const removeFlashcard = async (req, res) => {
 
     const { deckId, flashcardId } = req.body;
 
-    const { error } = await supabase
+    // Delete the flashcard
+    const { error: deleteError } = await supabase
       .from("flashcards")
       .delete()
       .eq("deck_id", deckId)
       .eq("id", flashcardId);
 
-    if (error) throw error;
-    res.json({ success: true });
+    if (deleteError) {
+      throw deleteError;
+    }
+
+    // Get current card count from deck
+    const { data: currentDeckData, error: fetchError } = await supabase
+      .from("decks")
+      .select("card_count")
+      .eq("id", deckId)
+      .single();
+
+    if (fetchError) {
+      throw fetchError;
+    }
+
+    // Decrement card count, ensuring it doesn't go below 0
+    const currentCount = currentDeckData?.card_count || 0;
+    const newCardCount = Math.max(0, currentCount - 1);
+
+    // Update the deck's card count and fetch the updated record
+    const { data: updatedDeck, error: updateError } = await supabase
+      .from("decks")
+      .update({ card_count: newCardCount })
+      .eq("id", deckId)
+      .select()
+      .single();
+
+    if (updateError) {
+      throw updateError;
+    }
+
+    // Return success along with the updated deck data
+    res.json({ success: true, updatedDeck });
   } catch (error) {
-    console.error("Error removing decks:", error);
-    res.status(500).json({ error: "Failed to remove decks" });
+    console.error("Error removing flashcard:", error);
+    res.status(500).json({ error: "Failed to remove flashcard" });
   }
 };
 
