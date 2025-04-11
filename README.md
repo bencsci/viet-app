@@ -32,13 +32,14 @@ A **language-learning web app** that uses **natural conversation** to teach Viet
 
 ---
 
-## Screenshots
+
 
 ### Chat
-![image](https://github.com/user-attachments/assets/3d45da42-1783-4663-8cbb-e4f945d128dd)
+## Screenshots
+![MainNew](https://github.com/user-attachments/assets/f425ac25-1676-45df-96c8-17b77787177b)
 
-### Add Flashcards
-![image](https://github.com/user-attachments/assets/a17a3bc9-49fd-4ab9-984d-f4d6b4ee02f0)
+### Translation
+![TranslationNew](https://github.com/user-attachments/assets/97672c06-8e71-4b0e-b936-42f50793136c)
 
 ### Decks
 ![image](https://github.com/user-attachments/assets/80cdf5ba-f9cf-49f5-983c-a29efa9de648)
