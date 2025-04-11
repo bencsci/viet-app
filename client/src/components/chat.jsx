@@ -11,8 +11,8 @@ import { AiOutlineMenuFold } from "react-icons/ai";
 import { UserContext } from "../context/userContext";
 import { useParams, useNavigate } from "react-router";
 import { toast } from "react-toastify";
-import ChatBubble from "./ChatBubble";
-import FlashcardModal from "./FlashcardModal";
+import ChatBubble from "./chatBubble";
+import FlashcardModal from "./flashcardModal";
 
 const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
   const { getToken } = useAuth();
