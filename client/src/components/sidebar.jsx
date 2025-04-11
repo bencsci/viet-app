@@ -205,7 +205,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
           <div className="bg-[#47A1BE] text-white p-4 flex items-center justify-between">
             <button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="p-1 hover:bg-[#489DBA] rounded transition-colors"
+              className="hover:bg-[#3E89A3] p-1 rounded transition-colors"
             >
               <AiOutlineMenuUnfold size={20} />
             </button>

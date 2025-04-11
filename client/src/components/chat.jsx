@@ -1,17 +1,18 @@
-import React, { useState, useEffect, useRef, useContext } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useContext,
+  useCallback,
+} from "react";
 import axios from "axios";
 import { useAuth } from "@clerk/clerk-react";
-import {
-  MdTranslate,
-  MdClear,
-  MdAdd,
-  MdRestartAlt,
-  MdVolumeUp,
-} from "react-icons/md";
-import { AiOutlineMenuFold, AiOutlineMenuUnfold } from "react-icons/ai";
+import { AiOutlineMenuFold } from "react-icons/ai";
 import { UserContext } from "../context/userContext";
 import { useParams, useNavigate } from "react-router";
 import { toast } from "react-toastify";
+import ChatBubble from "./ChatBubble";
+import FlashcardModal from "./FlashcardModal";
 
 const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
   const { getToken } = useAuth();
@@ -37,49 +38,72 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
   const navigate = useNavigate();
   const { convoId } = useParams();
   const [showFlashcardModal, setShowFlashcardModal] = useState(false);
-  //const [decks, setDecks] = useState([]);
   const [selectedDeck, setSelectedDeck] = useState({});
   const [flashcardFront, setFlashcardFront] = useState("");
   const [flashcardBack, setFlashcardBack] = useState("");
   const [currentTranslation, setCurrentTranslation] = useState("");
-  //const [isLoadingDecks, setIsLoadingDecks] = useState(false);
   const [showNewDeckForm, setShowNewDeckForm] = useState(false);
   const [newDeckTitle, setNewDeckTitle] = useState("");
   const [messageToPlay, setMessageToPlay] = useState(null);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const [isFlashcardModalOpen, setIsFlashcardModalOpen] = useState(false);
+  const [flashcardModalData, setFlashcardModalData] = useState({
+    front: "",
+    back: "",
+  });
+  const [audioContext, setAudioContext] = useState(null);
+  const [audioSource, setAudioSource] = useState(null);
+  const [isAudioPlayingGlobally, setIsAudioPlayingGlobally] = useState(false);
 
-  const loadMessages = async () => {
-    try {
+  const loadMessages = useCallback(
+    async (currentConvoId) => {
       setIsLoading(true);
-      const token = await getToken();
-      const res = await axios.post(
-        `${backendUrl}/api/history/get`,
-        { convoId: convoId },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+      try {
+        const token = await getToken();
+        const res = await axios.post(
+          `${backendUrl}/api/history/get`,
+          { convoId: currentConvoId },
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        if (res.data && res.data.messages) {
+          setMessages(res.data.messages);
+          const convo = conversations.find(
+            (c) => c.id.toString() === currentConvoId.toString()
+          );
+          if (convo && convo.title) {
+            setTitleGenerated(true);
+          } else {
+            setTitleGenerated(false);
+          }
+        } else {
+          setMessages([]);
+          setTitleGenerated(false);
         }
-      );
-      if (res.data && res.data.messages) {
-        setMessages(res.data.messages);
+      } catch (error) {
+        console.error("Error loading conversation:", error);
+        toast.error("Failed to load conversation.");
+        setMessages([]);
+        setTitleGenerated(false);
+        navigate("/404-not-found");
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error("Error loading conversation:", error);
-      setPrevConvoId(null);
-      navigate("/404-not-found");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+    [getToken, backendUrl, conversations, navigate]
+  );
 
   useEffect(() => {
     if (convoId) {
-      loadMessages();
+      loadMessages(convoId);
       setPrevConvoId(convoId);
+      setIsNewConversation(false);
     } else {
       setIsLoading(false);
       setMessages([]);
+      setIsNewConversation(true);
+      setTitleGenerated(false);
     }
   }, [convoId]);
 
@@ -91,12 +115,6 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
         );
 
         if (convo) {
-          // console.log("message.length", messages.length === 4);
-          // console.log("convoId", convoId !== null);
-          // console.log("conversations", !convo?.title);
-          // console.log("convo", convo?.title);
-          // console.log("titleGenerated", !titleGenerated);
-
           if (convo.title) {
             setTitleGenerated(true);
           } else {
@@ -110,8 +128,7 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
             !titleGenerated
           ) {
             console.log("Generating title...");
-            //setTitleGenerated(true);
-            generateTitle();
+            generateTitle(messages, convoId);
           }
         }
       }
@@ -122,218 +139,198 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
     } else {
       setIsNewConversation(false);
     }
-
-    //console.log("isNewConversation", isNewConversation);
   }, [messages]);
 
-  const generateTitle = async () => {
-    try {
-      const token = await getToken();
-      const res = await axios.post(
-        `${backendUrl}/api/history/generate-title`,
-        {
-          messages: messages,
-          convoId: convoId,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      console.log("Title generated successfully:", res.data);
-    } catch (error) {
-      console.error("Error generating title for conversation:", error);
-      //setTitleGenerated(false);
-    }
-  };
-
-  async function sendMessageToOpenAI(messages) {
-    try {
-      const token = await getToken();
-      const res = await axios.post(
-        `${backendUrl}/api/chat/send`,
-        { messages },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      const updatedMessages = [
-        ...messages,
-        { role: "assistant", content: res.data.reply },
-      ];
-      setMessages(updatedMessages);
-
-      // Saves user conversation if there are no other conversations
-      if (!convoId) {
-        createNewConversation(updatedMessages);
+  const generateTitle = useCallback(
+    async (currentMessages, currentConvoId) => {
+      if (!currentMessages || currentMessages.length < 2 || !currentConvoId)
+        return;
+      try {
+        const token = await getToken();
+        await axios.post(
+          `${backendUrl}/api/history/generate-title`,
+          { messages: currentMessages, convoId: currentConvoId },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        console.log("Title generation request sent for:", currentConvoId);
+        listDecks();
+      } catch (error) {
+        console.error("Error generating title:", error);
+        setTitleGenerated(false);
       }
-    } catch (error) {
-      console.error("Error details:", error.response?.data || error);
-      alert("Something went wrong. Please try again later!");
-      setMessages(messages);
-    } finally {
-      setIsTyping(false);
-    }
-  }
+    },
+    [getToken, backendUrl, listDecks]
+  );
 
-  const createNewConversation = async (messageToSave) => {
-    try {
-      const token = await getToken();
-      const res = await axios.post(
-        `${backendUrl}/api/history/save`,
-        { messages: messageToSave },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+  const sendMessageToOpenAI = useCallback(
+    async (messagesToSend) => {
+      setIsTyping(true);
+      let newConvoId = convoId;
+      try {
+        const token = await getToken();
+
+        if (!convoId && messagesToSend.length > 0) {
+          const createRes = await axios.post(
+            `${backendUrl}/api/history/save`,
+            { messages: [messagesToSend[0]] },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          if (createRes.data && createRes.data.id) {
+            newConvoId = createRes.data.id;
+            navigate(`/c/${newConvoId}`, { replace: true });
+            setIsNewConversation(false);
+            setPrevConvoId(newConvoId);
+            listDecks();
+          } else {
+            throw new Error("Failed to create conversation.");
+          }
         }
-      );
-      // Set the new conversation ID as the selected conversation
-      // if (res.data && res.data.convoId) {
-      //   setconvoId(res.data.convoId);
-      // }
-      navigate(`/c/${res.data.id}`);
-    } catch (error) {
-      console.error("Error creating conversation:", error);
-    }
-  };
 
-  async function translateWords(words) {
-    try {
-      const token = await getToken();
-      const res = await axios.post(
-        `${backendUrl}/api/chat/translate`,
-        {
-          words: typeof words === "string" ? words : words.join(" "),
-          //context: messages.slice(-1)[0]?.content || "",
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      return res.data.translation;
-    } catch (error) {
-      console.error("Error details:", error.response?.data || error);
-      alert("Something went wrong with translation!");
-      return null;
-    }
-  }
+        const chatRes = await axios.post(
+          `${backendUrl}/api/chat/send`,
+          { messages: messagesToSend, convoId: newConvoId },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
 
-  const handleWordTranslation = async (
-    word,
-    messageIndex,
-    content,
-    wordPosition
-  ) => {
-    setMessageStates((prev) => {
-      const currentState = prev[messageIndex] || { selectedWords: new Map() };
-      const newSelectedWords = new Map(currentState.selectedWords);
-
-      const key = `${word}-${wordPosition}`;
-      if (newSelectedWords.has(key)) {
-        newSelectedWords.delete(key);
-      } else {
-        newSelectedWords.set(key, { word, position: wordPosition });
+        setMessages((prev) => [
+          ...prev,
+          { role: "assistant", content: chatRes.data.reply },
+        ]);
+      } catch (error) {
+        console.error("Error sending message:", error);
+        toast.error("Failed to send message. Please try again.");
+        setMessages((prev) => prev.slice(0, -1));
+      } finally {
+        setIsTyping(false);
       }
+    },
+    [
+      convoId,
+      getToken,
+      backendUrl,
+      navigate,
+      setIsNewConversation,
+      setPrevConvoId,
+      listDecks,
+    ]
+  );
 
-      // Get words in original sentence order
-      const orderedWords = Array.from(newSelectedWords.values())
-        .sort((a, b) => a.position - b.position)
-        .map((item) => item.word);
+  const updateDatabase = useCallback(
+    async (currentMessages, currentConvoId) => {
+      if (updateDatabase.timeoutId) {
+        clearTimeout(updateDatabase.timeoutId);
+      }
+      updateDatabase.timeoutId = setTimeout(async () => {
+        try {
+          const token = await getToken();
+          await axios.post(
+            `${backendUrl}/api/history/update`,
+            { messages: currentMessages, convoId: currentConvoId },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+        } catch (error) {
+          console.error("Error updating conversation in DB:", error);
+        }
+      }, 1500);
+    },
+    [getToken, backendUrl]
+  );
 
-      // Set the flashcard front to the selected words
-      if (orderedWords.length > 0) {
-        setFlashcardFront(orderedWords.join(" "));
+  const translateText = useCallback(
+    async (text) => {
+      if (!text) return null;
+      try {
+        const token = await getToken();
+        const res = await axios.post(
+          `${backendUrl}/api/chat/translate`,
+          { words: text },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        return res.data.translation;
+      } catch (error) {
+        console.error("Translation API error:", error);
+        toast.error("Translation failed.");
+        throw error;
+      }
+    },
+    [getToken, backendUrl]
+  );
 
-        // Set loading state before translation
-        setMessageStates((current) => ({
-          ...current,
-          [messageIndex]: {
-            selectedWords: newSelectedWords,
-            isLoading: true,
-            type: "words",
-          },
-        }));
-
-        // Perform translation and update state when it completes
-        translateWords(orderedWords.join(" "), getToken).then((translation) => {
-          setMessageStates((current) => ({
-            ...current,
-            [messageIndex]: {
-              selectedWords: newSelectedWords,
-              translation: translation,
-              isLoading: false,
-              type: "words",
-            },
-          }));
+  const playAudio = useCallback(
+    async (text) => {
+      if (!text || isAudioPlayingGlobally) {
+        console.log("playAudio blocked:", {
+          textExists: !!text,
+          isAudioPlayingGlobally,
         });
-      } else {
-        // Clear flashcard front if no words are selected
-        setFlashcardFront("");
+        return;
       }
 
-      return {
-        ...prev,
-        [messageIndex]: {
-          selectedWords: newSelectedWords,
-          type: "words",
-        },
-      };
-    });
-  };
+      setIsAudioPlayingGlobally(true);
+      let audioUrl = null;
 
-  const handleBubbleTranslation = async (content, messageIndex) => {
-    setMessageStates((prev) => ({
-      ...prev,
-      [messageIndex]: {
-        selectedWords: new Map(),
-        isLoading: true,
-        type: "full",
-      },
-    }));
+      try {
+        const token = await getToken();
+        console.log("Requesting TTS blob from backend...");
+        const response = await axios.post(
+          `${backendUrl}/api/chat/tts`,
+          { text },
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            responseType: "blob",
+          }
+        );
 
-    console.log("Translating content:", content);
-    setMessageToPlay(content);
-    const translation = await translateWords(content);
+        console.log(
+          "Received TTS blob, type:",
+          response.data.type,
+          "size:",
+          response.data.size
+        );
+        const audioBlob = new Blob([response.data], { type: "audio/mp3" });
+        audioUrl = URL.createObjectURL(audioBlob);
+        const audio = new Audio(audioUrl);
 
-    setMessageStates((prev) => ({
-      ...prev,
-      [messageIndex]: {
-        selectedWords: new Map(),
-        translation: translation,
-        isLoading: false,
-        type: "full",
-      },
-    }));
-  };
+        console.log("Attempting to play audio...");
+        await audio.play();
 
-  const clearTranslation = (messageIndex) => {
-    setMessageStates((prev) => {
-      const newState = { ...prev };
-      delete newState[messageIndex];
-      return newState;
-    });
-  };
+        audio.onended = () => {
+          console.log("Audio playback finished.");
+          URL.revokeObjectURL(audioUrl);
+          setIsAudioPlayingGlobally(false);
+        };
+
+        audio.onerror = (err) => {
+          console.error("Audio element error:", err);
+          if (audioUrl) URL.revokeObjectURL(audioUrl);
+          setIsAudioPlayingGlobally(false);
+          toast.error("Error playing audio.");
+        };
+      } catch (error) {
+        console.error("TTS Error in playAudio:", error);
+        if (audioUrl) URL.revokeObjectURL(audioUrl);
+        setIsAudioPlayingGlobally(false);
+        toast.error("Failed to fetch audio.");
+        throw error;
+      }
+    },
+    [getToken, backendUrl, isAudioPlayingGlobally]
+  );
+
+  const handleShowFlashcardModal = useCallback((front, back) => {
+    setFlashcardModalData({ front, back });
+    setIsFlashcardModalOpen(true);
+  }, []);
 
   const handleSendMessage = (e) => {
     e.preventDefault();
-    if (!inputMessage.trim()) return;
+    if (!inputMessage.trim() || isTyping) return;
 
-    const newMessage = { role: "user", content: inputMessage };
+    const newMessage = { role: "user", content: inputMessage.trim() };
     setMessages((prev) => [...prev, newMessage]);
-    setIsTyping(true);
-
-    console.log("Messages:", messages);
+    setInputMessage("");
 
     sendMessageToOpenAI([...messages, newMessage]);
-
-    setInputMessage("");
   };
 
   const scrollToBottom = () => {
@@ -344,34 +341,10 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
     scrollToBottom();
   }, [messages, isTyping]);
 
-  const updateDatabase = async () => {
-    try {
-      // Double check to prevent empty messages from being saved
-      if (!convoId || messages.length === 0) return;
-
-      const token = await getToken();
-      await axios.post(
-        `${backendUrl}/api/history/update`,
-        {
-          messages,
-          convoId: convoId,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-    } catch (error) {
-      console.error("Error updating conversation:", error);
-    }
-  };
-
   useEffect(() => {
     if (conversations) {
-      // Only update if we have both convoId and messages
       if (convoId && messages.length > 0) {
-        updateDatabase();
+        updateDatabase(messages, convoId);
       }
     }
   }, [messages]);
@@ -397,7 +370,6 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
   const handleAddToFlashcards = (translation, index) => {
     setCurrentTranslation(translation);
 
-    // Get the selected words from the message state
     if (messageStates[index]?.selectedWords) {
       const orderedWords = Array.from(
         messageStates[index].selectedWords.values()
@@ -406,7 +378,6 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
         .map((item) => item.word)
         .join(" ");
 
-      // If there are selected words, use them for the front
       if (orderedWords) {
         setFlashcardFront(orderedWords);
       }
@@ -414,7 +385,6 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
 
     setFlashcardBack(translation);
     setShowFlashcardModal(true);
-    //fetchDecks();
   };
 
   const createNewDeck = async () => {
@@ -431,7 +401,6 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
           },
         }
       );
-      //fetchDecks();
 
       setDecks([...decks, res.data]);
       setSelectedDeck(res.data);
@@ -456,7 +425,7 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
         }
       );
 
-      loadDeck();
+      loadDecks();
     } catch (error) {
       console.error("Error updating card count in deck:", error);
     }
@@ -481,413 +450,117 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
       setFlashcardBack("");
       setSelectedDeck({});
       listDecks();
-      //updateCardCount();
     } catch (error) {
       console.error("Error adding flashcard:", error);
     }
   };
 
-  const playAudio = async (text) => {
-    try {
-      if (isPlayingAudio) return;
-      setIsPlayingAudio(true);
-
-      const token = await getToken();
-      const response = await axios.post(
-        `${backendUrl}/api/chat/tts`,
-        {
-          text,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          responseType: "blob",
-        }
-      );
-
-      const audioBlob = new Blob([response.data], { type: "audio/mp3" });
-      const audioUrl = URL.createObjectURL(audioBlob);
-      const audio = new Audio(audioUrl);
-
-      audio.onended = () => {
-        URL.revokeObjectURL(audioUrl);
-        setIsPlayingAudio(false);
-      };
-
-      await audio.play();
-    } catch (error) {
-      console.error("Error playing audio:", error);
-      toast.error("Failed to play audio");
-      setIsPlayingAudio(false);
-    }
-  };
-
   return (
-    <div
-      className={`flex flex-col h-[calc(100vh-64px)] bg-white transition-all duration-300 ease-in-out`}
-    >
-      <div className="bg-[#47A1BE] text-white p-4 flex items-center gap-2 sticky top-0 z-10">
+    <div className="flex flex-col h-[calc(100vh-64px)] bg-gray-50 transition-all duration-300 ease-in-out">
+      <div className="bg-[#47A1BE] text-white p-4 flex items-center gap-2 sticky top-0 z-20 shadow-sm flex-shrink-0">
         {!isSidebarOpen && (
           <button
             onClick={() => setIsSidebarOpen(true)}
             className="hover:bg-[#3E89A3] p-1 rounded transition-colors"
+            aria-label="Open sidebar"
           >
-            <AiOutlineMenuFold size={20} />
+            <AiOutlineMenuFold size={22} />
           </button>
         )}
-        <h1 className="text-xl font-bold truncate">Chat</h1>
+        <h1 className="text-xl font-bold truncate">
+          {isNewConversation
+            ? "New Chat"
+            : conversations.find((c) => c.id.toString() === convoId?.toString())
+                ?.title || "Chat"}
+        </h1>
       </div>
 
-      {isLoading ? (
-        isNewConversation ? (
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {/* User message placeholder */}
-            <div className="flex justify-end lg:px-5">
-              <div className="relative group max-w-[70%] rounded-2xl px-4 py-2 bg-[#3E89A3] text-white rounded-br-none">
-                <div>{messages[0]?.content ? messages[0]?.content : ""}</div>
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {isLoading ? (
+          isNewConversation ? (
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              <div className="flex justify-end lg:px-5">
+                <div className="relative group max-w-[70%] rounded-2xl px-4 py-2 bg-[#3E89A3] text-white rounded-br-none">
+                  <div>{messages[0]?.content ? messages[0]?.content : ""}</div>
+                </div>
               </div>
-            </div>
 
-            {/* Assistant message placeholder */}
-            <div className="flex justify-start lg:px-5">
-              <div className="relative group max-w-[70%] rounded-2xl px-4 py-2 bg-gray-300 text-black rounded-bl-none">
-                <div>{messages[1]?.content ? messages[1]?.content : ""}</div>
+              <div className="flex justify-start lg:px-5">
+                <div className="relative group max-w-[70%] rounded-2xl px-4 py-2 bg-gray-300 text-black rounded-bl-none">
+                  <div>{messages[1]?.content ? messages[1]?.content : ""}</div>
+                </div>
               </div>
             </div>
+          ) : (
+            <div className="flex-1 flex items-center justify-center">
+              <div className="flex flex-col items-center space-y-4">
+                <div className="w-12 h-12"></div>
+              </div>
+            </div>
+          )
+        ) : messages.length === 0 ? (
+          <div className="text-center text-gray-500 mt-16 px-4">
+            <p className="text-lg">Start a new conversation!</p>
+            <p className="text-sm mt-1">Ask a question or say hello 👋</p>
           </div>
         ) : (
-          <div className="flex-1 flex items-center justify-center">
-            <div className="flex flex-col items-center space-y-4">
-              <div className="w-12 h-12"></div>
+          messages.map((message, index) => (
+            <ChatBubble
+              key={index}
+              message={message}
+              index={index}
+              onTranslateText={translateText}
+              onPlayAudio={playAudio}
+              onShowFlashcardModal={handleShowFlashcardModal}
+            />
+          ))
+        )}
+
+        {isTyping && (
+          <div className="flex justify-start lg:px-5">
+            <div className="bg-gray-200 text-black rounded-2xl rounded-bl-none px-4 py-3 shadow-sm">
+              <div className="flex space-x-1.5 items-center">
+                <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"></div>
+              </div>
             </div>
           </div>
-        )
-      ) : (
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {messages.length === 0 && (
-            <div className="text-center text-gray-500 mt-8">
-              Hello! Start a conversation! 👋
-            </div>
-          )}
-          {messages.map((message, index) => (
-            <div key={index} className="space-y-2">
-              {(messageStates[index]?.translation ||
-                messageStates[index]?.isLoading) && (
-                <div
-                  className={`flex ${
-                    message.role === "user" ? "justify-end" : "justify-start"
-                  } lg:px-5`}
-                >
-                  <div className="bg-white shadow-md border border-gray-100 rounded-lg px-4 py-2 text-sm text-gray-600 max-w-[70%]">
-                    <div className="text-xs text-gray-400 mb-1">
-                      Translation:
-                    </div>
-                    {messageStates[index]?.isLoading ? (
-                      <div className="flex justify-center py-2">
-                        <div className="w-5 h-5 border-2 border-gray-300 border-t-[#47A1BE] rounded-full animate-spin"></div>
-                      </div>
-                    ) : (
-                      <div>{messageStates[index]?.translation}</div>
-                    )}
-                    <div className="mt-2 pt-2 border-t border-gray-400/30 flex space-x-2">
-                      <button
-                        className={`p-1.5 ${
-                          isPlayingAudio
-                            ? "bg-blue-200 animate-pulse cursor-not-allowed"
-                            : "bg-blue-100 hover:bg-blue-200"
-                        } rounded-full text-blue-600 transition-colors`}
-                        title={
-                          isPlayingAudio ? "Playing audio..." : "Play audio"
-                        }
-                        onClick={() => {
-                          if (isPlayingAudio) return;
-                          if (messageToPlay) {
-                            playAudio(messageToPlay);
-                            setMessageToPlay(null);
-                          } else {
-                            playAudio(
-                              Array.from(
-                                messageStates[index].selectedWords.values()
-                              )
-                                .sort((a, b) => a.position - b.position)
-                                .map((item) => item.word)
-                                .join(" ")
-                            );
-                          }
-                        }}
-                        disabled={isPlayingAudio}
-                      >
-                        <MdVolumeUp
-                          className={`w-3.5 h-3.5 ${
-                            isPlayingAudio ? "opacity-75" : ""
-                          }`}
-                        />
-                      </button>
-                      <button
-                        className="p-1.5 bg-green-100 hover:bg-green-200 rounded-full text-green-600 transition-colors"
-                        title="Add to flashcards"
-                        onClick={() =>
-                          handleAddToFlashcards(
-                            messageStates[index]?.translation,
-                            index
-                          )
-                        }
-                      >
-                        <MdAdd className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        onClick={() => clearTranslation(index)}
-                        className="p-1.5 bg-red-100 hover:bg-red-200 rounded-full text-red-500 transition-colors"
-                        title="Clear translation"
-                      >
-                        <MdClear className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <div
-                className={`flex ${
-                  message.role === "user" ? "justify-end" : "justify-start"
-                } lg:px-5`}
-              >
-                <div
-                  className={`relative group max-w-[70%] rounded-2xl px-4 py-2 ${
-                    message.role === "user"
-                      ? "bg-[#3E89A3] text-white rounded-br-none"
-                      : "bg-gray-300 text-black rounded-bl-none"
-                  }`}
-                >
-                  <div>
-                    {message.role === "user"
-                      ? message.content
-                      : message.content.split(" ").map((word, wordIndex) => (
-                          <span
-                            key={wordIndex}
-                            onClick={() => {
-                              handleWordTranslation(
-                                word,
-                                index,
-                                message.content,
-                                wordIndex
-                              );
-                            }}
-                            className={`cursor-pointer transition-colors duration-200 ${
-                              messageStates[index]?.selectedWords?.has(
-                                `${word}-${wordIndex}`
-                              )
-                                ? "text-[#3E89A3]"
-                                : "hover:text-[#95C9DA]"
-                            }`}
-                          >
-                            {word}{" "}
-                          </span>
-                        ))}
-                  </div>
-
-                  {message.role === "assistant" &&
-                    messageStates[index]?.selectedWords?.size > 0 && (
-                      <div className="mt-2 pt-2 border-t border-gray-400/30 flex space-x-2">
-                        <button
-                          onClick={() =>
-                            handleBubbleTranslation(message.content, index)
-                          }
-                          className="p-1 bg-blue-100 hover:bg-blue-200 rounded-full transition-colors text-blue-600"
-                          title="Translate message"
-                        >
-                          <MdTranslate className="w-4 h-4" />
-                        </button>
-                      </div>
-                    )}
-                </div>
-              </div>
-            </div>
-          ))}
-          {isTyping && (
-            <div className="flex justify-start">
-              <div className="bg-gray-300 text-black rounded-2xl rounded-bl-none px-4 py-2">
-                <div className="flex space-x-1">
-                  <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                  <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                  <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"></div>
-                </div>
-              </div>
-            </div>
-          )}
-          <div ref={messagesEndRef} />
-        </div>
-      )}
+        )}
+        <div ref={messagesEndRef} />
+      </div>
 
       <form
         onSubmit={handleSendMessage}
-        className="border-t border-gray-200 p-4 bg-white"
+        className="border-t border-gray-200 p-4 bg-white sticky bottom-0 flex-shrink-0 z-10"
       >
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-3">
           <input
             type="text"
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
-            placeholder="Type a message..."
-            className="flex-1 rounded-full border border-gray-300 px-4 py-2 focus:outline-none focus:border-[#47A1BE]"
+            placeholder="Send a message"
+            className="flex-1 rounded-full border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#47A1BE] focus:border-transparent"
+            disabled={isTyping || isLoading}
           />
           <button
             type="submit"
-            className="bg-[#489DBA] text-white rounded-full px-6 py-2 hover:bg-[#3E89A3] focus:outline-none"
+            className={`bg-[#489DBA] text-white rounded-full px-6 py-2 hover:bg-[#3E89A3] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#489DBA] transition-colors ${
+              isTyping || !inputMessage.trim() ? "cursor-not-allowed" : ""
+            }`}
+            disabled={isTyping || !inputMessage.trim() || isLoading}
           >
             Send
           </button>
         </div>
       </form>
 
-      {/* Flashcard Modal */}
-      {showFlashcardModal && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden">
-            <div className="bg-[#489DBA] text-white px-4 py-3 flex items-center justify-between">
-              <h2 className="text-lg font-bold">Add to Flashcards</h2>
-              <button
-                onClick={() => {
-                  setShowFlashcardModal(false);
-                  setShowNewDeckForm(false);
-                  setNewDeckTitle("");
-                }}
-                className="p-1 hover:bg-[#3E89A3] rounded-full transition-colors"
-              >
-                <MdClear className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-4 overflow-y-auto flex-1">
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Select Deck
-                </label>
-                {isLoadingDecks ? (
-                  <div className="flex justify-center py-2">
-                    <div className="w-5 h-5 border-2 border-gray-300 border-t-[#47A1BE] rounded-full animate-spin"></div>
-                  </div>
-                ) : (
-                  <>
-                    {showNewDeckForm ? (
-                      <div className="mb-3">
-                        <div className="flex flex-col sm:flex-row gap-2 mb-2">
-                          <input
-                            type="text"
-                            value={newDeckTitle}
-                            onChange={(e) => setNewDeckTitle(e.target.value)}
-                            placeholder="Enter deck title"
-                            className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm"
-                          />
-                          <button
-                            onClick={createNewDeck}
-                            disabled={!newDeckTitle.trim()}
-                            className={`px-3 py-2 rounded-md text-white text-sm ${
-                              !newDeckTitle.trim()
-                                ? "bg-gray-400 cursor-not-allowed"
-                                : "bg-[#489DBA] hover:bg-[#3E89A3]"
-                            }`}
-                          >
-                            Create
-                          </button>
-                        </div>
-                        <button
-                          onClick={() => {
-                            setShowNewDeckForm(false);
-                            setNewDeckTitle("");
-                          }}
-                          className="text-sm text-gray-500 hover:text-gray-700"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    ) : (
-                      <>
-                        <select
-                          value={selectedDeck.id || ""}
-                          onChange={(e) => {
-                            const selected = decks.find(
-                              (deck) => deck.id === e.target.value
-                            );
-                            setSelectedDeck(selected || {});
-                          }}
-                          className="w-full border border-gray-300 rounded-md px-3 py-2 mb-2"
-                        >
-                          <option value="">Select a deck</option>
-                          {decks.map((deck) => (
-                            <option key={deck.id} value={deck.id}>
-                              {deck.title}
-                            </option>
-                          ))}
-                        </select>
-                        <button
-                          onClick={() => setShowNewDeckForm(true)}
-                          className="text-sm text-[#47A1BE] hover:text-[#3E89A3]"
-                        >
-                          + Create new deck
-                        </button>
-                      </>
-                    )}
-                  </>
-                )}
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Front
-                </label>
-                <textarea
-                  value={flashcardFront}
-                  onChange={(e) => setFlashcardFront(e.target.value)}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2"
-                  rows="2"
-                />
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Back
-                </label>
-                <textarea
-                  value={flashcardBack}
-                  onChange={(e) => setFlashcardBack(e.target.value)}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2"
-                  rows="2"
-                />
-              </div>
-            </div>
-
-            <div className="border-t border-gray-200 p-4 bg-gray-50">
-              <div className="flex flex-col sm:flex-row gap-2 sm:justify-end">
-                <button
-                  onClick={() => {
-                    setShowFlashcardModal(false);
-                    setShowNewDeckForm(false);
-                    setNewDeckTitle("");
-                  }}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 w-full sm:w-auto"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={addFlashcard}
-                  disabled={
-                    !selectedDeck.id || !flashcardFront || !flashcardBack
-                  }
-                  className={`px-4 py-2 rounded-md text-white w-full sm:w-auto ${
-                    !selectedDeck.id || !flashcardFront || !flashcardBack
-                      ? "bg-gray-400 cursor-not-allowed"
-                      : "bg-[#489DBA] hover:bg-[#3E89A3]"
-                  }`}
-                >
-                  Add to Deck
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <FlashcardModal
+        isOpen={isFlashcardModalOpen}
+        onClose={() => setIsFlashcardModalOpen(false)}
+        initialFront={flashcardModalData.front}
+        initialBack={flashcardModalData.back}
+      />
     </div>
   );
 };

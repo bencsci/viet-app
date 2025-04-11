@@ -8,8 +8,8 @@ import {
 } from "react-icons/fa";
 import { Link } from "react-router";
 import Qilin from "../assets/QilingoMD.svg";
-import ConversationImg from "../assets/home/Main.png";
-import TranslationImg from "../assets/home/Translation.png";
+import ConversationImg from "../assets/home/MainNew.png";
+import TranslationImg from "../assets/home/TranslationNew.png";
 import DecksImg from "../assets/home/Decks.png";
 import FlashcardImg from "../assets/home/Flashcard.png";
 import ReviewImg from "../assets/home/Review.png";
