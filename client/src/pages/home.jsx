@@ -13,6 +13,7 @@ import TranslationImg from "../assets/home/Translation.png";
 import DecksImg from "../assets/home/Decks.png";
 import FlashcardImg from "../assets/home/Flashcard.png";
 import ReviewImg from "../assets/home/Review.png";
+import Footer from "../components/footer";
 
 const languages = [
   { code: "us", name: "English", flag: "us.svg" },
@@ -295,6 +296,7 @@ const home = () => {
           </Link>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

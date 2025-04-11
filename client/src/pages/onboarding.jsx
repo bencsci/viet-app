@@ -193,8 +193,8 @@ const Onboarding = () => {
               !selectedLanguage || !selectedLevel
                 ? "bg-gray-300 cursor-not-allowed"
                 : isSubmitting
-                ? "bg-gradient-to-r from-red-400 to-pink-400 cursor-wait"
-                : "bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600"
+                ? "bg-[#47A1BE] cursor-wait"
+                : "bg-[#47A1BE] hover:bg-[#3891AE]"
             }`}
           >
             {isSubmitting ? (

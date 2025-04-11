@@ -19,6 +19,8 @@ import ReviewDeck from "./pages/reviewDeck";
 import Settings from "./pages/settings";
 import Onboarding from "./pages/onboarding";
 import NotFound from "./pages/notFound";
+import Privacy from "./pages/privacy";
+import Terms from "./pages/terms";
 import { UserContext } from "./context/userContext";
 
 function App() {
@@ -53,6 +55,8 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
         </Routes>
       </SignedOut>
     </div>
