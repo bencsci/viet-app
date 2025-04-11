@@ -6,7 +6,8 @@ import axios from "axios";
 import { UserContext } from "../context/userContext";
 
 const ReviewDeck = () => {
-  const { backendUrl, getToken, reviewMode } = useContext(UserContext);
+  const { backendUrl, getToken, reviewMode, listDecks } =
+    useContext(UserContext);
   const { deckId } = useParams();
   const navigate = useNavigate();
   const [deck, setDeck] = useState(null);
@@ -23,7 +24,8 @@ const ReviewDeck = () => {
     easy: 0,
   });
   const [totalReviewed, setTotalReviewed] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [loadingDeck, setLoadingDeck] = useState(true);
+  const [loadingCards, setLoadingCards] = useState(true);
   const [timeToAnswer, setTimeToAnswer] = useState(null);
 
   useEffect(() => {
@@ -31,7 +33,7 @@ const ReviewDeck = () => {
     if (!isReviewing) {
       listFlashcards();
     }
-  }, [deckId]);
+  }, [deckId, isReviewing]);
 
   useEffect(() => {
     if (reviewComplete) {
@@ -62,7 +64,7 @@ const ReviewDeck = () => {
 
   const loadDeck = async () => {
     try {
-      setLoading(true);
+      setLoadingDeck(true);
       const token = await getToken();
       const res = await axios.post(
         `${backendUrl}/api/decks/get`,
@@ -75,12 +77,11 @@ const ReviewDeck = () => {
       );
 
       setDeck(res.data);
-      //console.log(reviewMode);
     } catch (error) {
       console.error("Error loading deck:", error);
       navigate("/404-not-found");
     } finally {
-      setLoading(false);
+      setLoadingDeck(false);
     }
   };
 
@@ -92,14 +93,13 @@ const ReviewDeck = () => {
     return array;
   };
 
-  const handleReviewMode = (cards) => {
+  const handleReviewMode = (fetchedCards) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
     switch (reviewMode) {
       case "srs":
-        // Filter cards that are due today or have no due date
-        return shuffleArray(cards).filter((card) => {
+        return shuffleArray(fetchedCards).filter((card) => {
           if (!card.due_date) return true;
           const dueDate = new Date(card.due_date);
           dueDate.setHours(0, 0, 0, 0);
@@ -107,25 +107,23 @@ const ReviewDeck = () => {
         });
 
       case "all":
-        // Return all cards in random order
-        return shuffleArray([...cards]);
+        return shuffleArray([...fetchedCards]);
 
       case "reversed":
-        // Swap front and back of all cards
-        return shuffleArray(cards).map((card) => ({
+        return shuffleArray(fetchedCards).map((card) => ({
           ...card,
           front: card.back,
           back: card.front,
         }));
 
       default:
-        return shuffleArray(cards);
+        return shuffleArray(fetchedCards);
     }
   };
 
   const listFlashcards = async () => {
     try {
-      setLoading(true);
+      setLoadingCards(true);
       const token = await getToken();
       const res = await axios.post(
         `${backendUrl}/api/decks/list-flashcards`,
@@ -139,15 +137,13 @@ const ReviewDeck = () => {
         }
       );
 
-      // Only process and set cards if we're not currently reviewing
-      if (!isReviewing) {
-        const processedCards = handleReviewMode(res.data);
-        setCards(processedCards);
-      }
+      const processedCards = handleReviewMode(res.data || []);
+      setCards(processedCards);
     } catch (error) {
       console.error("Error listing flashcards:", error);
+      setCards([]);
     } finally {
-      setLoading(false);
+      setLoadingCards(false);
     }
   };
 
@@ -163,7 +159,6 @@ const ReviewDeck = () => {
           }
         }
 
-        // Calculate average
         const averageMastery = Math.ceil(totalMastery / updatedCards.length);
         console.log("Average Mastery:", averageMastery);
         const token = await getToken();
@@ -181,6 +176,8 @@ const ReviewDeck = () => {
           ...prev,
           mastery: averageMastery,
         }));
+
+        listDecks();
       }
     } catch (error) {
       console.error("Error updating deck mastery:", error);
@@ -194,13 +191,11 @@ const ReviewDeck = () => {
     navigate(`/decks/${deckId}`);
   };
 
-  // Check if we have a current card
   const currentCard = cards.length > 0 ? cards[currentCardIndex] : null;
 
   const calculateScore = (rating, timeToAnswer) => {
     let score;
 
-    // timeToAnswer in seconds
     if (rating === "easy") {
       if (timeToAnswer <= 5) {
         score = 5;
@@ -240,6 +235,8 @@ const ReviewDeck = () => {
   };
 
   const updateFlashcard = async (rating) => {
+    if (!currentCard) return;
+
     try {
       const currentTime = new Date();
       const elapsedTimeMs = timeToAnswer ? currentTime - timeToAnswer : 0;
@@ -271,8 +268,7 @@ const ReviewDeck = () => {
         }
       );
 
-      // Add the updated card to our updatedCards array
-      setUpdatedCards(res.data);
+      setUpdatedCards((prev) => [...prev, res.data]);
     } catch (error) {
       console.error("Error updating flashcards:", error);
     }
@@ -297,14 +293,11 @@ const ReviewDeck = () => {
     }
   };
 
-  // Modify restartReview to handle stats properly
   const restartReview = async () => {
-    // Update stats for the completed review session
     if (totalReviewed > 0) {
       await updateDeckStats();
     }
 
-    // Reset the review session
     setCurrentCardIndex(0);
     setShowAnswer(false);
     setReviewComplete(false);
@@ -315,17 +308,18 @@ const ReviewDeck = () => {
       easy: 0,
     });
     setTotalReviewed(0);
+    setUpdatedCards([]);
 
     setIsReviewing(false);
-    loadDeck();
-    listFlashcards();
-    setUpdatedCards([]);
+    setLoadingDeck(true);
+    setLoadingCards(true);
+    await loadDeck();
+    await listFlashcards();
   };
 
-  // Calculate correct answers
   const correctCount = results.good + results.easy + results.hard;
 
-  if (loading || !deck) {
+  if (loadingDeck || !deck) {
     return (
       <div className="pt-16 min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="w-12 h-12 border-4 border-[#47A1BE] border-t-transparent rounded-full animate-spin"></div>
@@ -333,7 +327,7 @@ const ReviewDeck = () => {
     );
   }
 
-  if (cards.length === 0 && reviewMode === "srs") {
+  if (loadingCards) {
     return (
       <div className="pt-16 min-h-screen bg-gray-50 flex flex-col">
         <div className="bg-[#47A1BE] text-white py-4 px-4 md:px-8">
@@ -349,19 +343,45 @@ const ReviewDeck = () => {
             </div>
           </div>
         </div>
+        <div className="flex-1 flex items-center justify-center">
+          <div className="w-12 h-12 border-4 border-[#47A1BE] border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      </div>
+    );
+  }
 
+  if (cards.length === 0) {
+    const isEmptyDeck = reviewMode !== "srs";
+    const noCardsDue = reviewMode === "srs";
+
+    return (
+      <div className="pt-16 min-h-screen bg-gray-50 flex flex-col">
+        <div className="bg-[#47A1BE] text-white py-4 px-4 md:px-8">
+          <div className="max-w-4xl mx-auto flex items-center">
+            <button
+              onClick={handleReturn}
+              className="mr-4 p-2 hover:bg-[#327085] rounded-full transition-colors"
+            >
+              <MdArrowBack className="text-xl" />
+            </button>
+            <div>
+              <h1 className="text-xl font-bold">{deck.title}</h1>
+            </div>
+          </div>
+        </div>
         <div className="flex-1 flex items-center justify-center p-4">
           <div className="w-full max-w-2xl bg-white rounded-xl shadow-md p-8 text-center">
             <h2 className="text-2xl font-bold text-gray-800 mb-4">
-              No Cards Due
+              {noCardsDue ? "No Cards Due" : "Deck is Empty"}
             </h2>
             <p className="text-gray-600 mb-6">
-              Great job! You've completed all your due reviews. Come back later
-              or try a different review mode.
+              {noCardsDue
+                ? "Great job! You've completed all your due reviews. Come back later or try a different review mode."
+                : "This deck doesn't have any flashcards yet. Add some cards to start reviewing!"}
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <button
-                onClick={() => handleReturn()}
+                onClick={handleReturn}
                 className="px-6 py-3 bg-[#47A1BE] hover:bg-[#327085] text-white rounded-lg flex items-center gap-2"
               >
                 <MdArrowBack className="text-xl" />
@@ -370,15 +390,6 @@ const ReviewDeck = () => {
             </div>
           </div>
         </div>
-      </div>
-    );
-  }
-
-  // Keep the existing check for empty cards in other modes
-  if (cards.length === 0) {
-    return (
-      <div className="pt-16 min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-[#47A1BE] border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -410,7 +421,12 @@ const ReviewDeck = () => {
             {currentCard && (
               <div
                 className="p-8 min-h-[300px] flex flex-col justify-center cursor-pointer relative"
-                onClick={() => !showAnswer && setShowAnswer(true)}
+                onClick={() =>
+                  !showAnswer &&
+                  setShowAnswer(true) &&
+                  setTimeToAnswer(new Date()) &&
+                  setIsReviewing(true)
+                }
               >
                 <div className="text-center">
                   <p className="text-gray-500 mb-2 text-sm">Question</p>
@@ -455,7 +471,7 @@ const ReviewDeck = () => {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   <button
                     onClick={() => handleRateCard("fail")}
-                    className="px-4 py-4 bg-red-400 hover:bg-[#47A1BE] text-white rounded-lg flex items-center justify-center transition-colors text-lg font-medium"
+                    className="px-4 py-4 bg-red-400 hover:bg-red-500 text-white rounded-lg flex items-center justify-center transition-colors text-lg font-medium"
                   >
                     <span>Fail</span>
                   </button>
@@ -486,7 +502,7 @@ const ReviewDeck = () => {
             <div className="p-8 text-center">
               <h2 className="text-2xl font-bold mb-4">Review Complete!</h2>
               <p className="text-xl mb-6">
-                You got {correctCount} out of {cards.length} cards correct.
+                You got {correctCount} out of {totalReviewed} cards correct.
               </p>
 
               <div className="mb-8">
@@ -495,17 +511,19 @@ const ReviewDeck = () => {
                     className="h-full bg-green-500"
                     style={{
                       width: `${Math.round(
-                        (correctCount / cards.length) * 100
+                        (correctCount / totalReviewed) * 100
                       )}%`,
                     }}
                   ></div>
                 </div>
                 <p className="mt-2 text-gray-600">
-                  {Math.round((correctCount / cards.length) * 100)}% correct
+                  {totalReviewed > 0
+                    ? Math.round((correctCount / totalReviewed) * 100)
+                    : 0}
+                  % correct
                 </p>
               </div>
 
-              {/* Results breakdown */}
               <div className="mb-8 grid grid-cols-4 gap-2">
                 <div className="bg-red-100 p-3 rounded-lg">
                   <div className="text-red-600 font-bold text-xl">
