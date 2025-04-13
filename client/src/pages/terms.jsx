@@ -93,8 +93,6 @@ const Terms = () => {
               </p>
               <ul className="list-disc pl-6 mb-3 text-gray-700 space-y-2">
                 <li>In any way that violates applicable laws or regulations</li>
-                <li>To harass, abuse, or harm others</li>
-                <li>To distribute spam or malicious content</li>
                 <li>
                   To attempt to interfere with the proper functioning of the
                   service
@@ -166,7 +164,7 @@ const Terms = () => {
                 If you have any questions about these Terms, please contact:
               </p>
               <p className="text-gray-700 font-medium">
-                Email: benl275133@gmail.com
+                Email: qilingochat@gmail.com
                 <br />
               </p>
             </section>

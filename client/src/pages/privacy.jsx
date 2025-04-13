@@ -195,7 +195,7 @@ const Privacy = () => {
                 contact:
               </p>
               <p className="text-gray-700 font-medium mt-2">
-                Email: benl275133@gmail.com
+                Email: qilingochat@gmail.com
                 <br />
               </p>
             </section>
