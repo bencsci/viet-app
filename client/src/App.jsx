@@ -27,6 +27,15 @@ function App() {
   const { user } = useUser();
   const { isOnboarding, setIsOnboarding } = useContext(UserContext);
 
+  useEffect(() => {
+    if (user) {
+      document.title = "Qilingo";
+    } else {
+      document.title =
+        "Qilingo - Learn Languages Through Natural Conversations";
+    }
+  }, [user]);
+
   if (isOnboarding) {
     return (
       <div>
@@ -57,6 +66,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </SignedOut>
     </div>
