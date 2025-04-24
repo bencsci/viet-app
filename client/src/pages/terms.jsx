@@ -10,7 +10,7 @@ const Terms = () => {
             Terms of Service
           </h1>
           <p className="text-gray-600 mb-8 pb-4 border-b border-gray-200">
-            Last Updated: {new Date().toLocaleDateString()}
+            Last Updated: 4/10/2025
           </p>
 
           <div className="space-y-8">
