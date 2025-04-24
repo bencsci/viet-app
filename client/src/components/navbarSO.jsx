@@ -32,18 +32,20 @@ const NavbarSO = () => {
           </div>
 
           {/* Mobile Menu Button */}
-          <div className="md:hidden">
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="text-[#F5E6D3] hover:[#F5E6D3] focus:outline-none"
-            >
-              {isOpen ? (
-                <HiX className="h-6 w-6" />
-              ) : (
-                <HiMenu className="h-6 w-6" />
-              )}
-            </button>
-          </div>
+          {!isLoginPage && (
+            <div className="md:hidden">
+              <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="text-[#F5E6D3] hover:[#F5E6D3] focus:outline-none"
+              >
+                {isOpen ? (
+                  <HiX className="h-6 w-6" />
+                ) : (
+                  <HiMenu className="h-6 w-6" />
+                )}
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Mobile Menu */}

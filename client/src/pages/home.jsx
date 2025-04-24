@@ -78,11 +78,8 @@ const home = () => {
 
         <div className="grid grid-cols-2 sm:grid-cols-6 gap-4 sm:gap-2 md:gap-8 max-w-4xl mx-auto">
           {languages.map((lang) => (
-            <div
-              key={lang.code}
-              className="flex flex-col items-center p-3 hover:bg-gray-50 rounded-lg transition-all duration-300"
-            >
-              <div className="w-16 sm:w-20 h-12 sm:h-14 overflow-hidden rounded-lg shadow-md mb-3 hover:shadow-lg transition-shadow duration-300">
+            <div key={lang.code} className="flex flex-col items-center p-3">
+              <div className="w-16 sm:w-20 h-12 sm:h-14 overflow-hidden rounded-lg shadow-md mb-3">
                 <img
                   src={`https://flagcdn.com/${lang.flag}`}
                   alt={`${lang.name} Flag`}
