@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router";
 import { HiMenu, HiX } from "react-icons/hi";
 import Logo from "../assets/QilingoLogo.png";
@@ -7,6 +7,12 @@ const NavbarSO = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const isLoginPage = location.pathname === "/login";
+
+  useEffect(() => {
+    if (isLoginPage) {
+      setIsOpen(false);
+    }
+  }, [isLoginPage]);
 
   return (
     <nav className="bg-[#47A1BE] shadow-lg fixed top-0 left-0 right-0 z-50">
