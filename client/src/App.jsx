@@ -1,7 +1,5 @@
 import { useState, useEffect, useContext } from "react";
 import {
-  SignIn,
-  SignOutButton,
   SignedIn,
   SignedOut,
   useUser,
@@ -25,7 +23,7 @@ import { UserContext } from "./context/userContext";
 
 function App() {
   const { user } = useUser();
-  const { isOnboarding, setIsOnboarding } = useContext(UserContext);
+  const { isOnboarding } = useContext(UserContext);
 
   useEffect(() => {
     if (user) {

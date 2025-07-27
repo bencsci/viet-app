@@ -93,9 +93,6 @@ const handleUsers = async (req, res) => {
 
   let evt;
 
-  // Attempt to verify the incoming webhook
-  // If successful, the payload will be available from 'evt'
-  // If verification fails, error out and return error code
   try {
     evt = wh.verify(JSON.stringify(payload), {
       "svix-id": svix_id,

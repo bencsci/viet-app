@@ -3,8 +3,6 @@ import { useNavigate } from "react-router";
 import {
   MdAdd,
   MdSearch,
-  MdMoreVert,
-  MdPlayArrow,
   MdClose,
   MdSort,
 } from "react-icons/md";
@@ -18,7 +16,6 @@ const formatLastReviewed = (dateString) => {
 
   const date = new Date(dateString);
 
-  // Check if date is valid
   if (isNaN(date.getTime())) return "Never reviewed";
 
   const now = new Date();
@@ -147,7 +144,6 @@ const Review = () => {
 
   return (
     <div className="pt-16 min-h-screen bg-gray-50">
-      {/* Header Section with Qilin */}
       <div className="bg-[#4E9AB4] text-white py-6 px-4 md:px-8 overflow-hidden">
         <div className="max-w-6xl mx-auto relative">
           <div className="flex flex-col items-center text-center gap-4">
@@ -160,7 +156,6 @@ const Review = () => {
               />
             </div>
 
-            {/* Text Section */}
             <div>
               <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">
                 Flashcard Decks
@@ -173,7 +168,6 @@ const Review = () => {
         </div>
       </div>
 
-      {/* Search, Sort and Add Section */}
       <div className="max-w-6xl mx-auto px-4 md:px-8 py-6">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex flex-col md:flex-row gap-4 flex-1">
@@ -199,7 +193,6 @@ const Review = () => {
         </div>
       </div>
 
-      {/* Loading State */}
       {loadingDecks && (
         <div className="max-w-6xl mx-auto px-4 md:px-8 py-12 flex justify-center">
           <div className="flex flex-col items-center">
@@ -235,7 +228,6 @@ const Review = () => {
         </div>
       )}
 
-      {/* Empty State */}
       {!loadingDecks && decks.length === 0 && (
         <div className="max-w-md mx-auto text-center py-16">
           <div className="bg-blue-50 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">

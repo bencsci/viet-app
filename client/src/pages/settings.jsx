@@ -97,7 +97,6 @@ const Settings = () => {
         <div className="space-y-6">
           {!isLoading && (
             <>
-              {/* Language Selection */}
               <div>
                 <label
                   htmlFor="language"
@@ -119,7 +118,6 @@ const Settings = () => {
                 </select>
               </div>
 
-              {/* Difficulty Selection */}
               <div>
                 <label
                   htmlFor="difficulty"

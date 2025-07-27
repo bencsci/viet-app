@@ -138,24 +138,6 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
       return;
     }
 
-    // try {
-    //   const token = await getToken();
-    //   const res = await axios.post(
-    //     `${BACKEND_URL}/api/history/save`,
-    //     { messages: [] },
-    //     {
-    //       headers: {
-    //         Authorization: `Bearer ${token}`,
-    //       },
-    //     }
-    //   );
-    //   setSelectedConvoId(res.data.id);
-    //   loadConversations();
-    //   setIsSidebarOpen(false); // Close sidebar on mobile after creating new chat
-    // } catch (error) {
-    //   console.error("Error creating conversation:", error);
-    // }
-
     try {
       const token = await getToken();
       await axios.post(
@@ -211,7 +193,6 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
             </button>
           </div>
 
-          {/* New Chat button */}
           <div className="px-4 py-3 border-b border-gray-200">
             <button
               onClick={createNewConversation}
@@ -241,7 +222,6 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
                   </span>
                 </div>
 
-                {/* More options button and menu */}
                 <div className="relative">
                   <button
                     data-menu-button={conv.id}
@@ -287,7 +267,6 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
             )}
           </div>
 
-          {/* Footer section */}
           <div className="p-6 border-t border-gray-200 h-[4.7rem]">
             <div className="text-xs text-gray-500 text-center">
               Select words to translate them

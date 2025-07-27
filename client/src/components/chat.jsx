@@ -22,37 +22,21 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
     backendUrl,
     isNewConversation,
     setIsNewConversation,
-    decks,
-    setDecks,
-    isLoadingDecks,
-    setIsLoadingDecks,
     listDecks,
   } = useContext(UserContext);
   const messagesEndRef = useRef(null);
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const [messageStates, setMessageStates] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [titleGenerated, setTitleGenerated] = useState(false);
   const navigate = useNavigate();
   const { convoId } = useParams();
-  const [showFlashcardModal, setShowFlashcardModal] = useState(false);
-  const [selectedDeck, setSelectedDeck] = useState({});
-  const [flashcardFront, setFlashcardFront] = useState("");
-  const [flashcardBack, setFlashcardBack] = useState("");
-  const [currentTranslation, setCurrentTranslation] = useState("");
-  const [showNewDeckForm, setShowNewDeckForm] = useState(false);
-  const [newDeckTitle, setNewDeckTitle] = useState("");
-  const [messageToPlay, setMessageToPlay] = useState(null);
-  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [isFlashcardModalOpen, setIsFlashcardModalOpen] = useState(false);
   const [flashcardModalData, setFlashcardModalData] = useState({
     front: "",
     back: "",
   });
-  const [audioContext, setAudioContext] = useState(null);
-  const [audioSource, setAudioSource] = useState(null);
   const [isAudioPlayingGlobally, setIsAudioPlayingGlobally] = useState(false);
 
   const loadMessages = useCallback(
@@ -348,112 +332,6 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
       }
     }
   }, [messages]);
-
-  const fetchDecks = async () => {
-    try {
-      setIsLoadingDecks(true);
-      const token = await getToken();
-      const res = await axios.get(`${backendUrl}/api/decks/list`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      setDecks(res.data);
-    } catch (error) {
-      console.error("Error fetching decks:", error);
-    } finally {
-      setIsLoadingDecks(false);
-    }
-  };
-
-  const handleAddToFlashcards = (translation, index) => {
-    setCurrentTranslation(translation);
-
-    if (messageStates[index]?.selectedWords) {
-      const orderedWords = Array.from(
-        messageStates[index].selectedWords.values()
-      )
-        .sort((a, b) => a.position - b.position)
-        .map((item) => item.word)
-        .join(" ");
-
-      if (orderedWords) {
-        setFlashcardFront(orderedWords);
-      }
-    }
-
-    setFlashcardBack(translation);
-    setShowFlashcardModal(true);
-  };
-
-  const createNewDeck = async () => {
-    if (!newDeckTitle.trim()) return;
-
-    try {
-      const token = await getToken();
-      const res = await axios.post(
-        `${backendUrl}/api/decks/create`,
-        { deckName: newDeckTitle },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      setDecks([...decks, res.data]);
-      setSelectedDeck(res.data);
-      setShowNewDeckForm(false);
-      setNewDeckTitle("");
-      listDecks();
-    } catch (error) {
-      console.error("Error creating deck:", error);
-    }
-  };
-
-  const updateCardCount = async () => {
-    try {
-      const token = await getToken();
-      await axios.post(
-        `${backendUrl}/api/decks/edit`,
-        { deckId: selectedDeck.id, card_count: selectedDeck.card_count + 1 },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      loadDecks();
-    } catch (error) {
-      console.error("Error updating card count in deck:", error);
-    }
-  };
-
-  const addFlashcard = async () => {
-    try {
-      const token = await getToken();
-      await axios.post(
-        `${backendUrl}/api/decks/add-flashcard`,
-        {
-          deckId: selectedDeck.id,
-          front: flashcardFront,
-          back: flashcardBack,
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      toast.success(`Flashcard successfully added to ${selectedDeck.title}!`);
-      setShowFlashcardModal(false);
-      setFlashcardFront("");
-      setFlashcardBack("");
-      setSelectedDeck({});
-      listDecks();
-    } catch (error) {
-      console.error("Error adding flashcard:", error);
-    }
-  };
 
   return (
     <div className="flex flex-col h-[calc(100vh-64px)] bg-gray-50 transition-all duration-300 ease-in-out">

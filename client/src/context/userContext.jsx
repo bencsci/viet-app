@@ -61,7 +61,7 @@ export const UserContextProvider = ({ children }) => {
 
   const loadProfile = async () => {
     try {
-      if (!getToken || isOnboarding) return; // Skip if onboarding or auth not ready
+      if (!getToken || isOnboarding) return;
 
       const token = await getToken();
       if (!token) return;
@@ -84,7 +84,7 @@ export const UserContextProvider = ({ children }) => {
 
   const loadConversations = async () => {
     try {
-      if (!getToken || isOnboarding) return; // Skip if onboarding or auth not ready
+      if (!getToken || isOnboarding) return;
 
       const token = await getToken();
       if (!token) return;

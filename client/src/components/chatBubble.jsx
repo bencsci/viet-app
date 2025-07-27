@@ -5,7 +5,7 @@ const ChatBubble = memo(
   ({ message, index, onTranslateText, onPlayAudio, onShowFlashcardModal }) => {
     const [selectedWords, setSelectedWords] = useState(new Map());
     const [translation, setTranslation] = useState(null);
-    const [translationType, setTranslationType] = useState(null); // 'word' or 'full'
+    const [translationType, setTranslationType] = useState(null);
     const [isTranslationLoading, setIsTranslationLoading] = useState(false);
     const [isPlayingAudio, setIsPlayingAudio] = useState(false);
 
@@ -78,7 +78,7 @@ const ChatBubble = memo(
 
       setIsTranslationLoading(true);
       setTranslationType("full");
-      setSelectedWords(new Map()); // Clear word selection for full translation
+      setSelectedWords(new Map());
       try {
         const result = await onTranslateText(message.content);
         setTranslation(result);
@@ -123,7 +123,7 @@ const ChatBubble = memo(
           ? message.content
           : getSelectedText(selectedWords);
       onShowFlashcardModal(frontText, translation);
-      clearTranslation(); // Clear translation state after opening modal
+      clearTranslation();
     };
 
     const isAssistant = message.role === "assistant";
@@ -203,7 +203,7 @@ const ChatBubble = memo(
               {isUser
                 ? message.content
                 : message.content
-                    .split(/(\s+)/) // Split by space, keeping spaces
+                    .split(/(\s+)/)
                     .map((segment, wordIndex) => {
                       if (segment.match(/^\s+$/)) {
                         return segment;

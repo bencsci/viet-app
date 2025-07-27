@@ -18,14 +18,6 @@ const GCP_WORKLOAD_IDENTITY_POOL_ID = process.env.GCP_WORKLOAD_IDENTITY_POOL_ID;
 const GCP_WORKLOAD_IDENTITY_POOL_PROVIDER_ID =
   process.env.GCP_WORKLOAD_IDENTITY_POOL_PROVIDER_ID;
 
-// console.log(
-//   GCP_PROJECT_ID,
-//   GCP_PROJECT_NUMBER,
-//   GCP_SERVICE_ACCOUNT_EMAIL,
-//   GCP_WORKLOAD_IDENTITY_POOL_ID,
-//   GCP_WORKLOAD_IDENTITY_POOL_PROVIDER_ID
-// );
-
 // Initialize the External Account Client
 const authClient = ExternalAccountClient.fromJSON({
   type: "external_account",
@@ -34,13 +26,11 @@ const authClient = ExternalAccountClient.fromJSON({
   token_url: "https://sts.googleapis.com/v1/token",
   service_account_impersonation_url: `https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/${GCP_SERVICE_ACCOUNT_EMAIL}:generateAccessToken`,
   subject_token_supplier: {
-    // Use the Vercel OIDC token as the subject token
     getSubjectToken: getVercelOidcToken,
   },
 });
 
 export const getGCPCredentials = () => {
-  // for Vercel, use environment variables
   return process.env.GCP_PRIVATE_KEY
     ? {
         credentials: {
@@ -49,8 +39,7 @@ export const getGCPCredentials = () => {
         },
         projectId: process.env.GCP_PROJECT_ID,
       }
-    : // for local development, use gcloud CLI
-      {};
+    : {};
 };
 
 let translationClient;
@@ -64,14 +53,6 @@ if (process.env.ENV === "production") {
   translationClient = new TranslationServiceClient();
   speechClient = new textToSpeech.TextToSpeechClient();
 }
-
-// Add error checking for credentials
-// if (
-//   !process.env.GOOGLE_APPLICATION_CREDENTIALS ||
-//   !process.env.GOOGLE_CLOUD_PROJECT_ID
-// ) {
-//   console.error("Missing Google Cloud credentials or project ID");
-// }
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,

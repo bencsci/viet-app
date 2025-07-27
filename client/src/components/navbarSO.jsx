@@ -18,13 +18,11 @@ const NavbarSO = () => {
     <nav className="bg-[#47A1BE] shadow-lg fixed top-0 left-0 right-0 z-50">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between items-center h-16">
-          {/* Logo and Brand Name */}
           <Link to="/" className="flex items-center space-x-2">
             <img src={Logo} alt="Qilingo" className="h-8 w-8" />
             <span className="text-[#FFFAE7] font-bold text-3xl">Qilingo</span>
           </Link>
 
-          {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-4">
             {!isLoginPage && (
               <Link
@@ -37,7 +35,6 @@ const NavbarSO = () => {
             )}
           </div>
 
-          {/* Mobile Menu Button */}
           {!isLoginPage && (
             <div className="md:hidden">
               <button
@@ -54,7 +51,6 @@ const NavbarSO = () => {
           )}
         </div>
 
-        {/* Mobile Menu */}
         {isOpen && (
           <div className="md:hidden">
             <div className="px-2 pt-2 pb-3 space-y-3 sm:px-3">

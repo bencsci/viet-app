@@ -121,7 +121,6 @@ const Statistics = ({ deck, cards }) => {
                 </span>
               </p>
 
-              {/* This would be a chart in a real implementation */}
               <div className="h-40 bg-gray-100 rounded-lg mt-4 flex items-center justify-center">
                 <p className="text-gray-400">Review history chart</p>
               </div>

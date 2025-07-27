@@ -209,7 +209,6 @@ const Deck = () => {
 
   return (
     <div className="pt-16 min-h-screen bg-gray-50">
-      {/* Header Section */}
       <div className="bg-[#47A1BE] text-white py-6 px-4 md:px-8">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center mb-4">
@@ -226,7 +225,6 @@ const Deck = () => {
             </div>
           </div>
 
-          {/* Stats Overview */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
             <div className="bg-[#3E89A3] bg-opacity-30 rounded-lg p-4">
               <p className="text-blue-200 text-sm">Cards</p>
@@ -267,9 +265,8 @@ const Deck = () => {
         </div>
       </div>
 
-      {/* Main Content */}
+      {/* Main */}
       <div className="max-w-6xl mx-auto px-4 md:px-8 py-6">
-        {/* Action Buttons */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <Link to={`/decks/${deckId}/review`} className="w-full">
             <button
@@ -313,7 +310,6 @@ const Deck = () => {
           </button>
         </div>
 
-        {/* Tabs */}
         <div className="border-b border-gray-200 mb-6">
           <div className="flex space-x-8">
             <button
@@ -339,7 +335,6 @@ const Deck = () => {
           </div>
         </div>
 
-        {/* Tab Content */}
         {activeTab === "cards" && (
           <div>
             {cards.length === 0 ? (
@@ -379,7 +374,6 @@ const Deck = () => {
         {activeTab === "stats" && <Statistics deck={deck} cards={cards} />}
       </div>
 
-      {/* Deletion Confirmation Modal */}
       {isDeleteModalOpen && cardToDelete && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden">
@@ -503,7 +497,6 @@ const Deck = () => {
         </div>
       )}
 
-      {/* Delete Deck Confirmation Modal */}
       {isDeleteDeckModalOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden">
@@ -571,7 +564,6 @@ const Deck = () => {
                 Choose how you want to review your flashcards:
               </p>
               <div className="space-y-4">
-                {/* SRS Option */}
                 <label
                   className={`
                   block p-4 rounded-lg border-2 cursor-pointer transition-all
@@ -602,7 +594,6 @@ const Deck = () => {
                   </div>
                 </label>
 
-                {/* All Cards Option */}
                 <label
                   className={`
                   block p-4 rounded-lg border-2 cursor-pointer transition-all
@@ -632,7 +623,6 @@ const Deck = () => {
                   </div>
                 </label>
 
-                {/* Reversed Option */}
                 <label
                   className={`
                   block p-4 rounded-lg border-2 cursor-pointer transition-all

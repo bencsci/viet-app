@@ -5,7 +5,6 @@ import Sidebar from "../components/sidebar";
 const Conversation = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // Set initial sidebar state based on screen size
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 768) {
