@@ -11,9 +11,9 @@ import {
 } from "react-icons/md";
 import axios from "axios";
 import { UserContext } from "../context/userContext";
-import AddFlashcards from "../components/addFlashcards";
-import Statistics from "../components/statistics";
-import Flashcard from "../components/flashcard";
+import AddFlashcards from "../components/AddFlashcards";
+import Statistics from "../components/Statistics";
+import Flashcard from "../components/Flashcard";
 import SmModal from "../components/modals/smModal";
 import ReviewSettingsModal from "../components/modals/ReviewSettingsModal";
 import DeleteDeckModal from "../components/modals/DeleteDeckModal";

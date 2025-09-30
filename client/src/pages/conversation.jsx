@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import Chat from "../components/chat";
+import Chat from "../components/Chat";
 import Sidebar from "../components/Sidebar";
 
 const Conversation = () => {

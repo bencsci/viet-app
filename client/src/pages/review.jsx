@@ -1,7 +1,7 @@
 import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router";
 import { MdAdd, MdSearch, MdClose, MdSort } from "react-icons/md";
-import DeckCard from "../components/deckCard";
+import DeckCard from "../components/DeckCard";
 import { UserContext } from "../context/userContext";
 import axios from "axios";
 import SmModal from "../components/modals/smModal";

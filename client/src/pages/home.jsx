@@ -13,7 +13,7 @@ import TranslationImg from "../assets/home/TranslationNew.png";
 import DecksImg from "../assets/home/Decks.png";
 import FlashcardImg from "../assets/home/Flashcard.png";
 import ReviewImg from "../assets/home/Review.png";
-import Footer from "../components/footer";
+import Footer from "../components/Footer";
 
 const languages = [
   { code: "us", name: "English", flag: "us.svg" },
