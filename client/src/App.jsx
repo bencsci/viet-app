@@ -12,7 +12,7 @@ import Deck from "./pages/Deck";
 import ReviewDeck from "./pages/reviewDeck";
 import Settings from "./pages/Settings";
 import Onboarding from "./pages/Onboarding";
-import NotFound from "./pages/notFound";
+import NotFound from "./pages/NotFound";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import { UserContext } from "./context/userContext";

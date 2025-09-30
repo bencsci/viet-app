@@ -70,6 +70,7 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
         toast.error("Failed to load conversation.");
         setMessages([]);
         setTitleGenerated(false);
+        setPrevConvoId(null);
         navigate("/404-not-found");
       } finally {
         setIsLoading(false);
