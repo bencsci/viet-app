@@ -1,7 +1,7 @@
 import React from "react";
 import { SignIn, SignUp } from "@clerk/clerk-react";
 
-const login = () => {
+const Login = () => {
   return (
     <div className="flex justify-center items-center h-screen bg-gray-100">
       <SignIn />
@@ -9,4 +9,4 @@ const login = () => {
   );
 };
 
-export default login;
+export default Login;

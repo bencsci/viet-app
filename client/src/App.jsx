@@ -1,25 +1,22 @@
-import { useState, useEffect, useContext } from "react";
-import {
-  SignedIn,
-  SignedOut,
-  useUser,
-} from "@clerk/clerk-react";
+import { useEffect, useContext } from "react";
+import { SignedIn, SignedOut, useUser } from "@clerk/clerk-react";
 import { Routes, Route } from "react-router";
 import { ToastContainer } from "react-toastify";
-import Review from "./pages/review";
-import Conversation from "./pages/conversation";
-import Home from "./pages/home";
-import Login from "./pages/login";
+import Review from "./pages/Review";
+import Conversation from "./pages/Conversation";
+import Home from "./pages/Home";
+import Login from "./pages/Login";
 import NavbarSO from "./components/navbarSO";
 import NavbarSI from "./components/navbarSI";
-import Deck from "./pages/deck";
+import Deck from "./pages/Deck";
 import ReviewDeck from "./pages/reviewDeck";
-import Settings from "./pages/settings";
-import Onboarding from "./pages/onboarding";
+import Settings from "./pages/Settings";
+import Onboarding from "./pages/Onboarding";
 import NotFound from "./pages/notFound";
-import Privacy from "./pages/privacy";
-import Terms from "./pages/terms";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
 import { UserContext } from "./context/userContext";
+import ScrollToTop from "./components/ScrollToTop";
 
 function App() {
   const { user } = useUser();
@@ -59,13 +56,15 @@ function App() {
       </SignedIn>
       <SignedOut>
         <NavbarSO />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="/terms" element={<Terms />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <ScrollToTop>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </ScrollToTop>
       </SignedOut>
     </div>
   );

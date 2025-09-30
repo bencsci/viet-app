@@ -1,14 +1,10 @@
 import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router";
-import {
-  MdAdd,
-  MdSearch,
-  MdClose,
-  MdSort,
-} from "react-icons/md";
+import { MdAdd, MdSearch, MdClose, MdSort } from "react-icons/md";
 import DeckCard from "../components/deckCard";
 import { UserContext } from "../context/userContext";
 import axios from "axios";
+import SmModal from "../components/modals/smModal";
 import Qilin from "../assets/QilingoLeft.svg";
 
 const formatLastReviewed = (dateString) => {
@@ -249,60 +245,17 @@ const Review = () => {
         </div>
       )}
 
-      {/* Create Deck Modal */}
       {isCreateModalOpen && (
-        <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
-          <div
-            className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="bg-[#47A1BE] text-white px-4 py-3 flex items-center justify-between">
-              <h3 className="font-medium">Create New Deck</h3>
-              <button
-                onClick={() => setIsCreateModalOpen(false)}
-                className="p-1 hover:bg-[#47A1BE] rounded transition-colors"
-              >
-                <MdClose className="w-5 h-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleCreateDeck} className="p-4">
-              <div className="mb-4">
-                <label
-                  htmlFor="deckName"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Deck Name
-                </label>
-                <input
-                  type="text"
-                  id="deckName"
-                  value={newDeckName}
-                  onChange={(e) => setNewDeckName(e.target.value)}
-                  placeholder="Enter a name for your deck"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#47A1BE] focus:border-transparent"
-                  autoFocus
-                />
-              </div>
-
-              <div className="flex justify-end space-x-2">
-                <button
-                  type="button"
-                  onClick={() => setIsCreateModalOpen(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-[#47A1BE] text-white rounded-md hover:bg-[#47A1BE] focus:outline-none focus:ring-2 focus:ring-[#47A1BE] focus:ring-offset-2"
-                >
-                  Create Deck
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <SmModal
+          modalName="Create Deck"
+          valName="Deck Name"
+          value={newDeckName}
+          handleSubmit={handleCreateDeck}
+          onClose={() => setIsCreateModalOpen(false)}
+          onChange={(e) => setNewDeckName(e.target.value)}
+          placeholder="Enter a name for your deck"
+          submitButtonText="Create Deck"
+        />
       )}
     </div>
   );

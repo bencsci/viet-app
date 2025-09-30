@@ -3,7 +3,6 @@ import axios from "axios";
 import { useAuth } from "@clerk/clerk-react";
 import {
   MdAdd,
-  MdChat,
   MdDelete,
   MdEdit,
   MdMoreVert,
@@ -17,12 +16,8 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
   const {
     setPrevConvoId,
     conversations,
-    setConversations,
     loadConversations,
     backendUrl,
-    language,
-    isOnboarding,
-    isNewConversation,
     setIsNewConversation,
   } = useContext(UserContext);
   const { convoId } = useParams();

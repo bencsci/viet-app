@@ -6,9 +6,6 @@ import {
   MdArrowBack,
   MdPlayArrow,
   MdEdit,
-  MdBarChart,
-  MdCheck,
-  MdClose,
   MdDelete,
   MdSettings,
 } from "react-icons/md";
@@ -17,6 +14,10 @@ import { UserContext } from "../context/userContext";
 import AddFlashcards from "../components/addFlashcards";
 import Statistics from "../components/statistics";
 import Flashcard from "../components/flashcard";
+import SmModal from "../components/modals/smModal";
+import ReviewSettingsModal from "../components/modals/ReviewSettingsModal";
+import DeleteDeckModal from "../components/modals/DeleteDeckModal";
+import DeleteFlashCardModal from "../components/modals/DeleteFlashCardModal";
 
 const Deck = () => {
   const { deckId } = useParams();
@@ -375,296 +376,43 @@ const Deck = () => {
       </div>
 
       {isDeleteModalOpen && cardToDelete && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden">
-            <div className="bg-[#47A1BE] text-white px-4 py-3 flex items-center justify-between">
-              <h3 className="font-medium">Confirm Deletion</h3>
-              <button
-                onClick={() => {
-                  setIsDeleteModalOpen(false);
-                  setCardToDelete(null);
-                }}
-                className="p-1 hover:bg-[#47A1BE] rounded transition-colors"
-              >
-                <MdClose className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-6">
-              <p className="mb-4 text-gray-700">
-                You're about to remove this flashcard from your deck. This
-                action cannot be undone.
-              </p>
-
-              <div className="flex flex-col space-y-3 mb-6 bg-gray-50 p-4 rounded-lg border border-gray-100">
-                <div>
-                  <h4 className="text-sm font-medium text-gray-500 mb-1">
-                    Front:
-                  </h4>
-                  <p className="text-gray-800 font-medium">
-                    {cardToDelete.front}
-                  </p>
-                </div>
-
-                <div>
-                  <h4 className="text-sm font-medium text-gray-500 mb-1">
-                    Back:
-                  </h4>
-                  <p className="text-gray-800 font-medium">
-                    {cardToDelete.back}
-                  </p>
-                </div>
-              </div>
-
-              <p className="text-sm text-gray-500 mb-6">
-                If you're sure you want to delete this flashcard, please confirm
-                below.
-              </p>
-
-              <div className="flex justify-end space-x-3">
-                <button
-                  onClick={() => {
-                    setIsDeleteModalOpen(false);
-                    setCardToDelete(null);
-                  }}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={confirmDeleteFlashcard}
-                  className="px-4 py-2 bg-[#47A1BE] text-white rounded-md hover:bg-[#47A1BE]"
-                >
-                  Delete Flashcard
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <DeleteFlashCardModal
+          onClose={() => {
+            setIsDeleteModalOpen(false);
+            setCardToDelete(null);
+          }}
+          flashcard={cardToDelete}
+          deleteCard={confirmDeleteFlashcard}
+        ></DeleteFlashCardModal>
       )}
 
       {renameModalOpen && (
-        <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
-          <div
-            className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="bg-[#47A1BE] text-white px-4 py-3 flex items-center justify-between">
-              <h3 className="font-medium">Rename Deck</h3>
-              <button
-                onClick={() => setRenameModalOpen(false)}
-                className="p-1 hover:bg-[#47A1BE] rounded transition-colors"
-              >
-                <MdClose className="w-5 h-5" />
-              </button>
-            </div>
-
-            <form onSubmit={editTitle} className="p-4">
-              <div className="mb-4">
-                <label
-                  htmlFor="title"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  New Title
-                </label>
-                <input
-                  type="text"
-                  id="title"
-                  value={newTitle}
-                  onChange={(e) => setNewTitle(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#47A1BE] focus:border-transparent"
-                  autoFocus
-                />
-              </div>
-
-              <div className="flex justify-end space-x-2">
-                <button
-                  type="button"
-                  onClick={() => setRenameModalOpen(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-[#47A1BE] text-white rounded-md hover:bg-[#47A1BE] focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-                >
-                  Save
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <SmModal
+          modalName="Rename Deck"
+          valName="New Title"
+          value={newTitle}
+          handleSubmit={editTitle}
+          onClose={() => setRenameModalOpen(false)}
+          onChange={(e) => setNewTitle(e.target.value)}
+          placeholder=""
+          submitButtonText="Save"
+        ></SmModal>
       )}
 
       {isDeleteDeckModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden">
-            <div className="bg-[#47A1BE] text-white px-4 py-3 flex items-center justify-between">
-              <h3 className="font-medium">Delete Deck</h3>
-              <button
-                onClick={() => setIsDeleteDeckModalOpen(false)}
-                className="p-1 hover:bg-[#47A1BE] rounded transition-colors"
-              >
-                <MdClose className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-6">
-              <div className="flex items-center justify-center mb-4 text-red-500">
-                <MdDelete className="w-16 h-16" />
-              </div>
-
-              <h3 className="text-xl font-bold text-center mb-2">
-                Delete "{deck.title}"?
-              </h3>
-
-              <p className="mb-6 text-gray-700 text-center">
-                This will permanently delete this deck and all {deck.card_count}{" "}
-                flashcards it contains. This action cannot be undone.
-              </p>
-
-              <div className="flex justify-end space-x-3">
-                <button
-                  onClick={() => setIsDeleteDeckModalOpen(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={removeDeck}
-                  className="px-4 py-2 bg-[#47A1BE] text-white rounded-md hover:bg-[#47A1BE]"
-                >
-                  Delete Deck
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <DeleteDeckModal
+          onClose={() => setIsDeleteDeckModalOpen(false)}
+          deleteDeck={() => removeDeck()}
+          deck={deck}
+        ></DeleteDeckModal>
       )}
 
       {isReviewSettingsOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden">
-            <div className="bg-[#47A1BE] text-white px-6 py-4 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <MdSettings className="text-xl" />
-                <h3 className="text-lg font-medium">Review Settings</h3>
-              </div>
-              <button
-                onClick={() => setIsReviewSettingsOpen(false)}
-                className="p-2 hover:bg-[#3E89A3] rounded-full transition-colors"
-              >
-                <MdClose className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-6">
-              <p className="text-gray-600 mb-6">
-                Choose how you want to review your flashcards:
-              </p>
-              <div className="space-y-4">
-                <label
-                  className={`
-                  block p-4 rounded-lg border-2 cursor-pointer transition-all
-                  ${
-                    reviewMode === "srs"
-                      ? "border-[#47A1BE] bg-blue-50"
-                      : "border-gray-200 hover:border-gray-300"
-                  }
-                `}
-                >
-                  <div className="flex items-center gap-4">
-                    <input
-                      type="radio"
-                      name="reviewMode"
-                      checked={reviewMode === "srs"}
-                      onChange={() => setReviewMode("srs")}
-                      className="w-5 h-5 text-[#47A1BE] focus:ring-[#47A1BE]"
-                    />
-                    <div className="flex-1">
-                      <h4 className="font-medium text-gray-900 mb-1">
-                        Spaced Repetition
-                      </h4>
-                      <p className="text-sm text-gray-600">
-                        Smart review system that prioritizes cards based on your
-                        performance and review history
-                      </p>
-                    </div>
-                  </div>
-                </label>
-
-                <label
-                  className={`
-                  block p-4 rounded-lg border-2 cursor-pointer transition-all
-                  ${
-                    reviewMode === "all"
-                      ? "border-[#47A1BE] bg-blue-50"
-                      : "border-gray-200 hover:border-gray-300"
-                  }
-                `}
-                >
-                  <div className="flex items-center gap-4">
-                    <input
-                      type="radio"
-                      name="reviewMode"
-                      checked={reviewMode === "all"}
-                      onChange={() => setReviewMode("all")}
-                      className="w-5 h-5 text-[#47A1BE] focus:ring-[#47A1BE]"
-                    />
-                    <div className="flex-1">
-                      <h4 className="font-medium text-gray-900 mb-1">
-                        All Cards (Shuffled)
-                      </h4>
-                      <p className="text-sm text-gray-600">
-                        Review all cards in your deck in a random order
-                      </p>
-                    </div>
-                  </div>
-                </label>
-
-                <label
-                  className={`
-                  block p-4 rounded-lg border-2 cursor-pointer transition-all
-                  ${
-                    reviewMode === "reversed"
-                      ? "border-[#47A1BE] bg-blue-50"
-                      : "border-gray-200 hover:border-gray-300"
-                  }
-                `}
-                >
-                  <div className="flex items-center gap-4">
-                    <input
-                      type="radio"
-                      name="reviewMode"
-                      checked={reviewMode === "reversed"}
-                      onChange={() => setReviewMode("reversed")}
-                      className="w-5 h-5 text-[#47A1BE] focus:ring-[#47A1BE]"
-                    />
-                    <div className="flex-1">
-                      <h4 className="font-medium text-gray-900 mb-1">
-                        Reversed Cards
-                      </h4>
-                      <p className="text-sm text-gray-600">
-                        Test yourself by switching the front and back of all
-                        cards
-                      </p>
-                    </div>
-                  </div>
-                </label>
-              </div>
-
-              <div className="mt-8 flex justify-end">
-                <button
-                  onClick={() => setIsReviewSettingsOpen(false)}
-                  className="px-6 py-2.5 bg-[#47A1BE] text-white rounded-lg hover:bg-[#3E89A3] transition-colors font-medium"
-                >
-                  Save
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <ReviewSettingsModal
+          reviewMode={reviewMode}
+          setReviewMode={setReviewMode}
+          onClose={() => setIsReviewSettingsOpen(false)}
+        />
       )}
     </div>
   );

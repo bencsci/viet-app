@@ -1,6 +1,5 @@
 import React from "react";
 import Footer from "../components/footer";
-
 const Privacy = () => {
   return (
     <div className="min-h-screen bg-gray-50">

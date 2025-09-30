@@ -9,7 +9,10 @@ const Footer = () => {
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row justify-between items-center">
           <div className="mb-4 md:mb-0 text-center md:text-left">
-            <h3 className="text-xl font-bold mb-2">Qilingo</h3>
+            <h3 className="text-xl font-bold mb-2">
+              <Link to="/">Qilingo</Link>
+            </h3>
+
             <p className="text-blue-100 text-sm max-w-xs">
               Learn languages naturally through conversations.
             </p>
