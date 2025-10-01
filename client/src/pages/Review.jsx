@@ -6,6 +6,7 @@ import { UserContext } from "../context/userContext";
 import axios from "axios";
 import SmModal from "../components/modals/SmModal";
 import Qilin from "../assets/QilingoLeft.svg";
+import Spinner from "../components/Spinner";
 
 const formatLastReviewed = (dateString) => {
   if (!dateString || dateString === "null") return "Never reviewed";
@@ -189,13 +190,7 @@ const Review = () => {
         </div>
       </div>
 
-      {loadingDecks && (
-        <div className="max-w-6xl mx-auto px-4 md:px-8 py-12 flex justify-center">
-          <div className="flex flex-col items-center">
-            <div className="w-12 h-12 border-4 border-[#47A1BE] border-t-transparent rounded-full animate-spin"></div>
-          </div>
-        </div>
-      )}
+      {loadingDecks && <Spinner w="w-12" h="h-12" />}
 
       {/* Decks Grid */}
       {!loadingDecks && (

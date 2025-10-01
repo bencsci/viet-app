@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { MdClear } from "react-icons/md";
-import { UserContext } from "../context/userContext";
+import { UserContext } from "../../context/userContext";
 import { toast } from "react-toastify";
 
 const FlashcardModal = ({ isOpen, onClose, initialFront, initialBack }) => {

@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { UserContext } from "../context/userContext";
 import axios from "axios";
+import Spinner from "../components/Spinner";
 
 const Settings = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -140,11 +141,7 @@ const Settings = () => {
               </div>
             </>
           )}
-          {isLoading && (
-            <div className="flex justify-center py-12">
-              <div className="w-12 h-12 border-4 border-[#47A1BE] border-t-transparent rounded-full animate-spin"></div>
-            </div>
-          )}
+          {isLoading && <Spinner />}
         </div>
       </div>
     </div>

@@ -12,7 +12,7 @@ import { UserContext } from "../context/userContext";
 import { useParams, useNavigate } from "react-router";
 import { toast } from "react-toastify";
 import ChatBubble from "./ChatBubble";
-import FlashcardModal from "./FlashcardModal";
+import FlashcardModal from "./modals/FlashcardModal";
 
 const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
   const { getToken } = useAuth();
@@ -153,7 +153,8 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
       let newConvoId = convoId;
       try {
         const token = await getToken();
-
+        
+        // Create a new converstion, if new
         if (!convoId && messagesToSend.length > 0) {
           const createRes = await axios.post(
             `${backendUrl}/api/history/save`,
@@ -170,7 +171,8 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
             throw new Error("Failed to create conversation.");
           }
         }
-
+        
+        // Send message
         const chatRes = await axios.post(
           `${backendUrl}/api/chat/send`,
           { messages: messagesToSend, convoId: newConvoId },

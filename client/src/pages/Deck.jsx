@@ -18,6 +18,7 @@ import SmModal from "../components/modals/SmModal";
 import ReviewSettingsModal from "../components/modals/ReviewSettingsModal";
 import DeleteDeckModal from "../components/modals/DeleteDeckModal";
 import DeleteFlashCardModal from "../components/modals/DeleteFlashCardModal";
+import Spinner from "../components/Spinner";
 
 const Deck = () => {
   const { deckId } = useParams();
@@ -203,7 +204,7 @@ const Deck = () => {
   if (loading) {
     return (
       <div className="pt-16 min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-[#47A1BE] border-t-transparent rounded-full animate-spin"></div>
+        <Spinner />
       </div>
     );
   }

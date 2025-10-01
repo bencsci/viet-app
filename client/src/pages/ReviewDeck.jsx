@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useContext, act } from "react";
-import { MdClose, MdArrowBack, MdCheck, MdRefresh } from "react-icons/md";
-import { Link, useNavigate } from "react-router";
+import { MdArrowBack, MdRefresh } from "react-icons/md";
+import { useNavigate } from "react-router";
 import { useParams } from "react-router";
 import axios from "axios";
 import { UserContext } from "../context/userContext";
+import Spinner from "../components/Spinner";
 
 const ReviewDeck = () => {
   const { backendUrl, getToken, reviewMode, listDecks } =
@@ -322,7 +323,7 @@ const ReviewDeck = () => {
   if (loadingDeck || !deck) {
     return (
       <div className="pt-16 min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-[#47A1BE] border-t-transparent rounded-full animate-spin"></div>
+        <Spinner />
       </div>
     );
   }
