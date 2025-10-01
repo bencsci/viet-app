@@ -4,7 +4,7 @@ import { MdAdd, MdSearch, MdClose, MdSort } from "react-icons/md";
 import DeckCard from "../components/DeckCard";
 import { UserContext } from "../context/userContext";
 import axios from "axios";
-import SmModal from "../components/modals/smModal";
+import SmModal from "../components/modals/SmModal";
 import Qilin from "../assets/QilingoLeft.svg";
 
 const formatLastReviewed = (dateString) => {

@@ -14,7 +14,7 @@ import { UserContext } from "../context/userContext";
 import AddFlashcards from "../components/AddFlashcards";
 import Statistics from "../components/Statistics";
 import Flashcard from "../components/Flashcard";
-import SmModal from "../components/modals/smModal";
+import SmModal from "../components/modals/SmModal";
 import ReviewSettingsModal from "../components/modals/ReviewSettingsModal";
 import DeleteDeckModal from "../components/modals/DeleteDeckModal";
 import DeleteFlashCardModal from "../components/modals/DeleteFlashCardModal";
