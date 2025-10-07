@@ -29,7 +29,7 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
   const [inputMessage, setInputMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [titleGenerated, setTitleGenerated] = useState(false);
+  const [isGeneratingTitle, setisGeneratingTitle] = useState(false);
   const navigate = useNavigate();
   const { convoId } = useParams();
   const [isFlashcardModalOpen, setIsFlashcardModalOpen] = useState(false);
@@ -53,23 +53,13 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
         );
         if (res.data && res.data.messages) {
           setMessages(res.data.messages);
-          const convo = conversations.find(
-            (c) => c.id.toString() === currentConvoId.toString()
-          );
-          if (convo && convo.title) {
-            setTitleGenerated(true);
-          } else {
-            setTitleGenerated(false);
-          }
         } else {
           setMessages([]);
-          setTitleGenerated(false);
         }
       } catch (error) {
         console.error("Error loading conversation:", error);
         toast.error("Failed to load conversation.");
         setMessages([]);
-        setTitleGenerated(false);
         setPrevConvoId(null);
         navigate("/404-not-found");
       } finally {
@@ -88,48 +78,15 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
       setIsLoading(false);
       setMessages([]);
       setIsNewConversation(true);
-      setTitleGenerated(false);
     }
   }, [convoId]);
-
-  useEffect(() => {
-    if (!isLoading) {
-      if (convoId) {
-        const convo = conversations.find(
-          (c) => c.id.toString() === convoId.toString()
-        );
-
-        if (convo) {
-          if (convo.title) {
-            setTitleGenerated(true);
-          } else {
-            setTitleGenerated(false);
-          }
-
-          if (
-            messages.length === 4 &&
-            convoId &&
-            !convo.title &&
-            !titleGenerated
-          ) {
-            console.log("Generating title...");
-            generateTitle(messages, convoId);
-          }
-        }
-      }
-    }
-
-    if (!convoId) {
-      setIsNewConversation(true);
-    } else {
-      setIsNewConversation(false);
-    }
-  }, [messages]);
 
   const generateTitle = useCallback(
     async (currentMessages, currentConvoId) => {
       if (!currentMessages || currentMessages.length < 2 || !currentConvoId)
         return;
+
+      setisGeneratingTitle(true);
       try {
         const token = await getToken();
         await axios.post(
@@ -141,7 +98,8 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
         listDecks();
       } catch (error) {
         console.error("Error generating title:", error);
-        setTitleGenerated(false);
+      } finally {
+        setisGeneratingTitle(false);
       }
     },
     [getToken, backendUrl, listDecks]
@@ -153,7 +111,7 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
       let newConvoId = convoId;
       try {
         const token = await getToken();
-        
+
         // Create a new converstion, if new
         if (!convoId && messagesToSend.length > 0) {
           const createRes = await axios.post(
@@ -171,7 +129,7 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
             throw new Error("Failed to create conversation.");
           }
         }
-        
+
         // Send message
         const chatRes = await axios.post(
           `${backendUrl}/api/chat/send`,
@@ -188,6 +146,10 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
         toast.error("Failed to send message. Please try again.");
         setMessages((prev) => prev.slice(0, -1));
       } finally {
+        console.log(messages.length);
+        if (newConvoId && messages.length === 4 && !isGeneratingTitle) {
+          generateTitle(messages, newConvoId);
+        }
         setIsTyping(false);
       }
     },
