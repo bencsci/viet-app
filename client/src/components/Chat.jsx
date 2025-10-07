@@ -5,17 +5,14 @@ import React, {
   useContext,
   useCallback,
 } from "react";
-import axios from "axios";
-import { useAuth } from "@clerk/clerk-react";
 import { AiOutlineMenuFold } from "react-icons/ai";
 import { UserContext } from "../context/userContext";
-import { useParams, useNavigate } from "react-router";
-import { toast } from "react-toastify";
+import { useParams } from "react-router";
 import ChatBubble from "./ChatBubble";
 import FlashcardModal from "./modals/FlashcardModal";
+import { useChat } from "../hooks/useChat";
 
 const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
-  const { getToken } = useAuth();
   const {
     conversations,
     setPrevConvoId,
@@ -24,50 +21,28 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
     setIsNewConversation,
     listDecks,
   } = useContext(UserContext);
+
   const messagesEndRef = useRef(null);
-  const [messages, setMessages] = useState([]);
-  const [inputMessage, setInputMessage] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isGeneratingTitle, setisGeneratingTitle] = useState(false);
-  const navigate = useNavigate();
   const { convoId } = useParams();
+  const [inputMessage, setInputMessage] = useState("");
   const [isFlashcardModalOpen, setIsFlashcardModalOpen] = useState(false);
   const [flashcardModalData, setFlashcardModalData] = useState({
     front: "",
     back: "",
   });
-  const [isAudioPlayingGlobally, setIsAudioPlayingGlobally] = useState(false);
 
-  const loadMessages = useCallback(
-    async (currentConvoId) => {
-      setIsLoading(true);
-      try {
-        const token = await getToken();
-        const res = await axios.post(
-          `${backendUrl}/api/history/get`,
-          { convoId: currentConvoId },
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        if (res.data && res.data.messages) {
-          setMessages(res.data.messages);
-        } else {
-          setMessages([]);
-        }
-      } catch (error) {
-        console.error("Error loading conversation:", error);
-        toast.error("Failed to load conversation.");
-        setMessages([]);
-        setPrevConvoId(null);
-        navigate("/404-not-found");
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [getToken, backendUrl, conversations, navigate]
-  );
+  const {
+    messages,
+    setMessages,
+    isTyping,
+    isLoading,
+    setIsLoading,
+    loadMessages,
+    sendMessage,
+    updateConversation,
+    translateText,
+    playAudio,
+  } = useChat(setPrevConvoId, setIsNewConversation, listDecks);
 
   useEffect(() => {
     if (convoId) {
@@ -79,192 +54,24 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
       setMessages([]);
       setIsNewConversation(true);
     }
-  }, [convoId]);
+  }, [
+    convoId,
+    loadMessages,
+    setPrevConvoId,
+    setIsNewConversation,
+    setMessages,
+    setIsLoading,
+  ]);
 
-  const generateTitle = useCallback(
-    async (currentMessages, currentConvoId) => {
-      if (!currentMessages || currentMessages.length < 2 || !currentConvoId)
-        return;
+  useEffect(() => {
+    if (conversations && convoId && messages.length > 0) {
+      updateConversation(messages, convoId);
+    }
+  }, [messages, convoId, conversations, updateConversation]);
 
-      setisGeneratingTitle(true);
-      try {
-        const token = await getToken();
-        await axios.post(
-          `${backendUrl}/api/history/generate-title`,
-          { messages: currentMessages, convoId: currentConvoId },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        console.log("Title generation request sent for:", currentConvoId);
-        listDecks();
-      } catch (error) {
-        console.error("Error generating title:", error);
-      } finally {
-        setisGeneratingTitle(false);
-      }
-    },
-    [getToken, backendUrl, listDecks]
-  );
-
-  const sendMessageToOpenAI = useCallback(
-    async (messagesToSend) => {
-      setIsTyping(true);
-      let newConvoId = convoId;
-      try {
-        const token = await getToken();
-
-        // Create a new converstion, if new
-        if (!convoId && messagesToSend.length > 0) {
-          const createRes = await axios.post(
-            `${backendUrl}/api/history/save`,
-            { messages: [messagesToSend[0]] },
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
-          if (createRes.data && createRes.data.id) {
-            newConvoId = createRes.data.id;
-            navigate(`/c/${newConvoId}`, { replace: true });
-            setIsNewConversation(false);
-            setPrevConvoId(newConvoId);
-            listDecks();
-          } else {
-            throw new Error("Failed to create conversation.");
-          }
-        }
-
-        // Send message
-        const chatRes = await axios.post(
-          `${backendUrl}/api/chat/send`,
-          { messages: messagesToSend, convoId: newConvoId },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-
-        setMessages((prev) => [
-          ...prev,
-          { role: "assistant", content: chatRes.data.reply },
-        ]);
-      } catch (error) {
-        console.error("Error sending message:", error);
-        toast.error("Failed to send message. Please try again.");
-        setMessages((prev) => prev.slice(0, -1));
-      } finally {
-        console.log(messages.length);
-        if (newConvoId && messages.length === 4 && !isGeneratingTitle) {
-          generateTitle(messages, newConvoId);
-        }
-        setIsTyping(false);
-      }
-    },
-    [
-      convoId,
-      getToken,
-      backendUrl,
-      navigate,
-      setIsNewConversation,
-      setPrevConvoId,
-      listDecks,
-    ]
-  );
-
-  const updateDatabase = useCallback(
-    async (currentMessages, currentConvoId) => {
-      if (updateDatabase.timeoutId) {
-        clearTimeout(updateDatabase.timeoutId);
-      }
-      updateDatabase.timeoutId = setTimeout(async () => {
-        try {
-          const token = await getToken();
-          await axios.post(
-            `${backendUrl}/api/history/update`,
-            { messages: currentMessages, convoId: currentConvoId },
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
-        } catch (error) {
-          console.error("Error updating conversation in DB:", error);
-        }
-      }, 1500);
-    },
-    [getToken, backendUrl]
-  );
-
-  const translateText = useCallback(
-    async (text) => {
-      if (!text) return null;
-      try {
-        const token = await getToken();
-        const res = await axios.post(
-          `${backendUrl}/api/chat/translate`,
-          { words: text },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        return res.data.translation;
-      } catch (error) {
-        console.error("Translation API error:", error);
-        toast.error("Translation failed.");
-        throw error;
-      }
-    },
-    [getToken, backendUrl]
-  );
-
-  const playAudio = useCallback(
-    async (text) => {
-      if (!text || isAudioPlayingGlobally) {
-        console.log("playAudio blocked:", {
-          textExists: !!text,
-          isAudioPlayingGlobally,
-        });
-        return;
-      }
-
-      setIsAudioPlayingGlobally(true);
-      let audioUrl = null;
-
-      try {
-        const token = await getToken();
-        console.log("Requesting TTS blob from backend...");
-        const response = await axios.post(
-          `${backendUrl}/api/chat/tts`,
-          { text },
-          {
-            headers: { Authorization: `Bearer ${token}` },
-            responseType: "blob",
-          }
-        );
-
-        console.log(
-          "Received TTS blob, type:",
-          response.data.type,
-          "size:",
-          response.data.size
-        );
-        const audioBlob = new Blob([response.data], { type: "audio/mp3" });
-        audioUrl = URL.createObjectURL(audioBlob);
-        const audio = new Audio(audioUrl);
-
-        console.log("Attempting to play audio...");
-        await audio.play();
-
-        audio.onended = () => {
-          console.log("Audio playback finished.");
-          URL.revokeObjectURL(audioUrl);
-          setIsAudioPlayingGlobally(false);
-        };
-
-        audio.onerror = (err) => {
-          console.error("Audio element error:", err);
-          if (audioUrl) URL.revokeObjectURL(audioUrl);
-          setIsAudioPlayingGlobally(false);
-          toast.error("Error playing audio.");
-        };
-      } catch (error) {
-        console.error("TTS Error in playAudio:", error);
-        if (audioUrl) URL.revokeObjectURL(audioUrl);
-        setIsAudioPlayingGlobally(false);
-        toast.error("Failed to fetch audio.");
-        throw error;
-      }
-    },
-    [getToken, backendUrl, isAudioPlayingGlobally]
-  );
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isTyping]);
 
   const handleShowFlashcardModal = useCallback((front, back) => {
     setFlashcardModalData({ front, back });
@@ -279,24 +86,8 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
     setMessages((prev) => [...prev, newMessage]);
     setInputMessage("");
 
-    sendMessageToOpenAI([...messages, newMessage]);
+    sendMessage([...messages, newMessage], convoId);
   };
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages, isTyping]);
-
-  useEffect(() => {
-    if (conversations) {
-      if (convoId && messages.length > 0) {
-        updateDatabase(messages, convoId);
-      }
-    }
-  }, [messages]);
 
   return (
     <div className="flex flex-col h-[calc(100vh-64px)] bg-gray-50 transition-all duration-300 ease-in-out">
