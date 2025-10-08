@@ -3,8 +3,9 @@ import { MdAdd, MdClose } from "react-icons/md";
 import axios from "axios";
 import { UserContext } from "../context/userContext";
 import { toast } from "react-toastify";
+import { useFlashcard } from "../hooks/useFlashcard";
 
-const AddFlashcards = ({ deck, listFlashcards, loadDeck }) => {
+const AddFlashcards = ({ loadDeck, addFlashcards }) => {
   const { backendUrl, getToken, listDecks } = useContext(UserContext);
   const [newFlashcards, setNewFlashcards] = useState([
     { id: 0, front: "", back: "" },
@@ -44,34 +45,10 @@ const AddFlashcards = ({ deck, listFlashcards, loadDeck }) => {
 
     setIsSubmitting(true);
 
-    try {
-      const token = await getToken();
-
-      await axios.post(
-        `${backendUrl}/api/decks/add-multiple-flashcards`,
-        {
-          deckId: deck.id,
-          cards: validCards,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      setNewFlashcards([{ id: 0, front: "", back: "" }]);
-      await listFlashcards();
-      await loadDeck();
-      listDecks();
-
-      const updateMessage =
-        validCards.length === 1 ? "Added Flashcard!" : "Added Flashcards!";
-      toast.success(updateMessage);
-    } catch (error) {
-      console.error("Error creating flashcards:", error);
-      toast.error("Failed to add flashcards");
-    } finally {
-      setIsSubmitting(false);
-    }
+    await addFlashcards(validCards);
+    loadDeck();
+    setNewFlashcards([{ id: 0, front: "", back: "" }]);
+    setIsSubmitting(false);
   };
 
   return (

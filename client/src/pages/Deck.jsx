@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { useParams, Link, useNavigate } from "react-router";
-import { useAuth } from "@clerk/clerk-react";
+import { useParams, Link } from "react-router";
 import {
   MdAdd,
   MdArrowBack,
@@ -9,7 +8,6 @@ import {
   MdDelete,
   MdSettings,
 } from "react-icons/md";
-import axios from "axios";
 import { UserContext } from "../context/userContext";
 import AddFlashcards from "../components/AddFlashcards";
 import Statistics from "../components/Statistics";
@@ -19,94 +17,33 @@ import ReviewSettingsModal from "../components/modals/ReviewSettingsModal";
 import DeleteDeckModal from "../components/modals/DeleteDeckModal";
 import DeleteFlashCardModal from "../components/modals/DeleteFlashCardModal";
 import Spinner from "../components/Spinner";
+import { useDeck } from "../hooks/useDeck";
+import { useFlashcard } from "../hooks/useFlashcard";
 
 const Deck = () => {
   const { deckId } = useParams();
-  const { backendUrl, reviewMode, setReviewMode, listDecks } =
-    useContext(UserContext);
-  const { getToken } = useAuth();
-  const [deck, setDeck] = useState(null);
-  const [cards, setCards] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { reviewMode, setReviewMode, listDecks } = useContext(UserContext);
   const [activeTab, setActiveTab] = useState("cards");
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [cardToDelete, setCardToDelete] = useState(null);
   const [newTitle, setNewTitle] = useState("");
   const [renameModalOpen, setRenameModalOpen] = useState(false);
   const [isDeleteDeckModalOpen, setIsDeleteDeckModalOpen] = useState(false);
-  const navigate = useNavigate();
   const [isReviewSettingsOpen, setIsReviewSettingsOpen] = useState(false);
+  const { deck, loading, removeDeck, loadDeck, editTitle } = useDeck(
+    deckId,
+    listDecks
+  );
+  const { cards, listFlashcards, removeFlashcard, addFlashcards, updateCard } =
+    useFlashcard(deckId, listDecks);
 
   useEffect(() => {
-    loadDeck();
-    listFlashcards();
+    const loadData = async () => {
+      await loadDeck();
+      listFlashcards();
+    };
+    loadData();
   }, [deckId]);
-
-  const removeDeck = async () => {
-    try {
-      const token = await getToken();
-      await axios.post(
-        `${backendUrl}/api/decks/remove`,
-        { deckId: deckId },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      listDecks();
-      navigate("/decks");
-    } catch (error) {
-      console.log("Error deleting deck:", error);
-      alert("Failed to delete deck. Please try again.");
-    }
-  };
-
-  const loadDeck = async () => {
-    try {
-      setLoading(true);
-      const token = await getToken();
-      const res = await axios.post(
-        `${backendUrl}/api/decks/get`,
-        { deckId: deckId },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      setDeck(res.data);
-    } catch (error) {
-      console.error("Error loading deck:", error);
-      navigate("/404-not-found");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const listFlashcards = async () => {
-    try {
-      const token = await getToken();
-      const res = await axios.post(
-        `${backendUrl}/api/decks/list-flashcards`,
-        {
-          deckId,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      setCards(res.data);
-    } catch (error) {
-      console.error("Error listing flashcards:", error);
-      navigate("/404-not-found");
-    }
-  };
 
   const deleteFlashcard = async (card, e) => {
     if (e) {
@@ -121,62 +58,16 @@ const Deck = () => {
   const confirmDeleteFlashcard = async () => {
     if (!cardToDelete) return;
 
-    try {
-      const token = await getToken();
-
-      await axios.post(
-        `${backendUrl}/api/decks/remove-flashcard`,
-        {
-          deckId,
-          flashcardId: cardToDelete.id,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      setCards((prevCards) =>
-        prevCards.filter((c) => c.id !== cardToDelete.id)
-      );
-
-      loadDeck();
-      listDecks();
-
-      console.log("Flashcard deleted successfully");
-    } catch (error) {
-      console.error("Error deleting flashcard:", error);
-      alert("Failed to delete flashcard. Please try again.");
-    } finally {
-      setIsDeleteModalOpen(false);
-      setCardToDelete(null);
-    }
+    await removeFlashcard(cardToDelete.id);
+    loadDeck();
+    setIsDeleteModalOpen(false);
+    setCardToDelete(null);
   };
 
-  const editTitle = async (e) => {
+  const submitTitle = (e) => {
     e.preventDefault();
-
-    try {
-      const token = await getToken();
-      await axios.post(
-        `${backendUrl}/api/decks/edit`,
-        {
-          deckId,
-          title: newTitle,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      setRenameModalOpen(false);
-      loadDeck();
-    } catch (error) {
-      console.log("Error updating deck title", error);
-    }
+    editTitle(newTitle);
+    setRenameModalOpen(false);
   };
 
   const getGradeInfo = (mastery, totalReviews) => {
@@ -358,7 +249,7 @@ const Deck = () => {
                   <Flashcard
                     key={card.id}
                     card={card}
-                    listFlashcards={listFlashcards}
+                    updateCard={updateCard}
                     onDelete={() => deleteFlashcard(card)}
                   />
                 ))}
@@ -367,8 +258,10 @@ const Deck = () => {
 
             <AddFlashcards
               deck={deck}
-              listFlashcards={listFlashcards}
-              loadDeck={loadDeck}
+              addFlashcards={addFlashcards}
+              loadDeck={() => {
+                loadDeck(deckId);
+              }}
             />
           </div>
         )}
@@ -392,7 +285,7 @@ const Deck = () => {
           modalName="Rename Deck"
           valName="New Title"
           value={newTitle}
-          handleSubmit={editTitle}
+          handleSubmit={submitTitle}
           onClose={() => setRenameModalOpen(false)}
           onChange={(e) => setNewTitle(e.target.value)}
           placeholder=""

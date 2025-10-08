@@ -3,9 +3,9 @@ import { MdEdit, MdDelete, MdSave, MdClose } from "react-icons/md";
 import axios from "axios";
 import { UserContext } from "../context/userContext";
 import { toast } from "react-toastify";
+import { useFlashcard } from "../hooks/useFlashcard";
 
-const Flashcard = ({ card, listFlashcards, onDelete }) => {
-  const { backendUrl, getToken } = useContext(UserContext);
+const Flashcard = ({ card, updateCard, onDelete }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [newCard, setNewCard] = useState({
     front: card.front,
@@ -74,27 +74,7 @@ const Flashcard = ({ card, listFlashcards, onDelete }) => {
   };
 
   const editCard = async () => {
-    try {
-      const token = await getToken();
-      await axios.post(
-        `${backendUrl}/api/decks/edit-flashcard`,
-        {
-          cardId: card.id,
-          newFront: newCard.front,
-          newBack: newCard.back,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      await listFlashcards();
-      toast.success("Flashcard Updated!");
-    } catch (error) {
-      console.log("Error editing card", error);
-    }
+    await updateCard(card.id, newCard.front, newCard.back);
     setIsEditing(false);
   };
 

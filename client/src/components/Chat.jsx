@@ -16,7 +16,6 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
   const {
     conversations,
     setPrevConvoId,
-    backendUrl,
     isNewConversation,
     setIsNewConversation,
     listDecks,

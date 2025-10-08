@@ -1,12 +1,11 @@
 import React, { useState, useContext } from "react";
-import { useNavigate } from "react-router";
-import { MdAdd, MdSearch, MdClose, MdSort } from "react-icons/md";
+import { MdAdd, MdSearch, MdSort } from "react-icons/md";
 import DeckCard from "../components/DeckCard";
 import { UserContext } from "../context/userContext";
-import axios from "axios";
 import SmModal from "../components/modals/SmModal";
 import Qilin from "../assets/QilingoLeft.svg";
 import Spinner from "../components/Spinner";
+import { useDeck } from "../hooks/useDeck";
 
 const formatLastReviewed = (dateString) => {
   if (!dateString || dateString === "null") return "Never reviewed";
@@ -51,14 +50,13 @@ const formatLastReviewed = (dateString) => {
 };
 
 const Review = () => {
-  const navigate = useNavigate();
-  const { backendUrl, getToken, decks, listDecks, loadingDecks } =
-    useContext(UserContext);
+  const { decks, listDecks, loadingDecks } = useContext(UserContext);
   const [searchQuery, setSearchQuery] = useState("");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newDeckName, setNewDeckName] = useState("");
   const [sortBy, setSortBy] = useState("lastReviewed");
   const [sortDirection, setSortDirection] = useState("desc");
+  const { createDeck } = useDeck(null, listDecks);
 
   const filteredDecks = decks.filter((deck) =>
     deck.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -90,25 +88,7 @@ const Review = () => {
 
     if (!newDeckName.trim()) return;
 
-    try {
-      const token = await getToken();
-      const res = await axios.post(
-        `${backendUrl}/api/decks/create`,
-        { deckName: newDeckName },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      setIsCreateModalOpen(false);
-      listDecks();
-      navigate(`/decks/${res.data.id}`);
-    } catch (error) {
-      console.error("Error creating deck:", error);
-    }
-
+    createDeck(newDeckName);
     useEffect(() => {
       listDecks();
     }, [decks]);
