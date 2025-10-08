@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { MdClear } from "react-icons/md";
+import { IoMdArrowRoundBack } from "react-icons/io";
 import { UserContext } from "../../context/userContext";
 import { toast } from "react-toastify";
 
@@ -89,47 +90,52 @@ const FlashcardModal = ({ isOpen, onClose, initialFront, initialBack }) => {
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4 animate-fade-in-scale">
-      <div className="bg-white rounded-lg w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden shadow-xl">
-        <div className="bg-[#489DBA] text-white px-4 py-3 flex items-center justify-between flex-shrink-0">
-          <h2 className="text-lg font-semibold">Add Flashcard</h2>
+      <div className="max-w-lg w-full max-h-[90vh] flex flex-col rounded-xl shadow-2xl overflow-hidden">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-[#489DBA] to-[#5AAECC] text-white px-6 py-4 flex items-center justify-between flex-shrink-0">
+          <h2 className="text-xl font-semibold">Add Flashcard</h2>
           <button
             onClick={onClose}
-            className="p-1 hover:bg-[#3E89A3] rounded-full transition-colors disabled:opacity-50"
+            className="p-1.5 hover:bg-white/20 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={isCreatingDeck || isAddingCard}
+            aria-label="Close modal"
           >
             <MdClear className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="p-5 overflow-y-auto flex-1">
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+        {/* Body */}
+        <div className="bg-white flex-1 overflow-y-auto p-6 space-y-5">
+          {/* Deck Selection */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
               Select Deck
             </label>
             {isLoadingDecks ? (
-              <div className="flex justify-center py-2">
-                <div className="w-5 h-5 border-2 border-gray-300 border-t-[#47A1BE] rounded-full animate-spin"></div>
+              <div className="flex justify-center py-4">
+                <div className="w-6 h-6 border-3 border-gray-200 border-t-[#489DBA] rounded-full animate-spin"></div>
               </div>
             ) : (
               <>
                 {showNewDeckForm ? (
-                  <div className="mb-3 p-3 bg-gray-50 rounded-md border border-gray-200">
-                    <div className="flex flex-col sm:flex-row gap-2 mb-2">
+                  <div className="p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg border border-gray-200 space-y-3">
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <input
                         type="text"
                         value={newDeckTitle}
                         onChange={(e) => setNewDeckTitle(e.target.value)}
-                        placeholder="Enter new deck title..."
-                        className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-1 focus:ring-[#47A1BE] focus:border-[#47A1BE] outline-none disabled:bg-gray-100"
+                        placeholder="Enter deck name..."
+                        className="flex-1 border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#489DBA]/30 focus:border-[#489DBA] outline-none disabled:bg-gray-200 disabled:cursor-not-allowed transition-all"
                         disabled={isCreatingDeck}
+                        autoFocus
                       />
                       <button
                         onClick={createNewDeck}
                         disabled={!newDeckTitle.trim() || isCreatingDeck}
-                        className={`px-3 py-2 rounded-md text-white text-sm transition-colors flex items-center justify-center ${
+                        className={`px-5 py-2.5 rounded-lg text-white text-sm font-medium transition-all flex items-center justify-center min-w-[100px] ${
                           !newDeckTitle.trim() || isCreatingDeck
                             ? "bg-gray-400 cursor-not-allowed"
-                            : "bg-[#489DBA] hover:bg-[#3E89A3]"
+                            : "bg-[#489DBA] hover:bg-[#3E89A3] hover:shadow-md active:scale-95"
                         }`}
                       >
                         {isCreatingDeck ? (
@@ -141,14 +147,17 @@ const FlashcardModal = ({ isOpen, onClose, initialFront, initialBack }) => {
                     </div>
                     <button
                       onClick={() => setShowNewDeckForm(false)}
-                      className="text-xs text-gray-500 hover:text-gray-700 disabled:opacity-50"
+                      className="text-sm text-gray-600 hover:text-gray-800 font-medium disabled:opacity-50 transition-colors"
                       disabled={isCreatingDeck}
                     >
-                      Cancel
+                      <div className="flex mt-2">
+                        <IoMdArrowRoundBack className="mr-1 mt-1" />{" "}
+                        <span>Back to selection</span>
+                      </div>
                     </button>
                   </div>
                 ) : (
-                  <>
+                  <div className="space-y-2">
                     <select
                       value={selectedDeck?.id || ""}
                       onChange={(e) => {
@@ -157,9 +166,9 @@ const FlashcardModal = ({ isOpen, onClose, initialFront, initialBack }) => {
                           decks.find((deck) => deck.id === deckId) || {};
                         setSelectedDeck(selected);
                       }}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 mb-2 text-sm focus:ring-1 focus:ring-[#47A1BE] focus:border-[#47A1BE] outline-none"
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#489DBA]/30 focus:border-[#489DBA] outline-none transition-all bg-white cursor-pointer"
                     >
-                      <option value="">Select a Deck</option>
+                      <option value="">Choose a deck...</option>
                       {decks && decks.length > 0 ? (
                         decks.map((deck) => (
                           <option key={deck.id} value={deck.id}>
@@ -172,20 +181,22 @@ const FlashcardModal = ({ isOpen, onClose, initialFront, initialBack }) => {
                     </select>
                     <button
                       onClick={() => setShowNewDeckForm(true)}
-                      className="text-sm text-[#47A1BE] hover:text-[#3E89A3] font-medium"
+                      className="text-sm text-[#489DBA] hover:text-[#3E89A3] font-medium transition-colors inline-flex items-center gap-1"
                     >
-                      + Create new deck
+                      <span className="text-lg leading-none">+</span>
+                      <span>Create new deck</span>
                     </button>
-                  </>
+                  </div>
                 )}
               </>
             )}
           </div>
 
-          <div className="mb-4">
+          {/* Front of Card */}
+          <div>
             <label
               htmlFor="flashcard-front"
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className="block text-sm font-semibold text-gray-700 mb-2"
             >
               Front
             </label>
@@ -193,16 +204,17 @@ const FlashcardModal = ({ isOpen, onClose, initialFront, initialBack }) => {
               id="flashcard-front"
               value={front}
               onChange={(e) => setFront(e.target.value)}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-1 focus:ring-[#47A1BE] focus:border-[#47A1BE] outline-none"
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-[#489DBA]/30 focus:border-[#489DBA] outline-none transition-all resize-none"
               rows="3"
               placeholder="Term or phrase (e.g., Xin chào)"
             />
           </div>
 
-          <div className="mb-4">
+          {/* Back of Card */}
+          <div>
             <label
               htmlFor="flashcard-back"
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className="block text-sm font-semibold text-gray-700 mb-2"
             >
               Back
             </label>
@@ -210,19 +222,20 @@ const FlashcardModal = ({ isOpen, onClose, initialFront, initialBack }) => {
               id="flashcard-back"
               value={back}
               onChange={(e) => setBack(e.target.value)}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-1 focus:ring-[#47A1BE] focus:border-[#47A1BE] outline-none"
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-[#489DBA]/30 focus:border-[#489DBA] outline-none transition-all resize-none"
               rows="3"
               placeholder="Translation or definition (e.g., Hello)"
             />
           </div>
         </div>
 
-        <div className="border-t border-gray-200 p-4 bg-gray-50 flex-shrink-0">
-          <div className="flex flex-col sm:flex-row gap-2 sm:justify-end">
+        {/* Footer */}
+        <div className="bg-gray-50 border-t border-gray-200 px-6 py-4 flex-shrink-0">
+          <div className="flex flex-col-reverse sm:flex-row gap-3 sm:justify-end">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-100 w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#47A1BE] disabled:opacity-50"
+              className="px-5 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 hover:border-gray-400 w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#489DBA] disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95"
               disabled={isCreatingDeck || isAddingCard}
             >
               Cancel
@@ -231,10 +244,10 @@ const FlashcardModal = ({ isOpen, onClose, initialFront, initialBack }) => {
               type="button"
               onClick={addFlashcard}
               disabled={!selectedDeck?.id || !front || !back || isAddingCard}
-              className={`px-4 py-2 rounded-md text-sm text-white w-full sm:w-auto transition-colors flex items-center justify-center ${
+              className={`px-5 py-2.5 rounded-lg text-sm font-medium text-white w-full sm:w-auto transition-all flex items-center justify-center min-w-[120px] ${
                 !selectedDeck?.id || !front || !back || isAddingCard
                   ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-[#489DBA] hover:bg-[#3E89A3] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#47A1BE]"
+                  : "bg-[#489DBA] hover:bg-[#3E89A3] hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#489DBA] active:scale-95"
               }`}
             >
               {isAddingCard ? (
