@@ -11,13 +11,13 @@ export const useDeck = (currentDeckId, listDecks) => {
   const [isDeckLoading, setIsDeckLoading] = useState(true);
 
   const createDeck = useCallback(
-    async (newDeckName) => {
+    async (newDeckName, isModal = false) => {
       try {
         const token = await getToken();
         const res = await deckService.createDeck(newDeckName, token);
 
         listDecks();
-        navigate(`/decks/${res.id}`);
+        if (!isModal) navigate(`/decks/${res.id}`);
         toast.success("Deck created successfully!");
         return res;
       } catch (error) {

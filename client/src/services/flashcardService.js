@@ -32,6 +32,18 @@ export const flashcardService = {
     );
   },
 
+  async addFlashcard(deckId, front, back, token) {
+    await axios.post(
+      `${backendUrl}/api/decks/add-flashcard`,
+      {
+        deckId: deckId,
+        front: front,
+        back: back,
+      },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+  },
+
   async deleteFlashcard(deckId, cardId, token) {
     await axios.post(
       `${backendUrl}/api/decks/remove-flashcard`,

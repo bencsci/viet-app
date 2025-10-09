@@ -24,6 +24,23 @@ export const useFlashcard = (deckId, listDecks) => {
     }
   }, [getToken, deckId, navigate]);
 
+  const addFlashcard = useCallback(
+    async (deckId, front, back) => {
+      try {
+        setIsCardsLoading(true);
+        const token = await getToken();
+        await flashcardService.addFlashcard(deckId, front, back, token);
+
+        listDecks();
+        toast.success("Added Flashcard!");
+      } catch (error) {
+        console.error("Error creating flashcards:", error);
+        toast.error("Failed to add flashcards");
+      }
+    },
+    [getToken, deckId, listDecks]
+  );
+
   const addFlashcards = useCallback(
     async (cardsToAdd) => {
       try {
@@ -94,6 +111,7 @@ export const useFlashcard = (deckId, listDecks) => {
     setCards,
     isCardsLoading,
     listFlashcards,
+    addFlashcard,
     addFlashcards,
     removeFlashcard,
     updateCard,

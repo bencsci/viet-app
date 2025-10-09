@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useContext } from "react";
-import axios from "axios";
 import { MdClear } from "react-icons/md";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { UserContext } from "../../context/userContext";
-import { toast } from "react-toastify";
+import { useDeck } from "../../hooks/useDeck";
+import { useFlashcard } from "../../hooks/useFlashcard";
 
 const FlashcardModal = ({ isOpen, onClose, initialFront, initialBack }) => {
-  const { getToken, backendUrl, decks, isLoadingDecks, listDecks } =
-    useContext(UserContext);
-
+  const { decks, isLoadingDecks, listDecks } = useContext(UserContext);
+  const { createDeck } = useDeck(null, listDecks);
+  const { addFlashcard } = useFlashcard(null, listDecks);
   const [front, setFront] = useState(initialFront || "");
   const [back, setBack] = useState(initialBack || "");
   const [selectedDeck, setSelectedDeck] = useState({});
@@ -34,56 +34,21 @@ const FlashcardModal = ({ isOpen, onClose, initialFront, initialBack }) => {
     if (!newDeckTitle.trim() || isCreatingDeck) return;
 
     setIsCreatingDeck(true);
-    try {
-      const token = await getToken();
-      const res = await axios.post(
-        `${backendUrl}/api/decks/create`,
-        { deckName: newDeckTitle },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      const newDeck = res.data;
-      listDecks();
-      setSelectedDeck(newDeck);
-      setShowNewDeckForm(false);
-      setNewDeckTitle("");
-      toast.success(`Deck "${newDeck.title}" created!`);
-    } catch (error) {
-      console.error("Error creating deck:", error);
-      toast.error("Failed to create deck.");
-    } finally {
-      setIsCreatingDeck(false);
-    }
+
+    const newDeck = await createDeck(newDeckTitle, true);
+    setSelectedDeck(newDeck);
+    setShowNewDeckForm(false);
+    setNewDeckTitle("");
+    setIsCreatingDeck(false);
   };
 
-  const addFlashcard = async () => {
+  const addFlashcardToDeck = async () => {
     if (!selectedDeck?.id || !front || !back || isAddingCard) return;
 
     setIsAddingCard(true);
-    try {
-      const token = await getToken();
-      await axios.post(
-        `${backendUrl}/api/decks/add-flashcard`,
-        {
-          deckId: selectedDeck.id,
-          front: front,
-          back: back,
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      toast.success(`Flashcard added to "${selectedDeck.title}"!`);
-      listDecks();
-      onClose();
-    } catch (error) {
-      console.error("Error adding flashcard:", error);
-      toast.error("Failed to add flashcard.");
-    } finally {
-      setIsAddingCard(false);
-    }
+    await addFlashcard(selectedDeck.id, front, back);
+    onClose();
+    setIsAddingCard(false);
   };
 
   if (!isOpen) return null;
@@ -242,7 +207,7 @@ const FlashcardModal = ({ isOpen, onClose, initialFront, initialBack }) => {
             </button>
             <button
               type="button"
-              onClick={addFlashcard}
+              onClick={addFlashcardToDeck}
               disabled={!selectedDeck?.id || !front || !back || isAddingCard}
               className={`px-5 py-2.5 rounded-lg text-sm font-medium text-white w-full sm:w-auto transition-all flex items-center justify-center min-w-[120px] ${
                 !selectedDeck?.id || !front || !back || isAddingCard
