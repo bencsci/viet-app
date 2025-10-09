@@ -1,9 +1,5 @@
-import React, { useState, useContext } from "react";
+import React, { useState, } from "react";
 import { MdEdit, MdDelete, MdSave, MdClose } from "react-icons/md";
-import axios from "axios";
-import { UserContext } from "../context/userContext";
-import { toast } from "react-toastify";
-import { useFlashcard } from "../hooks/useFlashcard";
 
 const Flashcard = ({ card, updateCard, onDelete }) => {
   const [isEditing, setIsEditing] = useState(false);

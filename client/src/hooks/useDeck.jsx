@@ -8,12 +8,11 @@ export const useDeck = (currentDeckId, listDecks) => {
   const { getToken } = useAuth();
   const navigate = useNavigate();
   const [deck, setDeck] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [isDeckLoading, setIsDeckLoading] = useState(true);
 
   const createDeck = useCallback(
     async (newDeckName) => {
       try {
-        setLoading(true);
         const token = await getToken();
         const res = await deckService.createDeck(newDeckName, token);
 
@@ -24,8 +23,6 @@ export const useDeck = (currentDeckId, listDecks) => {
       } catch (error) {
         console.error("Error creating deck:", error);
         toast.error("Failed to create deck. Please try again.");
-      } finally {
-        setLoading(false);
       }
     },
     [getToken, listDecks, navigate]
@@ -33,7 +30,7 @@ export const useDeck = (currentDeckId, listDecks) => {
 
   const removeDeck = useCallback(async () => {
     try {
-      setLoading(true);
+      setIsDeckLoading(true);
       const token = await getToken();
       await deckService.deleteDeck(currentDeckId, token);
 
@@ -44,13 +41,13 @@ export const useDeck = (currentDeckId, listDecks) => {
       console.error("Error deleting deck:", error);
       toast.error("Failed to delete deck. Please try again.");
     } finally {
-      setLoading(false);
+      setIsDeckLoading(false);
     }
   }, [getToken, listDecks, navigate]);
 
   const loadDeck = useCallback(async () => {
     try {
-      setLoading(true);
+      setIsDeckLoading(true);
       const token = await getToken();
       const res = await deckService.loadDeck(currentDeckId, token);
 
@@ -60,13 +57,13 @@ export const useDeck = (currentDeckId, listDecks) => {
       navigate("/404-not-found");
       throw error;
     } finally {
-      setLoading(false);
+      setIsDeckLoading(false);
     }
   }, [getToken, navigate]);
   const editTitle = useCallback(
     async (newTitle) => {
       try {
-        setLoading(true);
+        setIsDeckLoading(true);
         const token = await getToken();
         await deckService.editTitle(currentDeckId, newTitle, token);
 
@@ -78,7 +75,7 @@ export const useDeck = (currentDeckId, listDecks) => {
         console.error("Error updating deck title:", error);
         toast.error("Failed to update deck title. Please try again.");
       } finally {
-        setLoading(false);
+        setIsDeckLoading(false);
       }
     },
     [getToken]
@@ -86,11 +83,11 @@ export const useDeck = (currentDeckId, listDecks) => {
 
   return {
     deck,
-    loading,
     createDeck,
     removeDeck,
     loadDeck,
     editTitle,
     setDeck,
+    isDeckLoading,
   };
 };

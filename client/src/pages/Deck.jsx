@@ -30,18 +30,27 @@ const Deck = () => {
   const [renameModalOpen, setRenameModalOpen] = useState(false);
   const [isDeleteDeckModalOpen, setIsDeleteDeckModalOpen] = useState(false);
   const [isReviewSettingsOpen, setIsReviewSettingsOpen] = useState(false);
-  const { deck, loading, removeDeck, loadDeck, editTitle } = useDeck(
+  const { deck, removeDeck, loadDeck, editTitle, isDeckLoading } = useDeck(
     deckId,
     listDecks
   );
-  const { cards, listFlashcards, removeFlashcard, addFlashcards, updateCard } =
-    useFlashcard(deckId, listDecks);
+  const {
+    cards,
+    listFlashcards,
+    removeFlashcard,
+    addFlashcards,
+    updateCard,
+    isCardsLoading,
+  } = useFlashcard(deckId, listDecks);
+
+  const isLoading = isDeckLoading || isCardsLoading;
+
+  const loadData = async () => {
+    await listFlashcards();
+    await loadDeck();
+  };
 
   useEffect(() => {
-    const loadData = async () => {
-      await loadDeck();
-      listFlashcards();
-    };
     loadData();
   }, [deckId]);
 
@@ -59,14 +68,14 @@ const Deck = () => {
     if (!cardToDelete) return;
 
     await removeFlashcard(cardToDelete.id);
-    loadDeck();
     setIsDeleteModalOpen(false);
     setCardToDelete(null);
   };
 
-  const submitTitle = (e) => {
+  const submitTitle = async (e) => {
     e.preventDefault();
-    editTitle(newTitle);
+
+    await editTitle(newTitle);
     setRenameModalOpen(false);
   };
 
@@ -92,7 +101,7 @@ const Deck = () => {
     return { grade: "F", color: "text-red-600", bg: "bg-red-400" };
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="pt-16 min-h-screen bg-gray-50 flex items-center justify-center">
         <Spinner />

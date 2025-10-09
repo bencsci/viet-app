@@ -1,12 +1,7 @@
-import React, { useState, useContext } from "react";
+import React, { useState } from "react";
 import { MdAdd, MdClose } from "react-icons/md";
-import axios from "axios";
-import { UserContext } from "../context/userContext";
-import { toast } from "react-toastify";
-import { useFlashcard } from "../hooks/useFlashcard";
 
 const AddFlashcards = ({ loadDeck, addFlashcards }) => {
-  const { backendUrl, getToken, listDecks } = useContext(UserContext);
   const [newFlashcards, setNewFlashcards] = useState([
     { id: 0, front: "", back: "" },
   ]);

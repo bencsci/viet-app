@@ -8,13 +8,16 @@ export const useFlashcard = (deckId, listDecks) => {
   const { getToken } = useAuth();
   const navigate = useNavigate();
   const [cards, setCards] = useState([]);
+  const [isCardsLoading, setIsCardsLoading] = useState(true);
 
   const listFlashcards = useCallback(async () => {
     try {
+      setIsCardsLoading(true);
       const token = await getToken();
       const res = await flashcardService.loadFlashcards(deckId, token);
 
       setCards(res);
+      setIsCardsLoading(false);
     } catch (error) {
       console.error("Error listing flashcards:", error);
       navigate("/404-not-found");
@@ -24,12 +27,13 @@ export const useFlashcard = (deckId, listDecks) => {
   const addFlashcards = useCallback(
     async (cardsToAdd) => {
       try {
+        setIsCardsLoading(true);
         const token = await getToken();
-
         await flashcardService.addFlashcards(deckId, cardsToAdd, token);
 
         listFlashcards();
         listDecks();
+        setIsCardsLoading(false);
         const updateMessage =
           cardsToAdd.length === 1 ? "Added Flashcard!" : "Added Flashcards!";
         toast.success(updateMessage);
@@ -44,8 +48,8 @@ export const useFlashcard = (deckId, listDecks) => {
   const removeFlashcard = useCallback(
     async (currentCardId) => {
       try {
+        setIsCardsLoading(true);
         const token = await getToken();
-
         await flashcardService.deleteFlashcard(deckId, currentCardId, token);
 
         setCards((prevCards) =>
@@ -53,7 +57,7 @@ export const useFlashcard = (deckId, listDecks) => {
         );
 
         listDecks();
-
+        setIsCardsLoading(false);
         console.log("Flashcard deleted successfully");
       } catch (error) {
         console.error("Error deleting flashcard:", error);
@@ -66,6 +70,7 @@ export const useFlashcard = (deckId, listDecks) => {
   const updateCard = useCallback(
     async (currentCardId, newFront, newBack) => {
       try {
+        setIsCardsLoading(true);
         const token = await getToken();
         await flashcardService.updateFlashcards(
           currentCardId,
@@ -75,11 +80,11 @@ export const useFlashcard = (deckId, listDecks) => {
         );
 
         await listFlashcards();
+        setIsCardsLoading(false);
         toast.success("Flashcard Updated!");
       } catch (error) {
         console.log("Error editing card", error);
       }
-
     },
     [getToken, listFlashcards]
   );
@@ -87,6 +92,7 @@ export const useFlashcard = (deckId, listDecks) => {
   return {
     cards,
     setCards,
+    isCardsLoading,
     listFlashcards,
     addFlashcards,
     removeFlashcard,
