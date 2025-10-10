@@ -29,6 +29,15 @@ export const chatService = {
 
     return res.data;
   },
+  async createConversation(token) {
+    const res = await axios.post(
+      `${backendUrl}/api/history/save`,
+      { messages: [] },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    return res.data;
+  },
   async getResponse(messages, convoId, token) {
     const res = await axios.post(
       `${backendUrl}/api/chat/send`,
@@ -67,5 +76,29 @@ export const chatService = {
     );
 
     return res.data;
+  },
+
+  async deleteConversation(convoId, token) {
+    await axios.post(
+      `${backendUrl}/api/history/delete`,
+      { convoId: convoId },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+  },
+
+  async renameConversation(convoId, newTitle, token) {
+    await axios.post(
+      `${backendUrl}/api/history/update-title`,
+      { title: newTitle, convoId: convoId },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
   },
 };

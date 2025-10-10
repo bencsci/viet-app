@@ -1,33 +1,26 @@
 import React, { useState, useEffect, useContext } from "react";
-import axios from "axios";
-import { useAuth } from "@clerk/clerk-react";
-import {
-  MdAdd,
-  MdDelete,
-  MdEdit,
-  MdMoreVert,
-  MdClose,
-} from "react-icons/md";
+import { MdAdd, MdDelete, MdEdit, MdMoreVert, MdClose } from "react-icons/md";
 import { AiOutlineMenuUnfold } from "react-icons/ai";
 import { UserContext } from "../context/userContext";
 import { useNavigate, useParams } from "react-router";
+import { useChat } from "../hooks/useChat";
+import SmModal from "./modals/SmModal";
 
 const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
   const {
     setPrevConvoId,
     conversations,
     loadConversations,
-    backendUrl,
     setIsNewConversation,
   } = useContext(UserContext);
   const { convoId } = useParams();
   const navigate = useNavigate();
-  const { getToken } = useAuth();
   const [activeMenu, setActiveMenu] = useState(null);
   const [renameModalOpen, setRenameModalOpen] = useState(false);
   const [conversationToRename, setConversationToRename] = useState(null);
   const [newTitle, setNewTitle] = useState("");
-
+  const { createConversation, deleteConversation, renameConversation } =
+    useChat(setPrevConvoId, setIsNewConversation, null);
   useEffect(() => {
     loadConversations();
 
@@ -47,69 +40,20 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
   }, []);
 
   const createNewConversation = async () => {
-    try {
-      const token = await getToken();
-      const res = await axios.post(
-        `${backendUrl}/api/history/save`,
-        { messages: [] },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      navigate(`/c/${res.data.id}`);
-      setPrevConvoId(res.data.id);
-      loadConversations();
-      setIsSidebarOpen(false);
-    } catch (error) {
-      console.error("Error creating conversation:", error);
-    }
+    await createConversation();
+    loadConversations();
+    setIsSidebarOpen(false);
   };
 
-  const deleteConversation = async (id, e) => {
+  const handleDeleteConversation = async (id, e) => {
     console.log("Deleting conversation:", id);
     e.stopPropagation();
     setActiveMenu(null);
 
+    await deleteConversation(id);
+    loadConversations();
     if (convoId === id) {
-      // First delete the conversation
-      try {
-        const token = await getToken();
-        await axios.post(
-          `${backendUrl}/api/history/delete`,
-          { convoId: id },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        // Then navigate to home and reset
-        navigate("/");
-        loadConversations();
-      } catch (error) {
-        console.error("Error deleting conversation:", error);
-      }
-    } else {
-      // If not the current conversation, just delete normally
-      try {
-        const token = await getToken();
-        await axios.post(
-          `${backendUrl}/api/history/delete`,
-          { convoId: id },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        loadConversations();
-      } catch (error) {
-        console.error("Error deleting conversation:", error);
-      }
+      navigate("/");
     }
   };
 
@@ -133,28 +77,11 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
       return;
     }
 
-    try {
-      const token = await getToken();
-      await axios.post(
-        `${backendUrl}/api/history/update-title`,
-        { title: newTitle, convoId: conversationToRename },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      // Close modal and reset state
-      setRenameModalOpen(false);
-      setConversationToRename(null);
-      setNewTitle("");
-
-      // Reload conversations to show the updated title
-      loadConversations();
-    } catch (error) {
-      console.error("Error renaming conversation:", error);
-    }
+    await renameConversation(conversationToRename, newTitle);
+    setRenameModalOpen(false);
+    setConversationToRename(null);
+    setNewTitle("");
+    loadConversations();
   };
 
   const handleConversationSelect = (convoId) => {
@@ -244,7 +171,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
                         <MdEdit className="mr-2" /> Rename
                       </button>
                       <button
-                        onClick={(e) => deleteConversation(conv.id, e)}
+                        onClick={(e) => handleDeleteConversation(conv.id, e)}
                         className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
                       >
                         <MdDelete className="mr-2" /> Delete
@@ -272,58 +199,16 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
 
       {/* Rename Modal */}
       {renameModalOpen && (
-        <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
-          <div
-            className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="bg-[#47A1BE] text-white px-4 py-3 flex items-center justify-between">
-              <h3 className="font-medium">Rename Conversation</h3>
-              <button
-                onClick={() => setRenameModalOpen(false)}
-                className="p-1 hover:bg-[#489DBA] rounded transition-colors"
-              >
-                <MdClose className="w-5 h-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleRenameSubmit} className="p-4">
-              <div className="mb-4">
-                <label
-                  htmlFor="title"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  New Title
-                </label>
-                <input
-                  type="text"
-                  id="title"
-                  value={newTitle}
-                  onChange={(e) => setNewTitle(e.target.value)}
-                  placeholder="Enter a new title"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#47A1BE] focus:border-transparent"
-                  autoFocus
-                />
-              </div>
-
-              <div className="flex justify-end space-x-2">
-                <button
-                  type="button"
-                  onClick={() => setRenameModalOpen(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-[#47A1BE] text-white rounded-md hover:bg-[#489DBA] focus:outline-none focus:ring-2 focus:ring-[#47A1BE] focus:ring-offset-2"
-                >
-                  Save
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <SmModal
+          modalName="Rename Conversation"
+          valName="New Title"
+          value={newTitle}
+          handleSubmit={handleRenameSubmit}
+          onClose={() => setRenameModalOpen(false)}
+          onChange={(e) => setNewTitle(e.target.value)}
+          placeholder=""
+          submitButtonText="Save"
+        />
       )}
     </>
   );

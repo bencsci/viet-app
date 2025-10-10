@@ -1,11 +1,13 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useContext } from "react";
 import { useAuth } from "@clerk/clerk-react";
 import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
 import { chatService } from "../services/chatService";
+import { UserContext } from "../context/userContext";
 
 export const useChat = (setPrevConvoId, setIsNewConversation, listDecks) => {
   const { getToken } = useAuth();
+  const { conversations } = useContext(UserContext);
   const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
@@ -39,7 +41,15 @@ export const useChat = (setPrevConvoId, setIsNewConversation, listDecks) => {
 
   const generateTitle = useCallback(
     async (currentMessages, currentConvoId) => {
-      if (!currentMessages || currentMessages.length < 2 || !currentConvoId)
+      const hasTitle = conversations.find(
+        (c) => c.id.toString() === currentConvoId?.toString()
+      ).title;
+      if (
+        !currentMessages ||
+        currentMessages.length < 2 ||
+        !currentConvoId ||
+        hasTitle
+      )
         return;
 
       setIsGeneratingTitle(true);
@@ -55,6 +65,42 @@ export const useChat = (setPrevConvoId, setIsNewConversation, listDecks) => {
       }
     },
     [getToken, listDecks]
+  );
+
+  const createConversation = useCallback(async () => {
+    try {
+      const token = await getToken();
+      const res = await chatService.createConversation(token);
+
+      navigate(`/c/${res.id}`);
+      setPrevConvoId(res.id);
+    } catch (error) {
+      console.error("Error creating conversation:", error);
+    }
+  }, [getToken, navigate, setPrevConvoId]);
+
+  const deleteConversation = useCallback(
+    async (currentConvoId) => {
+      try {
+        const token = await getToken();
+        await chatService.deleteConversation(currentConvoId, token);
+      } catch (error) {
+        console.error("Error deleting conversation:", error);
+      }
+    },
+    [getToken]
+  );
+
+  const renameConversation = useCallback(
+    async (currentConvoId, newTitle) => {
+      try {
+        const token = await getToken();
+        await chatService.renameConversation(currentConvoId, newTitle, token);
+      } catch (error) {
+        console.error("Error renaming conversation:", error);
+      }
+    },
+    [getToken]
   );
 
   const sendMessage = useCallback(
@@ -88,13 +134,18 @@ export const useChat = (setPrevConvoId, setIsNewConversation, listDecks) => {
           token
         );
 
-        setMessages((prev) => [
-          ...prev,
+        console.log(newConvoId);
+        // Construct the updated messages array with the new assistant reply
+        const updatedMessages = [
+          ...messagesToSend,
           { role: "assistant", content: chatData.reply },
-        ]);
+        ];
+
+        setMessages(updatedMessages);
+        updateConversation(updatedMessages, newConvoId);
 
         // Generate title after a few messages
-        if (newConvoId && messagesToSend.length === 4 && !isGeneratingTitle) {
+        if (newConvoId && updatedMessages.length === 6 && !isGeneratingTitle) {
           generateTitle(messagesToSend, newConvoId);
         }
       } catch (error) {
@@ -118,21 +169,16 @@ export const useChat = (setPrevConvoId, setIsNewConversation, listDecks) => {
 
   const updateConversation = useCallback(
     async (currentMessages, currentConvoId) => {
-      if (updateConversation.timeoutId) {
-        clearTimeout(updateConversation.timeoutId);
+      try {
+        const token = await getToken();
+        await chatService.updateConversation(
+          currentMessages,
+          currentConvoId,
+          token
+        );
+      } catch (error) {
+        console.error("Error updating conversation in DB:", error);
       }
-      updateConversation.timeoutId = setTimeout(async () => {
-        try {
-          const token = await getToken();
-          await chatService.updateConversation(
-            currentMessages,
-            currentConvoId,
-            token
-          );
-        } catch (error) {
-          console.error("Error updating conversation in DB:", error);
-        }
-      }, 1500);
     },
     [getToken]
   );
@@ -219,5 +265,8 @@ export const useChat = (setPrevConvoId, setIsNewConversation, listDecks) => {
     updateConversation,
     translateText,
     playAudio,
+    createConversation,
+    deleteConversation,
+    renameConversation,
   };
 };

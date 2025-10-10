@@ -38,13 +38,14 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
     setIsLoading,
     loadMessages,
     sendMessage,
-    updateConversation,
     translateText,
     playAudio,
   } = useChat(setPrevConvoId, setIsNewConversation, listDecks);
 
   useEffect(() => {
     if (convoId) {
+      // setMessages([]);
+      // setIsLoading(true);
       loadMessages(convoId);
       setPrevConvoId(convoId);
       setIsNewConversation(false);
@@ -61,12 +62,6 @@ const Chat = ({ isSidebarOpen, setIsSidebarOpen }) => {
     setMessages,
     setIsLoading,
   ]);
-
-  useEffect(() => {
-    if (conversations && convoId && messages.length > 0) {
-      updateConversation(messages, convoId);
-    }
-  }, [messages, convoId, conversations, updateConversation]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
